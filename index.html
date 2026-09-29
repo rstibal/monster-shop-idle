@@ -112,6 +112,11 @@
     box-shadow: 0 3px 0 var(--gold-dark); transition: transform 80ms, box-shadow 80ms;
   }
   .btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 0 0 var(--gold-dark); }
+  /* Raised buttons move down 3-4px when pressed. Stretch the hit area over the ledge below and the gap left above,
+     so a press anywhere on what looks like the button lands on it; child spans never become the press target. */
+  .btn, .icon { position: relative; }
+  .btn::after, .icon::after { content: ""; position: absolute; inset: -4px 0; }
+  .btn > *, .icon > * { pointer-events: none; }
   .btn:disabled { background: #5a4e66; color: #a79fb3; box-shadow: 0 3px 0 #40364b; cursor: not-allowed; }
   .btn.alt { background: var(--slime); box-shadow: 0 3px 0 #5f9a30; color: #12250a; }
   .btn.alt:disabled { background: #4c5a4f; color: #9aa89d; box-shadow: 0 3px 0 #38443a; }
@@ -469,6 +474,8 @@
     return (x >= 100 ? x.toFixed(0) : x >= 10 ? x.toFixed(1) : x.toFixed(2)) + SUFFIX[t];
   }
   const money = v => "$" + fmt(v);
+  // Rewriting a button's contents mid-press drops the click, so per-frame updates only write when something changed.
+  const setHTML = (el, html) => { if (el._html !== html) { el._html = html; el.innerHTML = html; } };
   const fmtTime = s => s < 60 ? Math.round(s) + "s" : Math.round(s / 60) + "m";
 
   // ---------- Actions ----------
@@ -764,11 +771,11 @@
       r.label.textContent = sc.n < 1 ? "Buy a customer to open" : auto ? money(perSecond(i)) + "/s" : (sc.running ? money(income) : "Tap to run: " + money(income));
       const k = buyCount(i), cost = bulkCost(i, k);
       const nextM = MILESTONES.find(m => m > sc.n);
-      r.info.innerHTML = `Runs every <b>${fmtTime(def.time)}</b>` + (nextM ? ` · next bonus at <b>${nextM}</b>` : " · all bonuses earned");
-      r.buy.innerHTML = `Buy x${k}<span class="sub">${money(cost)}</span>`;
+      setHTML(r.info, `Runs every <b>${fmtTime(def.time)}</b>` + (nextM ? ` · next bonus at <b>${nextM}</b>` : " · all bonuses earned"));
+      setHTML(r.buy, `Buy x${k}<span class="sub">${money(cost)}</span>`);
       r.buy.disabled = S.cash < cost;
       if (auto) r.auto.hidden = true;
-      else { r.auto.hidden = false; r.auto.innerHTML = `Automate<span class="sub">${money(autoCost(i))}</span>`; r.auto.disabled = S.cash < autoCost(i) || sc.n < 1; }
+      else { r.auto.hidden = false; setHTML(r.auto, `Automate<span class="sub">${money(autoCost(i))}</span>`); r.auto.disabled = S.cash < autoCost(i) || sc.n < 1; }
       r.n.textContent = sc.n + " customers" + (auto ? " · auto" : "");
     });
     $("ips").textContent = money(total) + "/s";
