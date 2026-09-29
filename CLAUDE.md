@@ -28,7 +28,8 @@ Episode 1 should take about 30 minutes; the simulator (greedy, always-tapping pl
 
 ## Testing notes
 
-- The in-app browser pane can't run page tools on `file://` URLs. Serve the folder instead (`python -m http.server 8770`, then open `http://localhost:8770/index.html?debug`) and stop the server afterwards.
+- The in-app browser pane can't run page tools on `file://` URLs. Serve the folder instead (`python -m http.server 8770`, then open `http://localhost:8770/index.html?debug`) and stop the server afterwards. The pane caches the page, so after editing add a throwaway query (`&v=2`) when reloading, or you'll test the old code.
+- Automated clicks are instant, so they miss bugs that only happen during a held press. `left_click_drag` from a point to 1px away gives a realistic held press.
 - Background tabs pause `requestAnimationFrame`, so taps and income look frozen if the preview tab isn't in front. Front the tab or test functions directly through `?debug`. If the pane itself is hidden, frames stay paused even for the front tab; taking a screenshot makes it render.
 - A `beforeunload` handler saves state, so injecting a save then navigating gets overwritten. Override `Storage.prototype.setItem` first if you need to test loading a crafted save.
 
