@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grizzle's Haunted Mall</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --moss: #22362c;
+    --moss-deep: #182820;
+    --plum: #3b2748;
+    --plum-edge: #6b4a7c;
+    --gold: #f2b632;
+    --gold-dark: #b8841a;
+    --slime: #9be15d;
+    --ink: #f4ebd9;
+    --ink-dim: #b9b3c4;
+    --beer: #e8923a;
+    --danger: #ff7a6b;
+    --radius: 14px;
+    --display: "Bagel Fat One", "Trebuchet MS", sans-serif;
+    --body: "Figtree", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1200px 500px at 50% -10%, #34503f 0%, transparent 70%),
+      var(--moss);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.45;
+    min-height: 100vh;
+  }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  :focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 16px; }
+
+  /* Header: the cash counter is the one loud thing */
+  header.top { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px 24px; padding: 8px 0 16px; }
+  .brand { flex: 1 1 260px; }
+  .brand h1 { font-family: var(--display); font-weight: 400; font-size: 1.15rem; margin: 0; color: var(--ink-dim); letter-spacing: 0.02em; }
+  .cash { font-family: var(--display); font-size: clamp(2.6rem, 9vw, 4.6rem); line-height: 1; color: var(--gold); text-shadow: 0 3px 0 var(--gold-dark); margin: 4px 0 0; }
+  .cash small { font-size: 0.45em; color: var(--gold-dark); text-shadow: none; margin-left: 6px; }
+  .stats { display: flex; gap: 20px; flex-wrap: wrap; color: var(--ink-dim); font-size: 0.95rem; }
+  .stats b { color: var(--ink); font-weight: 700; }
+  .stats .beer b { color: var(--beer); }
+
+  .layout { display: grid; grid-template-columns: 1fr; gap: 16px; }
+  @media (min-width: 820px) { .layout { grid-template-columns: minmax(0, 1fr) 300px; align-items: start; } }
+
+  .toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: var(--ink-dim); font-size: 0.95rem; }
+  .seg { display: inline-flex; border: 2px solid var(--plum-edge); border-radius: 999px; overflow: hidden; }
+  .seg button { background: transparent; border: 0; padding: 4px 14px; font-weight: 600; color: var(--ink-dim); }
+  .seg button[aria-pressed="true"] { background: var(--plum-edge); color: var(--ink); }
+
+  /* Shop signs */
+  .signs { display: flex; flex-direction: column; gap: 14px; }
+  .sign {
+    --hue: 100;
+    position: relative;
+    background: var(--plum);
+    border: 3px solid var(--plum-edge);
+    border-radius: var(--radius);
+    padding: 12px 14px 14px;
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 4px 12px;
+    box-shadow: 0 6px 0 var(--moss-deep);
+  }
+  /* hanging chains */
+  .sign::before, .sign::after {
+    content: ""; position: absolute; top: -13px; width: 4px; height: 12px; background: var(--plum-edge); border-radius: 2px;
+  }
+  .sign::before { left: 26px; }
+  .sign::after { right: 26px; }
+  .sign.locked { opacity: 0.55; grid-template-columns: 60px 1fr; }
+  .icon {
+    grid-row: span 3; width: 60px; height: 60px; border-radius: 12px; border: 0;
+    font-size: 2rem; display: grid; place-items: center;
+    background: hsl(var(--hue) 45% 26%);
+    box-shadow: inset 0 -4px 0 hsl(var(--hue) 45% 18%);
+    transition: transform 80ms;
+  }
+  .icon:active:not(:disabled) { transform: translateY(2px); }
+  .icon:disabled { cursor: default; }
+  .sign h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 1.15rem; display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .sign h3 .n { color: var(--gold); font-size: 1rem; white-space: nowrap; }
+  .bar { height: 18px; background: var(--moss-deep); border-radius: 999px; overflow: hidden; position: relative; }
+  .bar i { position: absolute; inset: 0 auto 0 0; width: 0; background: hsl(var(--hue) 65% 55%); border-radius: 999px; }
+  .bar span { position: absolute; inset: 0; display: grid; place-items: center; font-size: 0.78rem; font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.7); }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; grid-column: 2; }
+  .meta .info { font-size: 0.85rem; color: var(--ink-dim); }
+  .meta .info b { color: var(--ink); }
+  .buys { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn {
+    background: var(--gold); color: #2a1c00; border: 0; border-radius: 10px; padding: 7px 12px; font-weight: 700;
+    box-shadow: 0 3px 0 var(--gold-dark); transition: transform 80ms, box-shadow 80ms;
+  }
+  .btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 0 0 var(--gold-dark); }
+  .btn:disabled { background: #5a4e66; color: #a79fb3; box-shadow: 0 3px 0 #40364b; cursor: not-allowed; }
+  .btn.alt { background: var(--slime); box-shadow: 0 3px 0 #5f9a30; color: #12250a; }
+  .btn.alt:disabled { background: #4c5a4f; color: #9aa89d; box-shadow: 0 3px 0 #38443a; }
+  .btn .sub { display: block; font-size: 0.75rem; font-weight: 600; opacity: 0.8; }
+  .auto-tag { color: var(--slime); font-weight: 700; font-size: 0.9rem; }
+  .locked-msg { grid-column: 2; color: var(--ink-dim); margin: 0; }
+
+  /* Side panel */
+  aside { display: flex; flex-direction: column; gap: 16px; }
+  .panel { background: var(--plum); border: 3px solid var(--plum-edge); border-radius: var(--radius); padding: 14px; }
+  .panel h2 { font-family: var(--display); font-weight: 400; font-size: 1.15rem; margin: 0 0 8px; }
+  .goal { margin: 0 0 10px; }
+  .goal .gbar { height: 8px; background: var(--moss-deep); border-radius: 999px; margin-top: 4px; overflow: hidden; }
+  .goal .gbar i { display: block; height: 100%; background: var(--slime); }
+  .goal .label { font-size: 0.92rem; display: flex; justify-content: space-between; gap: 8px; }
+  .goal .label span:last-child { color: var(--ink-dim); white-space: nowrap; }
+  .panel p { margin: 0 0 10px; font-size: 0.92rem; color: var(--ink-dim); }
+  .panel p b { color: var(--ink); }
+  .finale .btn { width: 100%; padding: 10px; }
+  .small-btn { background: transparent; border: 2px solid var(--plum-edge); border-radius: 10px; padding: 4px 10px; color: var(--ink-dim); font-size: 0.85rem; }
+  .small-btn:hover { color: var(--ink); border-color: var(--ink-dim); }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 20px; transform: translate(-50%, 30px); opacity: 0;
+    background: var(--gold); color: #2a1c00; font-weight: 700; padding: 10px 16px; border-radius: 12px;
+    max-width: calc(100vw - 32px); text-align: center; transition: opacity 200ms, transform 200ms; pointer-events: none;
+    box-shadow: 0 4px 0 var(--gold-dark);
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .pop { position: fixed; pointer-events: none; font-family: var(--display); color: var(--gold); text-shadow: 0 2px 0 var(--gold-dark); animation: pop 800ms ease-out forwards; z-index: 5; }
+  @keyframes pop { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-40px); } }
+  @media (prefers-reduced-motion: reduce) {
+    .pop { animation: none; opacity: 0; }
+    .toast, .btn, .icon { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1 id="episodeName">Grizzle's Haunted Mall</h1>
+      <div class="cash" id="cash">$0</div>
+    </div>
+    <div class="stats">
+      <span>Income <b id="ips">$0/s</b></span>
+      <span class="beer">Beer <b id="beer">0</b></span>
+      <span>Permanent bonus <b id="perm">x1</b></span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <main>
+      <div class="toolbar">
+        <span>Buy</span>
+        <div class="seg" role="group" aria-label="Buy amount">
+          <button data-mode="1" aria-pressed="true">x1</button>
+          <button data-mode="10" aria-pressed="false">x10</button>
+          <button data-mode="max" aria-pressed="false">Max</button>
+        </div>
+      </div>
+      <div class="signs" id="signs"></div>
+    </main>
+
+    <aside>
+      <section class="panel" aria-labelledby="goalsH">
+        <h2 id="goalsH">Goals</h2>
+        <div id="goals"></div>
+        <p id="goalsNote"></p>
+      </section>
+      <section class="panel finale" aria-labelledby="finH">
+        <h2 id="finH">Episode finale</h2>
+        <p id="finText"></p>
+        <button class="btn alt" id="finBtn" disabled>Locked</button>
+      </section>
+      <section class="panel">
+        <p>Your shops keep earning while the tab is closed (up to 8 hours).</p>
+        <button class="small-btn" id="resetBtn">Wipe save</button>
+      </section>
+    </aside>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  // ---------- Content (all placeholder, tune freely) ----------
+  const SCHEMES = [
+    { name: "Pretzel kiosk of mystery", icon: "🥨", hue: 35,  base: 4,       growth: 1.07, payout: 1,      time: 1,  auto: 500 },
+    { name: "Cursed phone-case cart",   icon: "📱", hue: 275, base: 60,      growth: 1.15, payout: 60,     time: 3,  auto: 5e3 },
+    { name: "Love-potion perfume counter", icon: "🧪", hue: 320, base: 720, growth: 1.14, payout: 540,    time: 6,  auto: 5e4 },
+    { name: "Haunted arcade",           icon: "🕹️", hue: 190, base: 8640,    growth: 1.13, payout: 4320,   time: 12, auto: 5e5 },
+    { name: "Elevator-to-nowhere toll", icon: "🛗", hue: 210, base: 103680,  growth: 1.12, payout: 51840,  time: 24, auto: 5e6 },
+    { name: "Dragon anchor-store lease", icon: "🐉", hue: 10,  base: 1244160, growth: 1.11, payout: 622080, time: 96, auto: 5e7 },
+  ];
+  const MILESTONES = [10, 25, 50, 100, 150];   // each doubles that scheme's income and gives 1 beer
+  const BEER_BONUS = 0.02;                      // +2% global income per beer (stand-in until cards exist)
+  const PERM_PER_EPISODE = 0.5;                 // +50% per finished episode
+  const OFFLINE_CAP_S = 8 * 3600;
+  const EPISODES = ["Haunted Mall", "Swamp Market", "Crypt Quarter", "Sewer Bazaar", "Moonlit Docks"];
+  const SAVE_KEY = "grizzle-haunted-mall-v1";
+  const SPEED = Math.max(1, Number(new URLSearchParams(location.search).get("speed")) || 1); // ?speed=10 for testing
+
+  const GOALS = [
+    { id: "g1", text: "Own 25 pretzel customers",       cur: s => s.schemes[0].n, target: 25 },
+    { id: "g2", text: "Automate 3 shops",               cur: s => s.schemes.filter(x => x.auto).length, target: 3 },
+    { id: "g3", text: "Own 10 perfume customers",       cur: s => s.schemes[2].n, target: 10 },
+    { id: "g4", text: "Hold $100K at once",             cur: s => s.cash, target: 1e5 },
+    { id: "g5", text: "Own 5 arcade customers",         cur: s => s.schemes[3].n, target: 5 },
+    { id: "g6", text: "Sign a dragon lease",            cur: s => s.schemes[5].n, target: 1 },
+  ];
+  const GOALS_NEEDED = 2;
+
+  // ---------- State ----------
+  const fresh = () => ({
+    cash: 0, beer: 0, episode: 0, perm: 1, goalsDone: [],
+    schemes: SCHEMES.map((_, i) => ({ n: i === 0 ? 1 : 0, auto: false, running: false, progress: 0 })),
+    seen: Date.now(),
+  });
+  let S = load() || fresh();
+  let buyMode = "1";
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(SAVE_KEY);
+      if (!raw) return null;
+      const s = JSON.parse(raw);
+      if (!s || !Array.isArray(s.schemes) || s.schemes.length !== SCHEMES.length) return null;
+      return s;
+    } catch { return null; }
+  }
+  function save() {
+    try { S.seen = Date.now(); localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch {}
+  }
+
+  // ---------- Math ----------
+  const milestoneMult = n => Math.pow(2, MILESTONES.filter(m => n >= m).length);
+  const globalMult = () => S.perm * (1 + BEER_BONUS * S.beer);
+  const runIncome = i => S.schemes[i].n * SCHEMES[i].payout * milestoneMult(S.schemes[i].n) * globalMult();
+  const perSecond = i => S.schemes[i].n ? runIncome(i) / SCHEMES[i].time : 0;
+  const nextCost = i => SCHEMES[i].base * Math.pow(SCHEMES[i].growth, S.schemes[i].n);
+  function bulkCost(i, k) {
+    const r = SCHEMES[i].growth;
+    return nextCost(i) * (Math.pow(r, k) - 1) / (r - 1);
+  }
+  function maxAffordable(i) {
+    const r = SCHEMES[i].growth;
+    const k = Math.floor(Math.log(1 + S.cash * (r - 1) / nextCost(i)) / Math.log(r));
+    return Math.max(0, k);
+  }
+  function buyCount(i) {
+    if (buyMode === "max") return Math.max(1, maxAffordable(i));
+    return Number(buyMode);
+  }
+
+  const SUFFIX = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
+  function fmt(v) {
+    if (!isFinite(v)) return "∞";
+    if (v < 1000) return v < 10 && v % 1 ? v.toFixed(2).replace(/0$/, "") : Math.floor(v).toString();
+    const t = Math.min(Math.floor(Math.log10(v) / 3), SUFFIX.length - 1);
+    const x = v / Math.pow(1000, t);
+    return (x >= 100 ? x.toFixed(0) : x >= 10 ? x.toFixed(1) : x.toFixed(2)) + SUFFIX[t];
+  }
+  const money = v => "$" + fmt(v);
+  const fmtTime = s => s < 60 ? Math.round(s) + "s" : Math.round(s / 60) + "m";
+
+  // ---------- Actions ----------
+  function unlocked(i) { return i === 0 || S.schemes[i - 1].n >= 1; }
+
+  function buy(i) {
+    const k = buyCount(i);
+    const cost = bulkCost(i, k);
+    if (S.cash < cost) return;
+    const before = S.schemes[i].n;
+    S.cash -= cost;
+    S.schemes[i].n += k;
+    const crossed = MILESTONES.filter(m => before < m && S.schemes[i].n >= m).length;
+    if (crossed) {
+      S.beer += crossed;
+      toast(SCHEMES[i].name + ": income x" + Math.pow(2, crossed) + " and +" + crossed + " beer");
+    }
+    render();
+  }
+  function automate(i) {
+    const sc = S.schemes[i];
+    if (sc.auto || S.cash < SCHEMES[i].auto || sc.n < 1) return;
+    S.cash -= SCHEMES[i].auto;
+    sc.auto = true;
+    if (!sc.running) sc.running = true;
+    render();
+  }
+  function tap(i, ev) {
+    const sc = S.schemes[i];
+    if (sc.n < 1 || sc.auto || sc.running) return;
+    sc.running = true;
+  }
+
+  function finaleReady() {
+    return S.goalsDone.length >= GOALS_NEEDED && S.schemes[SCHEMES.length - 1].n >= 1;
+  }
+  function finish() {
+    if (!finaleReady()) return;
+    const next = fresh();
+    next.episode = S.episode + 1;
+    next.perm = S.perm + PERM_PER_EPISODE;
+    next.beer = S.beer;
+    S = next;
+    save();
+    toast("Episode " + (S.episode + 1) + ": " + episodeName() + ". Permanent bonus is now x" + S.perm.toFixed(1));
+    build();
+  }
+  const episodeName = () => EPISODES[S.episode % EPISODES.length] + (S.episode >= EPISODES.length ? " " + (Math.floor(S.episode / EPISODES.length) + 1) : "");
+
+  // ---------- Loop ----------
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min((now - last) / 1000, 1) * SPEED;
+    last = now;
+    for (let i = 0; i < SCHEMES.length; i++) {
+      const sc = S.schemes[i];
+      if (!sc.running || sc.n < 1) continue;
+      sc.progress += dt / SCHEMES[i].time;
+      if (sc.progress >= 1) {
+        const runs = sc.auto ? Math.floor(sc.progress) : 1;
+        S.cash += runIncome(i) * runs;
+        sc.progress = sc.auto ? sc.progress - runs : 0;
+        sc.running = sc.auto;
+      }
+    }
+    checkGoals();
+    update();
+    requestAnimationFrame(frame);
+  }
+
+  function checkGoals() {
+    for (const g of GOALS) {
+      if (!S.goalsDone.includes(g.id) && g.cur(S) >= g.target) {
+        S.goalsDone.push(g.id);
+        toast("Goal cleared: " + g.text);
+        renderGoals();
+      }
+    }
+  }
+
+  // ---------- Offline ----------
+  function offline() {
+    const secs = Math.min((Date.now() - (S.seen || Date.now())) / 1000, OFFLINE_CAP_S);
+    if (secs < 30) return;
+    let gain = 0;
+    SCHEMES.forEach((_, i) => { if (S.schemes[i].auto) gain += perSecond(i) * secs; });
+    if (gain > 0) {
+      S.cash += gain;
+      toast("Welcome back. Your shops earned " + money(gain) + " in " + (secs >= 3600 ? (secs / 3600).toFixed(1) + " hours" : Math.round(secs / 60) + " minutes"));
+    }
+  }
+
+  // ---------- Rendering ----------
+  const $ = id => document.getElementById(id);
+  const signsEl = $("signs");
+  let rows = [];
+
+  function build() {
+    $("episodeName").textContent = "Grizzle's " + episodeName();
+    signsEl.innerHTML = "";
+    rows = SCHEMES.map((sc, i) => {
+      const el = document.createElement("article");
+      el.className = "sign";
+      el.style.setProperty("--hue", sc.hue);
+      el.innerHTML = `
+        <button class="icon" aria-label="Run ${sc.name}"></button>
+        <h3><span class="nm"></span><span class="n"></span></h3>
+        <div class="bar"><i></i><span></span></div>
+        <div class="meta">
+          <div class="info"></div>
+          <div class="buys">
+            <button class="btn buy"></button>
+            <button class="btn alt auto"></button>
+          </div>
+        </div>
+        <p class="locked-msg" hidden></p>`;
+      signsEl.appendChild(el);
+      const r = {
+        el, icon: el.querySelector(".icon"), nm: el.querySelector(".nm"), n: el.querySelector(".n"),
+        fill: el.querySelector(".bar i"), label: el.querySelector(".bar span"), info: el.querySelector(".info"),
+        buy: el.querySelector(".buy"), auto: el.querySelector(".auto"), locked: el.querySelector(".locked-msg"),
+        meta: el.querySelector(".meta"), bar: el.querySelector(".bar"),
+      };
+      r.icon.addEventListener("click", ev => tap(i, ev));
+      r.buy.addEventListener("click", () => buy(i));
+      r.auto.addEventListener("click", () => automate(i));
+      return r;
+    });
+    renderGoals();
+    render();
+  }
+
+  function renderGoals() {
+    const active = GOALS.filter(g => !S.goalsDone.includes(g.id)).slice(0, 3);
+    $("goals").innerHTML = active.map(g => {
+      const cur = Math.min(g.cur(S), g.target);
+      return `<div class="goal" data-id="${g.id}"><div class="label"><span>${g.text}</span><span>${fmt(cur)} / ${fmt(g.target)}</span></div><div class="gbar"><i style="width:${(cur / g.target) * 100}%"></i></div></div>`;
+    }).join("") || "<p>All goals cleared.</p>";
+    $("goalsNote").innerHTML = `Cleared <b>${S.goalsDone.length}</b> of the <b>${GOALS_NEEDED}</b> needed to open the finale.`;
+  }
+
+  function render() {
+    S.schemes.forEach((sc, i) => {
+      const r = rows[i], def = SCHEMES[i];
+      const open = unlocked(i);
+      r.el.classList.toggle("locked", !open);
+      r.nm.textContent = open ? def.name : "Locked shop";
+      r.icon.textContent = open ? def.icon : "🔒";
+      r.icon.disabled = !open || sc.auto;
+      r.meta.hidden = r.bar.hidden = !open;
+      r.locked.hidden = open;
+      r.locked.textContent = open ? "" : "Open one " + SCHEMES[i - 1].name.toLowerCase() + " customer to unlock.";
+      r.n.textContent = open ? sc.n + " customers" : "";
+    });
+    update(true);
+  }
+
+  // cheap per-frame update: bars, cash, button states
+  function update(force) {
+    $("cash").textContent = money(S.cash);
+    $("beer").textContent = S.beer;
+    $("perm").textContent = "x" + S.perm.toFixed(1);
+    let total = 0;
+    S.schemes.forEach((sc, i) => {
+      const r = rows[i], def = SCHEMES[i];
+      if (!unlocked(i)) return;
+      if (sc.auto) total += perSecond(i);
+      const fast = sc.auto && def.time / SPEED < 0.25;
+      r.fill.style.width = ((fast ? 1 : sc.progress) * 100) + "%";
+      const income = runIncome(i);
+      r.label.textContent = sc.n < 1 ? "Buy a customer to open" : sc.auto ? money(perSecond(i)) + "/s" : (sc.running ? money(income) : "Tap to run: " + money(income));
+      const k = buyCount(i), cost = bulkCost(i, k);
+      const nextM = MILESTONES.find(m => m > sc.n);
+      r.info.innerHTML = `Runs every <b>${fmtTime(def.time)}</b>` + (nextM ? ` · next bonus at <b>${nextM}</b>` : " · all bonuses earned");
+      r.buy.innerHTML = `Buy x${k}<span class="sub">${money(cost)}</span>`;
+      r.buy.disabled = S.cash < cost;
+      if (sc.auto) r.auto.hidden = true;
+      else { r.auto.hidden = false; r.auto.innerHTML = `Automate<span class="sub">${money(def.auto)}</span>`; r.auto.disabled = S.cash < def.auto || sc.n < 1; }
+      r.n.textContent = sc.n + " customers" + (sc.auto ? " · auto" : "");
+    });
+    $("ips").textContent = money(total) + "/s";
+    // finale
+    const ready = finaleReady();
+    const btn = $("finBtn");
+    btn.disabled = !ready;
+    const nextEp = EPISODES[(S.episode + 1) % EPISODES.length];
+    btn.textContent = ready ? "Cut the mall's power" : "Locked";
+    $("finText").innerHTML = ready
+      ? `Bramble is ready to pull the big switch. This resets your cash and shops, keeps your beer, adds <b>+${PERM_PER_EPISODE * 100}%</b> permanent income, and moves you to the <b>${nextEp}</b>.`
+      : `Clear ${GOALS_NEEDED} goals and sign a dragon lease to open the finale.`;
+    // refresh goal progress a few times a second, not every frame
+    const t = Math.floor(performance.now() / 250);
+    if (force || t !== update.t) { update.t = t; renderGoals(); }
+  }
+
+  let toastTimer;
+  function toast(msg) {
+    const el = $("toast");
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove("show"), 3500);
+  }
+
+  // ---------- Wiring ----------
+  document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => {
+    buyMode = b.dataset.mode;
+    document.querySelectorAll(".seg button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    update(true);
+  }));
+  $("finBtn").addEventListener("click", finish);
+  $("resetBtn").addEventListener("click", () => {
+    if (confirm("Wipe your save and start over?")) {
+      try { localStorage.removeItem(SAVE_KEY); } catch {}
+      S = fresh(); build();
+    }
+  });
+  addEventListener("beforeunload", save);
+  document.addEventListener("visibilitychange", () => { if (document.hidden) save(); });
+  setInterval(save, 5000);
+
+  offline();
+  // resume any automated shops
+  S.schemes.forEach(sc => { if (sc.auto && sc.n > 0) sc.running = true; });
+  build();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
