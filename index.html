@@ -266,6 +266,7 @@
   ];
   const MILESTONES = [10, 25, 50, 100, 150];   // each doubles that scheme's income and gives 1 beer
   const PERM_PER_EPISODE = 0.5;                 // +50% per finished episode (Bramble boosts this)
+  const EPISODE_COST_STEP = 1;                  // costs x(1 + 1 per finished episode): customers, automation, cash goals
   const OFFLINE_CAP_S = 8 * 3600;               // base cap (Countess Vex extends it)
 
   // Cards: permanent, survive episode resets. Copies needed for levels 1..5 (cumulative).
@@ -383,14 +384,15 @@
   const SPEED = Math.max(1, Number(new URLSearchParams(location.search).get("speed")) || 1); // ?speed=10 for testing
 
   // Listed roughly in the order a player reaches them; the first three uncleared ones are shown.
-  // {n} in the text is filled with that shop's noun for the current episode. The finale also needs the last shop (see finaleReady).
+  // {n} in the text is filled with that shop's noun for the current episode, {$} with the target as money.
+  // scaled goals grow with episode costs (see costMult). The finale also needs the last shop (see finaleReady).
   const GOALS = [
     { id: "h1", text: "Own 25 {0} customers",       cur: s => s.schemes[0].n, target: 25 },
     { id: "h2", text: "Own 10 {2} customers",       cur: s => s.schemes[2].n, target: 10 },
     { id: "h3", text: "Automate 3 shops",               cur: s => s.schemes.filter((x, i) => isAuto(i)).length, target: 3 },
     { id: "h4", text: "Own 25 {3} customers",        cur: s => s.schemes[3].n, target: 25 },
     { id: "h5", text: "Own 10 {4} customers",      cur: s => s.schemes[4].n, target: 10 },
-    { id: "h6", text: "Hold $3M at once",               cur: s => s.cash, target: 3e6 },
+    { id: "h6", text: "Hold {$} at once",               cur: s => s.cash, target: 3e6, scaled: true },
     { id: "h7", text: "Own 50 {3} customers",        cur: s => s.schemes[3].n, target: 50 },
     { id: "h8", text: "Own 25 {4} customers",      cur: s => s.schemes[4].n, target: 25 },
     { id: "h9", text: "Automate 5 shops",               cur: s => s.schemes.filter((x, i) => isAuto(i)).length, target: 5 },
@@ -427,7 +429,7 @@
   // ---------- Episode content ----------
   const EP = () => EPISODES[S.episode % EPISODES.length];
   const shop = i => EP().shops[i];
-  const goalText = g => g.text.replace(/\{(\d)\}/g, (m, i) => shop(i).noun);
+  const goalText = g => g.text.replace(/\{(\d)\}/g, (m, i) => shop(i).noun).replace("{$}", () => money(goalTarget(g)));
 
   // ---------- Math ----------
   const milestoneMult = n => Math.pow(2, MILESTONES.filter(m => n >= m).length);
@@ -440,7 +442,10 @@
   const finaleGain = () => PERM_PER_EPISODE * (1 + 0.2 * cardLevel("bramble"));
   const runIncome = i => S.schemes[i].n * SCHEMES[i].payout * milestoneMult(S.schemes[i].n) * shopMult(i) * globalMult();
   const perSecond = i => S.schemes[i].n ? runIncome(i) / SCHEMES[i].time : 0;
-  const nextCost = i => SCHEMES[i].base * Math.pow(SCHEMES[i].growth, S.schemes[i].n);
+  const costMult = () => 1 + EPISODE_COST_STEP * S.episode;
+  const goalTarget = g => g.target * (g.scaled ? costMult() : 1);
+  const autoCost = i => SCHEMES[i].auto * costMult();
+  const nextCost = i => SCHEMES[i].base * costMult() * Math.pow(SCHEMES[i].growth, S.schemes[i].n);
   function bulkCost(i, k) {
     const r = SCHEMES[i].growth;
     return nextCost(i) * (Math.pow(r, k) - 1) / (r - 1);
@@ -485,8 +490,8 @@
   }
   function automate(i) {
     const sc = S.schemes[i];
-    if (isAuto(i) || S.cash < SCHEMES[i].auto || sc.n < 1) return;
-    S.cash -= SCHEMES[i].auto;
+    if (isAuto(i) || S.cash < autoCost(i) || sc.n < 1) return;
+    S.cash -= autoCost(i);
     sc.auto = true;
     if (!sc.running) sc.running = true;
     render();
@@ -606,7 +611,7 @@
 
   function checkGoals() {
     for (const g of GOALS) {
-      if (!S.goalsDone.includes(g.id) && g.cur(S) >= g.target) {
+      if (!S.goalsDone.includes(g.id) && g.cur(S) >= goalTarget(g)) {
         S.goalsDone.push(g.id);
         S.eggs += EGGS_PER_GOAL;
         toast("Goal cleared: " + goalText(g) + " (+" + EGGS_PER_GOAL + " egg)");
@@ -713,8 +718,8 @@
   function renderGoals() {
     const active = GOALS.filter(g => !S.goalsDone.includes(g.id)).slice(0, 3);
     $("goals").innerHTML = active.map(g => {
-      const cur = Math.min(g.cur(S), g.target);
-      return `<div class="goal" data-id="${g.id}"><div class="label"><span>${goalText(g)}</span><span>${fmt(cur)} / ${fmt(g.target)}</span></div><div class="gbar"><i style="width:${(cur / g.target) * 100}%"></i></div></div>`;
+      const target = goalTarget(g), cur = Math.min(g.cur(S), target);
+      return `<div class="goal" data-id="${g.id}"><div class="label"><span>${goalText(g)}</span><span>${fmt(cur)} / ${fmt(target)}</span></div><div class="gbar"><i style="width:${(cur / target) * 100}%"></i></div></div>`;
     }).join("") || "<p>All goals cleared.</p>";
     $("goalsNote").innerHTML = `Cleared <b>${clearedCount()}</b> of the <b>${GOALS_NEEDED}</b> needed to open the finale.`;
   }
@@ -763,7 +768,7 @@
       r.buy.innerHTML = `Buy x${k}<span class="sub">${money(cost)}</span>`;
       r.buy.disabled = S.cash < cost;
       if (auto) r.auto.hidden = true;
-      else { r.auto.hidden = false; r.auto.innerHTML = `Automate<span class="sub">${money(def.auto)}</span>`; r.auto.disabled = S.cash < def.auto || sc.n < 1; }
+      else { r.auto.hidden = false; r.auto.innerHTML = `Automate<span class="sub">${money(autoCost(i))}</span>`; r.auto.disabled = S.cash < autoCost(i) || sc.n < 1; }
       r.n.textContent = sc.n + " customers" + (auto ? " · auto" : "");
     });
     $("ips").textContent = money(total) + "/s";
