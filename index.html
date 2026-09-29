@@ -271,23 +271,24 @@
   ];
   const MILESTONES = [10, 25, 50, 100, 150];   // each doubles that scheme's income and gives 1 beer
   const PERM_PER_EPISODE = 0.5;                 // +50% per finished episode (Bramble boosts this)
-  const EPISODE_COST_STEP = 1;                  // costs x(1 + 1 per finished episode): customers, automation, cash goals
-  const OFFLINE_CAP_S = 8 * 3600;               // base cap (Countess Vex extends it)
+  const EPISODE_COST_STEP = 2;                  // costs x(1 + 2 per finished episode): customers, automation, cash goals
+  const OFFLINE_CAP_S = 8 * 3600;               // shops earn for at most this long while the tab is closed
 
   // Cards: permanent, survive episode resets. Copies needed for levels 1..5 (cumulative).
+  // Each card is one multiplier; per is its strength per level (see the Math section for how each one applies).
   const LEVEL_AT = [1, 3, 6, 11, 19];
   const MAX_LEVEL = LEVEL_AT.length;
   const CARDS = [
-    { id: "grizzle", name: "Grizzle", role: "Scrappy owner",       icon: "👺", hue: 100, weight: 30,
-      perk: l => `First shop income x${(1 + 0.5 * l).toFixed(1)}`, unit: "First shop income +50%" },
-    { id: "mort",    name: "Mort",    role: "Night-shift ghoul",   icon: "🧟", hue: 160, weight: 25,
-      perk: l => `Runs the first ${l} shop${l > 1 ? "s" : ""} for free`, unit: "Automates one more shop" },
-    { id: "vex",     name: "Countess Vex", role: "Vampire bookkeeper", icon: "🧛", hue: 340, weight: 20,
-      perk: l => `Offline cap ${8 + 2 * l} hours`, unit: "Offline cap +2 hours" },
-    { id: "bramble", name: "Bramble", role: "Bouncer and collector", icon: "🧌", hue: 30, weight: 15,
-      perk: l => `Finale bonus +${Math.round(PERM_PER_EPISODE * (1 + 0.2 * l) * 100)}%`, unit: "Finale bonus x1.2 more" },
-    { id: "witch",   name: "Old Bog Witch", role: "Rival across the street", icon: "🧙", hue: 285, weight: 10,
-      perk: l => `All income +${l * 10}%`, unit: "All income +10%" },
+    { id: "grizzle", name: "Grizzle", role: "Scrappy owner",       icon: "👺", hue: 100, weight: 30, per: 0.1,
+      perk: l => `All income x${(1 + 0.1 * l).toFixed(1)}` },
+    { id: "mort",    name: "Mort",    role: "Night-shift ghoul",   icon: "🧟", hue: 160, weight: 25, per: 0.1,
+      perk: l => `Shops run x${(1 + 0.1 * l).toFixed(1)} faster` },
+    { id: "vex",     name: "Countess Vex", role: "Vampire bookkeeper", icon: "🧛", hue: 340, weight: 20, per: 0.04,
+      perk: l => `Customers and automation ${Math.round(4 * l)}% cheaper` },
+    { id: "bramble", name: "Bramble", role: "Bouncer and collector", icon: "🧌", hue: 30, weight: 15, per: 0.2,
+      perk: l => `Finale bonus +${Math.round(PERM_PER_EPISODE * (1 + 0.2 * l) * 100)}%` },
+    { id: "witch",   name: "Old Bog Witch", role: "Rival across the street", icon: "🧙", hue: 285, weight: 10, per: 0.05,
+      perk: l => `Milestones multiply income x${(2 + 0.05 * l).toFixed(2)}` },
   ];
   const CHESTS = [
     { id: "egg",    name: "Egg chest",     cur: "eggs",     cost: 2,  pulls: 3, blurb: "Eggs come from clearing goals and finishing episodes." },
@@ -406,7 +407,7 @@
 
   // ---------- State ----------
   const fresh = () => ({
-    cash: 0, beer: 0, eggs: 0, crystals: 0, cards: {}, episode: 0, storySeen: -1, perm: 1, goalsDone: [],
+    cash: 0, beer: 0, eggs: 0, crystals: 0, cards: {}, cardsV2: true, episode: 0, storySeen: -1, perm: 1, goalsDone: [],
     schemes: SCHEMES.map((_, i) => ({ n: i === 0 ? 1 : 0, auto: false, running: false, progress: 0 })),
     seen: Date.now(),
   });
@@ -424,6 +425,12 @@
       s.eggs = s.eggs || 0; s.crystals = s.crystals || 0; s.cards = s.cards || {};
       // saves from before the story existed count as having read the current intro
       if (typeof s.storySeen !== "number") s.storySeen = s.episode || 0;
+      // saves from when Mort ran the first shops for free keep those shops automated
+      if (!s.cardsV2) {
+        const mort = LEVEL_AT.filter(c => (s.cards.mort || 0) >= c).length;
+        s.schemes.forEach((sc, i) => { if (i < mort && sc.n > 0) sc.auto = true; });
+        s.cardsV2 = true;
+      }
       return s;
     } catch { return null; }
   }
@@ -437,20 +444,22 @@
   const goalText = g => g.text.replace(/\{(\d)\}/g, (m, i) => shop(i).noun).replace("{$}", () => money(goalTarget(g)));
 
   // ---------- Math ----------
-  const milestoneMult = n => Math.pow(2, MILESTONES.filter(m => n >= m).length);
   const copies = id => S.cards[id] || 0;
   const cardLevel = id => LEVEL_AT.filter(c => copies(id) >= c).length;
-  const globalMult = () => S.perm * (1 + 0.1 * cardLevel("witch"));
-  const shopMult = i => (i === 0 ? 1 + 0.5 * cardLevel("grizzle") : 1);
-  const isAuto = i => S.schemes[i].auto || i < cardLevel("mort");
-  const offlineCap = () => OFFLINE_CAP_S + cardLevel("vex") * 2 * 3600;
-  const finaleGain = () => PERM_PER_EPISODE * (1 + 0.2 * cardLevel("bramble"));
-  const runIncome = i => S.schemes[i].n * SCHEMES[i].payout * milestoneMult(S.schemes[i].n) * shopMult(i) * globalMult();
-  const perSecond = i => S.schemes[i].n ? runIncome(i) / SCHEMES[i].time : 0;
+  const cardBonus = id => CARDS.find(c => c.id === id).per * cardLevel(id);   // e.g. 0.3 at level 3 of a 0.1 card
+  const milestoneMult = n => Math.pow(2 + cardBonus("witch"), MILESTONES.filter(m => n >= m).length);
+  const globalMult = () => S.perm * (1 + cardBonus("grizzle"));
+  const runTime = i => SCHEMES[i].time / (1 + cardBonus("mort"));
+  const discount = () => 1 - cardBonus("vex");
+  const isAuto = i => S.schemes[i].auto;
+  const offlineCap = () => OFFLINE_CAP_S;
+  const finaleGain = () => PERM_PER_EPISODE * (1 + cardBonus("bramble"));
+  const runIncome = i => S.schemes[i].n * SCHEMES[i].payout * milestoneMult(S.schemes[i].n) * globalMult();
+  const perSecond = i => S.schemes[i].n ? runIncome(i) / runTime(i) : 0;
   const costMult = () => 1 + EPISODE_COST_STEP * S.episode;
   const goalTarget = g => g.target * (g.scaled ? costMult() : 1);
-  const autoCost = i => SCHEMES[i].auto * costMult();
-  const nextCost = i => SCHEMES[i].base * costMult() * Math.pow(SCHEMES[i].growth, S.schemes[i].n);
+  const autoCost = i => SCHEMES[i].auto * costMult() * discount();
+  const nextCost = i => SCHEMES[i].base * costMult() * discount() * Math.pow(SCHEMES[i].growth, S.schemes[i].n);
   function bulkCost(i, k) {
     const r = SCHEMES[i].growth;
     return nextCost(i) * (Math.pow(r, k) - 1) / (r - 1);
@@ -476,7 +485,7 @@
   const money = v => "$" + fmt(v);
   // Rewriting a button's contents mid-press drops the click, so per-frame updates only write when something changed.
   const setHTML = (el, html) => { if (el._html !== html) { el._html = html; el.innerHTML = html; } };
-  const fmtTime = s => s < 60 ? Math.round(s) + "s" : Math.round(s / 60) + "m";
+  const fmtTime = s => s < 10 ? +s.toFixed(1) + "s" : s < 60 ? Math.round(s) + "s" : Math.round(s / 60) + "m";
 
   // ---------- Actions ----------
   function unlocked(i) { return i === 0 || S.schemes[i - 1].n >= 1; }
@@ -603,7 +612,7 @@
       const auto = isAuto(i);
       if (auto && !sc.running && sc.n >= 1) sc.running = true;
       if (!sc.running || sc.n < 1) continue;
-      sc.progress += dt / SCHEMES[i].time;
+      sc.progress += dt / runTime(i);
       if (sc.progress >= 1) {
         const runs = auto ? Math.floor(sc.progress) : 1;
         S.cash += runIncome(i) * runs;
@@ -765,13 +774,13 @@
       if (!unlocked(i)) return;
       const auto = isAuto(i);
       if (auto) total += perSecond(i);
-      const fast = auto && def.time / SPEED < 0.25;
+      const fast = auto && runTime(i) / SPEED < 0.25;
       r.fill.style.width = ((fast ? 1 : sc.progress) * 100) + "%";
       const income = runIncome(i);
       r.label.textContent = sc.n < 1 ? "Buy a customer to open" : auto ? money(perSecond(i)) + "/s" : (sc.running ? money(income) : "Tap to run: " + money(income));
       const k = buyCount(i), cost = bulkCost(i, k);
       const nextM = MILESTONES.find(m => m > sc.n);
-      setHTML(r.info, `Runs every <b>${fmtTime(def.time)}</b>` + (nextM ? ` · next bonus at <b>${nextM}</b>` : " · all bonuses earned"));
+      setHTML(r.info, `Runs every <b>${fmtTime(runTime(i))}</b>` + (nextM ? ` · next bonus at <b>${nextM}</b>` : " · all bonuses earned"));
       setHTML(r.buy, `Buy x${k}<span class="sub">${money(cost)}</span>`);
       r.buy.disabled = S.cash < cost;
       if (auto) r.auto.hidden = true;

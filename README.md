@@ -31,19 +31,21 @@ Each episode has its own district, shops, goal wording and a short story scene a
 | 2 | Swamp Market | Mushroom stall, bog-water bottler, lucky charms, fog boat tours, stilt-house timeshare, kraken ferry monopoly |
 | 3 | Crypt Quarter | Grave-flower cart, coffin showroom, seance parlor, ghost tours, bone-china antiques, mausoleum condos |
 
-After episode 3 the list repeats (shown as "Haunted Mall 2" and so on), and the permanent bonus keeps carrying over. All episodes share the same six shop slots, but costs grow each episode: customers, automation and the cash goal cost 2x in episode 2, 3x in episode 3 and so on. That keeps episodes 2 to 4 about as long as the first, with later ones slowly getting faster as cards level up.
+After episode 3 the list repeats (shown as "Haunted Mall 2" and so on), and the permanent bonus keeps carrying over. All episodes share the same six shop slots, but costs grow each episode: customers, automation and the cash goal cost 3x in episode 2, 5x in episode 3 and so on. That keeps episodes 2 to 4 about as long as the first, with later ones slowly getting faster as cards level up.
 
 ### Cards and chests
 
 Cards survive episode resets. Duplicates level a card up to level 5 (1, 3, 6, 11 and 19 total copies).
 
-| Card | Perk per level |
-| --- | --- |
-| Grizzle | Pretzel kiosk income +50% |
-| Mort | Runs one more shop for free |
-| Countess Vex | Offline cap +2 hours |
-| Bramble | Finale bonus +20% |
-| Old Bog Witch | All income +10% |
+Each card is one multiplier that grows with its level.
+
+| Card | Perk per level | At level 5 |
+| --- | --- | --- |
+| Grizzle | All income +10% | x1.5 income |
+| Mort | Shops run 10% faster | x1.5 speed |
+| Countess Vex | Customers and automation 4% cheaper | 20% off |
+| Bramble | Finale bonus +20% | +100% instead of +50% |
+| Old Bog Witch | Each milestone multiplies income by 0.05 more | x2.25 per milestone instead of x2 |
 
 | Chest | Cost | Cards | Where the currency comes from |
 | --- | --- | --- | --- |
@@ -57,7 +59,7 @@ Everything lives at the top of the script in `index.html`: `SCHEMES` (costs, pay
 
 Balance check: `node tools/sim.mjs` reads the numbers from `index.html`, plays a greedy player who taps every shop the moment it's idle, and prints when each shop opens and when the finale unlocks. Episode 1 currently takes about 26 minutes that way, with the fifth goal landing a few minutes before the lease. It also prints when each goal clears. Real players are less efficient, so expect 30 to 40.
 
-It then plays several episodes in a row (carrying over the bonus, beer, eggs and cards, opening chests as soon as it can) and prints the median time per episode: currently about 29, 28, 25, 23 and 21 minutes for episodes 2 to 6. `node tools/sim.mjs 9 50` plays 9 episodes over 50 runs, and `STEP=1.5 node tools/sim.mjs` tries a different cost step without editing the game.
+It then plays several episodes in a row (carrying over the bonus, beer, eggs and cards, opening chests as soon as it can) and prints the median time per episode: currently about 31, 27, 24, 21 and 19 minutes for episodes 2 to 6. `node tools/sim.mjs 9 50` plays 9 episodes over 50 runs, and `STEP=1.5 node tools/sim.mjs` tries a different cost step without editing the game.
 
 ## Roadmap
 

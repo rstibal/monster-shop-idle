@@ -33,8 +33,8 @@ const goalTarget = (g, ep) => g.target * (g.scaled ? costMult(ep) : 1);
 const fmtMoney = v => v >= 1e6 ? "$" + +(v / 1e6).toFixed(1) + "M" : "$" + v;
 const goalText = (g, ep) => g.text.replace(/\{(\d)\}/g, (m, i) => EP(ep).shops[i].noun).replace("{$}", fmtMoney(goalTarget(g, ep)));
 
-const mult = n => Math.pow(2, MILESTONES.filter(m => n >= m).length);
 const level = (meta, id) => LEVEL_AT.filter(c => (meta.cards[id] || 0) >= c).length;
+const bonus = (meta, id) => CARDS.find(c => c.id === id).per * level(meta, id);
 
 function rng(seed) {
   return () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 2 ** 32; };
@@ -59,14 +59,17 @@ function openChests(meta, rand) {
 
 function play(ep, meta, { tick = 0.25, limit = 4 * 3600 } = {}) {
   const cm = costMult(ep);
-  const global = meta.perm * (1 + 0.1 * level(meta, "witch"));
-  const grizzle = 1 + 0.5 * level(meta, "grizzle");
-  const rate = (i, n) => n ? n * SCHEMES[i].payout * mult(n) * global * (i === 0 ? grizzle : 1) / SCHEMES[i].time : 0;
-  const cost = (i, n) => SCHEMES[i].base * cm * Math.pow(SCHEMES[i].growth, n);
-  const autoCost = i => SCHEMES[i].auto * cm;
+  // same formulas as the Math section of index.html
+  const global = meta.perm * (1 + bonus(meta, "grizzle"));
+  const speed = 1 + bonus(meta, "mort");
+  const disc = 1 - bonus(meta, "vex");
+  const mult = n => Math.pow(2 + bonus(meta, "witch"), MILESTONES.filter(m => n >= m).length);
+  const rate = (i, n) => n ? n * SCHEMES[i].payout * mult(n) * global * speed / SCHEMES[i].time : 0;
+  const cost = (i, n) => SCHEMES[i].base * cm * disc * Math.pow(SCHEMES[i].growth, n);
+  const autoCost = i => SCHEMES[i].auto * cm * disc;
   let t = 0, cash = 0;
   const n = SCHEMES.map((_, i) => (i === 0 ? 1 : 0));
-  const auto = SCHEMES.map((_, i) => i < level(meta, "mort"));
+  const auto = SCHEMES.map(() => false);
   const log = [];
   const goals = Object.fromEntries(GOALS_SIM.map(g => [g.id, null]));
   autoFlags = auto;
@@ -118,9 +121,9 @@ function play(ep, meta, { tick = 0.25, limit = 4 * 3600 } = {}) {
   return { t, log, goals, n, timedOut: true };
 }
 
-const fmtT = s => `${Math.floor(s / 60)}m${String(Math.round(s % 60)).padStart(2, "0")}s`;
+const fmtT = s => { s = Math.round(s); return `${Math.floor(s / 60)}m${String(s % 60).padStart(2, "0")}s`; };
 const newMeta = () => ({ perm: 1, beer: 0, eggs: 0, crystals: 0, cards: {} });
-const finale = meta => { meta.perm += PERM_PER_EPISODE * (1 + 0.2 * level(meta, "bramble")); meta.eggs += EGGS_PER_FINALE; };
+const finale = meta => { meta.perm += PERM_PER_EPISODE * (1 + bonus(meta, "bramble")); meta.eggs += EGGS_PER_FINALE; };
 
 // Episode 1 in detail
 const r = play(0, newMeta());

@@ -16,15 +16,15 @@ An idle clicker: a goblin shopkeeper runs dodgy shops in monster districts. Hobb
 
 - Six shop slots, unlocked in order. Numbers per slot live in `SCHEMES` (cost, growth, payout, run time, automate cost). Names, icons, nouns and story text per episode live in `EPISODES`. Costs grow geometrically, milestones at 10/25/50/100/150 customers double a shop's income and give 1 beer.
 - Prestige = episode finale. Needs `GOALS_NEEDED` (5) of the 9 goals plus one customer of the sixth shop. Resets cash and shops; keeps beer, eggs, crystals and cards; adds a permanent +50% income and 3 eggs.
-- Episodes: Haunted Mall, Swamp Market, Crypt Quarter, then it repeats ("Haunted Mall 2"). All episodes share the same `SCHEMES`, but customer costs, automation costs and goals marked `scaled: true` (the cash goal, `{$}` in its text) multiply by `costMult()` = `1 + EPISODE_COST_STEP * episode` (step 1, so x2, x3, ...).
-- Cards (Grizzle, Mort, Countess Vex, Bramble, Old Bog Witch) level 1 to 5 by duplicates and survive resets. Chests: egg (2 eggs, 3 cards), beer (5 beer, 2 cards), crystal barrel (12 crystals, 4 cards). Duplicates of maxed cards give crystals.
+- Episodes: Haunted Mall, Swamp Market, Crypt Quarter, then it repeats ("Haunted Mall 2"). All episodes share the same `SCHEMES`, but customer costs, automation costs and goals marked `scaled: true` (the cash goal, `{$}` in its text) multiply by `costMult()` = `1 + EPISODE_COST_STEP * episode` (step 2, so x3, x5, ...).
+- Cards level 1 to 5 by duplicates and survive resets. Each is one multiplier, strength per level in its `per` field, applied through `cardBonus(id)` in the Math section (the simulator mirrors those formulas): Grizzle all income, Mort run speed, Countess Vex cost discount, Bramble finale bonus, Old Bog Witch milestone multiplier (2 + bonus). Rob prefers multiplier cards (speed, money, finale bonus) over rule-changing perks like free automation or offline caps. Saves from before this (no `cardsV2`) keep shops Mort used to automate. Chests: egg (2 eggs, 3 cards), beer (5 beer, 2 cards), crystal barrel (12 crystals, 4 cards). Duplicates of maxed cards give crystals.
 - Story: a `<dialog>` shows an intro per episode (once, tracked by `S.storySeen`) and a finale scene when the finale button is pressed.
 - Saves: localStorage key `grizzle-haunted-mall-v1` (game), `...-buymode` and `...-view` (UI prefs, kept separate so resets don't wipe them). Offline earnings are credited on load and when a background tab becomes visible.
 - URL flags: `?speed=10` runs faster, `?debug` exposes `window.__game` (state and a few functions).
 
 ## Balance target
 
-Episode 1 should take about 30 minutes; the simulator (greedy, always-tapping player) currently gives about 26 minutes, with the fifth goal clearing about 4 minutes before the dragon lease. Later episodes should stay about as long: with the cost step at 1, episodes 2 to 6 take about 29, 28, 25, 23 and 21 minutes (slowly faster as cards level up). Real players are slower. If you change costs or goals, rerun the simulator and update the README numbers.
+Episode 1 should take about 30 minutes; the simulator (greedy, always-tapping player) currently gives about 26 minutes, with the fifth goal clearing about 4 minutes before the dragon lease. Later episodes should stay about as long: with the cost step at 2, episodes 2 to 6 take about 31, 27, 24, 21 and 19 minutes (slowly faster as cards level up). Real players are slower. If you change costs or goals, rerun the simulator and update the README numbers.
 
 ## Testing notes
 
