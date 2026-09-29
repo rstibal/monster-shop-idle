@@ -43,11 +43,13 @@ Cards survive episode resets. Duplicates level a card up to level 5 (1, 3, 6, 11
 
 Everything lives at the top of the script in `index.html`: `SCHEMES` (costs, payouts, run times), `MILESTONES`, `GOALS`, `CARDS`, `CHESTS`, `LEVEL_AT`, `PERM_PER_EPISODE` and `OFFLINE_CAP_S`.
 
+Balance check: `node tools/sim.mjs` reads the numbers from `index.html`, plays a greedy player who taps every shop the moment it's idle, and prints when each shop opens and when the finale unlocks. Episode 1 currently takes about 26 minutes that way. Real players are less efficient, so expect 30 to 40.
+
 ## Roadmap
 
 - [x] Cards and chests (permanent, survive episode resets)
 - [ ] Episode-specific shops and story beats
-- [ ] Balance pass targeting about 30 minutes for episode 1
+- [x] Balance pass targeting about 30 minutes for episode 1
 - [ ] Art and sound
 - [ ] Optional rewarded-ad boosts
 
