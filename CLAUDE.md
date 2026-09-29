@@ -36,7 +36,7 @@ Episode 1 should take about 30 minutes; the simulator (greedy, always-tapping pl
 ## Working preferences
 
 - Commit locally as work is done, but ask before pushing. Pushing publishes to the public repo and the live Pages site. After a push, Pages takes about a minute; verify with the Pages build status (`gh api repos/rstibal/monster-shop-idle/pages/builds/latest`).
-- End commit messages with `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
+- End commit messages with a `Co-Authored-By: Claude <model> <noreply@anthropic.com>` line naming the model actually running the session (for example `Claude Opus 5.5`).
 - The repo lives at `C:\www\monster-shop-idle` on the main computer (outside OneDrive on purpose; don't put `.git` in a synced folder).
 - Keep the UI distinctive, not generic (moss and plum palette, Bagel Fat One display font, gold accent, raised buttons). No all-caps labels.
 
