@@ -162,6 +162,13 @@
   .card .perk b { color: var(--slime); }
   .card .perk small { display: block; color: var(--ink-dim); font-size: 0.8rem; }
 
+  dialog#story { border: 3px solid var(--plum-edge); border-radius: var(--radius); background: var(--plum); color: var(--ink); padding: 20px 22px; width: min(520px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow-x: hidden; overflow-y: auto; overflow-wrap: anywhere; box-shadow: 0 8px 0 var(--moss-deep); }
+  dialog#story::backdrop { background: rgba(10, 20, 15, 0.72); }
+  dialog#story h2 { font-family: var(--display); font-weight: 400; font-size: 1.4rem; margin: 0 0 10px; color: var(--gold); }
+  dialog#story p { margin: 0 0 10px; line-height: 1.55; }
+  dialog#story b { color: var(--gold); }
+  .story-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
+
   .toast {
     position: fixed; left: 50%; bottom: 20px; transform: translate(-50%, 30px); opacity: 0;
     background: var(--gold); color: #2a1c00; font-weight: 700; padding: 10px 16px; border-radius: 12px;
@@ -183,7 +190,7 @@
     <div class="brand">
       <h1 id="episodeName">Grizzle's Haunted Mall</h1>
       <div class="cash" id="cash">$0</div>
-      <p class="hint" id="hint" hidden>Tap the pretzel kiosk (the icon or its bar) to earn your first dollars. Every $1 gets you closer to a second customer.</p>
+      <p class="hint" id="hint" hidden></p>
     </div>
     <div class="stats">
       <span>Income <b id="ips">$0/s</b></span>
@@ -236,6 +243,11 @@
     </aside>
   </div>
 </div>
+<dialog id="story" aria-labelledby="storyTitle">
+  <h2 id="storyTitle"></h2>
+  <div id="storyText"></div>
+  <div class="story-actions" id="storyActions"></div>
+</dialog>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -243,13 +255,14 @@
   "use strict";
 
   // ---------- Content (all placeholder, tune freely) ----------
+  // The numbers behind the six shop slots. Names, icons and story per episode live in EPISODES below.
   const SCHEMES = [
-    { name: "Pretzel kiosk of mystery", icon: "🥨", hue: 35,  base: 4,       growth: 1.07, payout: 1,      time: 1,  auto: 500 },
-    { name: "Cursed phone-case cart",   icon: "📱", hue: 275, base: 60,      growth: 1.15, payout: 60,     time: 3,  auto: 5e3 },
-    { name: "Love-potion perfume counter", icon: "🧪", hue: 320, base: 1000, growth: 1.14, payout: 540,    time: 6,  auto: 5e4 },
-    { name: "Haunted arcade",           icon: "🕹️", hue: 190, base: 20000,    growth: 1.13, payout: 4320,   time: 12, auto: 5e5 },
-    { name: "Elevator-to-nowhere toll", icon: "🛗", hue: 210, base: 300000,  growth: 1.12, payout: 51840,  time: 24, auto: 5e6 },
-    { name: "Dragon anchor-store lease", icon: "🐉", hue: 10,  base: 4000000, growth: 1.11, payout: 622080, time: 96, auto: 5e7 },
+    { hue: 35,  base: 4,       growth: 1.07, payout: 1,      time: 1,  auto: 500 },
+    { hue: 275, base: 60,      growth: 1.15, payout: 60,     time: 3,  auto: 5e3 },
+    { hue: 320, base: 1000,    growth: 1.14, payout: 540,    time: 6,  auto: 5e4 },
+    { hue: 190, base: 20000,   growth: 1.13, payout: 4320,   time: 12, auto: 5e5 },
+    { hue: 210, base: 300000,  growth: 1.12, payout: 51840,  time: 24, auto: 5e6 },
+    { hue: 10,  base: 4000000, growth: 1.11, payout: 622080, time: 96, auto: 5e7 },
   ];
   const MILESTONES = [10, 25, 50, 100, 150];   // each doubles that scheme's income and gives 1 beer
   const PERM_PER_EPISODE = 0.5;                 // +50% per finished episode (Bramble boosts this)
@@ -260,7 +273,7 @@
   const MAX_LEVEL = LEVEL_AT.length;
   const CARDS = [
     { id: "grizzle", name: "Grizzle", role: "Scrappy owner",       icon: "👺", hue: 100, weight: 30,
-      perk: l => `Pretzel kiosk income x${(1 + 0.5 * l).toFixed(1)}`, unit: "Pretzel kiosk income +50%" },
+      perk: l => `First shop income x${(1 + 0.5 * l).toFixed(1)}`, unit: "First shop income +50%" },
     { id: "mort",    name: "Mort",    role: "Night-shift ghoul",   icon: "🧟", hue: 160, weight: 25,
       perk: l => `Runs the first ${l} shop${l > 1 ? "s" : ""} for free`, unit: "Automates one more shop" },
     { id: "vex",     name: "Countess Vex", role: "Vampire bookkeeper", icon: "🧛", hue: 340, weight: 20,
@@ -276,28 +289,117 @@
     { id: "barrel", name: "Crystal barrel", cur: "crystals", cost: 12, pulls: 4, blurb: "Crystals come from duplicates of maxed cards." },
   ];
   const EGGS_PER_GOAL = 1, EGGS_PER_FINALE = 3;
-  const EPISODES = ["Haunted Mall", "Swamp Market", "Crypt Quarter", "Sewer Bazaar", "Moonlit Docks"];
+  // Episodes repeat after the last one (shown as "Haunted Mall 2" and so on), with the permanent bonus carrying over.
+  // shops[i] fills SCHEMES[i]: noun is used in goal text ("Own 25 pretzel customers"), lease is the last shop's name in short.
+  const EPISODES = [
+    {
+      name: "Haunted Mall",
+      lease: "dragon lease",
+      shops: [
+        { name: "Pretzel kiosk of mystery",   icon: "🥨", noun: "pretzel" },
+        { name: "Cursed phone-case cart",     icon: "📱", noun: "phone-case" },
+        { name: "Love-potion perfume counter", icon: "🧪", noun: "perfume" },
+        { name: "Haunted arcade",             icon: "🕹️", noun: "arcade" },
+        { name: "Elevator-to-nowhere toll",   icon: "🛗", noun: "elevator" },
+        { name: "Dragon anchor-store lease",  icon: "🐉", noun: "dragon" },
+      ],
+      intro: {
+        text: [
+          "The mall closed in 1994. Nobody told the ghosts, the goblins, or Grizzle.",
+          "Grizzle has a pretzel kiosk, a dream, and a lease that says AS-IS in very large letters. Mort has the night shift and no complaints. Countess Vex is doing the books, in a manner of speaking.",
+          "Sell something. Anything.",
+        ],
+      },
+      finale: {
+        title: "The big switch",
+        text: [
+          "Every shop is humming. The Old Bog Witch has been outbid, and a dragon has signed a lease on the whole east wing, food court included.",
+          "That leaves the mall's main breaker. Bramble is standing next to it. \"Boss,\" says Bramble, \"this is a bad idea.\" \"That's why it'll work,\" says Grizzle.",
+          "The lights go out. The profits do not.",
+        ],
+        ready: "Bramble is standing by the big switch.",
+        button: "Cut the mall's power",
+      },
+    },
+    {
+      name: "Swamp Market",
+      lease: "ferry monopoly",
+      shops: [
+        { name: "Mushroom stall of mystery",   icon: "🍄", noun: "mushroom" },
+        { name: "Bog-water bottler",           icon: "🫙", noun: "bottled-water" },
+        { name: "Newt-eye lucky charms",       icon: "🧿", noun: "charm" },
+        { name: "Fog boat tours",              icon: "🛶", noun: "boat tour" },
+        { name: "Stilt-house timeshare",       icon: "🏚️", noun: "timeshare" },
+        { name: "Kraken ferry monopoly",       icon: "🦑", noun: "ferry" },
+      ],
+      intro: {
+        text: [
+          "The Swamp Market opens at dusk and never closes, because nobody remembers where the doors are.",
+          "Grizzle arrives with a crate of unsold pretzels and a reputation. The Old Bog Witch runs the stall across the way and has been expecting him. \"You again,\" she says.",
+          "Countess Vex has already found the ledger. Mort has already found the swamp.",
+        ],
+      },
+      finale: {
+        title: "Anchors aweigh",
+        text: [
+          "The Witch offers a truce and a very small pie. Grizzle declines the pie. She takes this personally.",
+          "So Bramble unhooks the market from its moorings, on purpose, with the kraken's blessing. The whole thing floats, and drifts downriver toward the next district.",
+          "It smells like old stone and expensive candles.",
+        ],
+        ready: "The market is straining at its moorings.",
+        button: "Cut the moorings",
+      },
+    },
+    {
+      name: "Crypt Quarter",
+      lease: "mausoleum condo",
+      shops: [
+        { name: "Grave-flower cart",           icon: "🥀", noun: "flower" },
+        { name: "Coffin showroom",             icon: "⚰️", noun: "coffin" },
+        { name: "Seance parlor",               icon: "🔮", noun: "seance" },
+        { name: "Ghost-tour desk",             icon: "👻", noun: "ghost tour" },
+        { name: "Bone-china antiques",         icon: "🦴", noun: "antique" },
+        { name: "Mausoleum condo sales",       icon: "🏛️", noun: "condo" },
+      ],
+      intro: {
+        text: [
+          "The Crypt Quarter is the oldest, quietest, most overpriced district in town. Nobody here pays in cash. Everyone pays in favors, and Countess Vex knows all of them.",
+          "Grizzle opens a flower cart outside a family mausoleum. Nobody complains. Somehow that is the most worrying part.",
+        ],
+      },
+      finale: {
+        title: "Fine print",
+        text: [
+          "By dawn every mausoleum is a condo and every ghost has a timeshare. Then the Old Bog Witch turns up with an offer to buy the whole street.",
+          "Grizzle laughs. She shows him the paperwork. Bramble reads it twice. \"Boss,\" says Bramble, \"we have a bigger problem.\"",
+          "Somewhere in the distance, a mall reopens.",
+        ],
+        ready: "The Witch's paperwork is on your desk.",
+        button: "Burn the paperwork",
+      },
+    },
+  ];
   const SAVE_KEY = "grizzle-haunted-mall-v1";
   const SPEED = Math.max(1, Number(new URLSearchParams(location.search).get("speed")) || 1); // ?speed=10 for testing
 
   // Listed roughly in the order a player reaches them; the first three uncleared ones are shown.
-  // The finale also needs a dragon lease (see finaleReady).
+  // {n} in the text is filled with that shop's noun for the current episode. The finale also needs the last shop (see finaleReady).
   const GOALS = [
-    { id: "h1", text: "Own 25 pretzel customers",       cur: s => s.schemes[0].n, target: 25 },
-    { id: "h2", text: "Own 10 perfume customers",       cur: s => s.schemes[2].n, target: 10 },
+    { id: "h1", text: "Own 25 {0} customers",       cur: s => s.schemes[0].n, target: 25 },
+    { id: "h2", text: "Own 10 {2} customers",       cur: s => s.schemes[2].n, target: 10 },
     { id: "h3", text: "Automate 3 shops",               cur: s => s.schemes.filter((x, i) => isAuto(i)).length, target: 3 },
-    { id: "h4", text: "Own 25 arcade customers",        cur: s => s.schemes[3].n, target: 25 },
-    { id: "h5", text: "Own 10 elevator customers",      cur: s => s.schemes[4].n, target: 10 },
+    { id: "h4", text: "Own 25 {3} customers",        cur: s => s.schemes[3].n, target: 25 },
+    { id: "h5", text: "Own 10 {4} customers",      cur: s => s.schemes[4].n, target: 10 },
     { id: "h6", text: "Hold $3M at once",               cur: s => s.cash, target: 3e6 },
-    { id: "h7", text: "Own 50 arcade customers",        cur: s => s.schemes[3].n, target: 50 },
-    { id: "h8", text: "Own 25 elevator customers",      cur: s => s.schemes[4].n, target: 25 },
+    { id: "h7", text: "Own 50 {3} customers",        cur: s => s.schemes[3].n, target: 50 },
+    { id: "h8", text: "Own 25 {4} customers",      cur: s => s.schemes[4].n, target: 25 },
     { id: "h9", text: "Automate 5 shops",               cur: s => s.schemes.filter((x, i) => isAuto(i)).length, target: 5 },
   ];
   const GOALS_NEEDED = 5;
 
   // ---------- State ----------
   const fresh = () => ({
-    cash: 0, beer: 0, eggs: 0, crystals: 0, cards: {}, episode: 0, perm: 1, goalsDone: [],
+    cash: 0, beer: 0, eggs: 0, crystals: 0, cards: {}, episode: 0, storySeen: -1, perm: 1, goalsDone: [],
     schemes: SCHEMES.map((_, i) => ({ n: i === 0 ? 1 : 0, auto: false, running: false, progress: 0 })),
     seen: Date.now(),
   });
@@ -313,12 +415,19 @@
       if (!s || !Array.isArray(s.schemes) || s.schemes.length !== SCHEMES.length) return null;
       // saves from before cards existed
       s.eggs = s.eggs || 0; s.crystals = s.crystals || 0; s.cards = s.cards || {};
+      // saves from before the story existed count as having read the current intro
+      if (typeof s.storySeen !== "number") s.storySeen = s.episode || 0;
       return s;
     } catch { return null; }
   }
   function save() {
     try { S.seen = Date.now(); localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch {}
   }
+
+  // ---------- Episode content ----------
+  const EP = () => EPISODES[S.episode % EPISODES.length];
+  const shop = i => EP().shops[i];
+  const goalText = g => g.text.replace(/\{(\d)\}/g, (m, i) => shop(i).noun);
 
   // ---------- Math ----------
   const milestoneMult = n => Math.pow(2, MILESTONES.filter(m => n >= m).length);
@@ -370,7 +479,7 @@
     const crossed = MILESTONES.filter(m => before < m && S.schemes[i].n >= m).length;
     if (crossed) {
       S.beer += crossed;
-      toast(SCHEMES[i].name + ": income x" + Math.pow(2, crossed) + " and +" + crossed + " beer");
+      toast(shop(i).name + ": income x" + Math.pow(2, crossed) + " and +" + crossed + " beer");
     }
     render();
   }
@@ -430,10 +539,47 @@
     next.cards = S.cards;
     S = next;
     save();
-    toast("Episode " + (S.episode + 1) + ": " + episodeName() + ". Permanent bonus is now x" + S.perm.toFixed(1) + ", +" + EGGS_PER_FINALE + " eggs");
     build();
+    maybeShowIntro();
   }
-  const episodeName = () => EPISODES[S.episode % EPISODES.length] + (S.episode >= EPISODES.length ? " " + (Math.floor(S.episode / EPISODES.length) + 1) : "");
+  const nameOf = ep => EPISODES[ep % EPISODES.length].name + (ep >= EPISODES.length ? " " + (Math.floor(ep / EPISODES.length) + 1) : "");
+  const episodeName = () => nameOf(S.episode);
+
+  // ---------- Story ----------
+  function showStory({ title, text, actions }) {
+    $("storyTitle").textContent = title;
+    $("storyText").innerHTML = text.map(t => "<p>" + t + "</p>").join("");
+    const box = $("storyActions");
+    box.innerHTML = "";
+    actions.forEach((a, k) => {
+      const b = document.createElement("button");
+      b.className = k === 0 ? "btn alt" : "small-btn";
+      b.textContent = a.label;
+      b.addEventListener("click", () => { $("story").close(); if (a.run) a.run(); });
+      box.appendChild(b);
+    });
+    $("story").showModal();
+    box.firstChild.focus();
+  }
+  function maybeShowIntro() {
+    if (S.storySeen >= S.episode) return;
+    S.storySeen = S.episode;
+    save();
+    showStory({
+      title: "Episode " + (S.episode + 1) + ": " + episodeName(),
+      text: EP().intro.text,
+      actions: [{ label: "Open for business" }],
+    });
+  }
+  function openFinale() {
+    if (!finaleReady()) return;
+    const f = EP().finale;
+    showStory({
+      title: f.title,
+      text: f.text.concat(["<b>Reward:</b> +" + Math.round(finaleGain() * 100) + "% permanent income and " + EGGS_PER_FINALE + " eggs. Next stop: " + nameOf(S.episode + 1) + "."]),
+      actions: [{ label: "Start " + nameOf(S.episode + 1), run: finish }, { label: "Not yet" }],
+    });
+  }
 
   // ---------- Loop ----------
   let last = performance.now();
@@ -463,7 +609,7 @@
       if (!S.goalsDone.includes(g.id) && g.cur(S) >= g.target) {
         S.goalsDone.push(g.id);
         S.eggs += EGGS_PER_GOAL;
-        toast("Goal cleared: " + g.text + " (+" + EGGS_PER_GOAL + " egg)");
+        toast("Goal cleared: " + goalText(g) + " (+" + EGGS_PER_GOAL + " egg)");
         renderGoals();
       }
     }
@@ -487,14 +633,14 @@
   let rows = [];
 
   function build() {
-    $("episodeName").textContent = "Grizzle's " + episodeName();
+    $("episodeName").textContent = document.title = "Grizzle's " + episodeName();
     signsEl.innerHTML = "";
     rows = SCHEMES.map((sc, i) => {
       const el = document.createElement("article");
       el.className = "sign";
       el.style.setProperty("--hue", sc.hue);
       el.innerHTML = `
-        <button class="icon" aria-label="Run ${sc.name}"></button>
+        <button class="icon" aria-label="Run ${shop(i).name}"></button>
         <h3><span class="nm"></span><span class="n"></span></h3>
         <div class="bar"><i></i><span></span></div>
         <div class="meta">
@@ -568,7 +714,7 @@
     const active = GOALS.filter(g => !S.goalsDone.includes(g.id)).slice(0, 3);
     $("goals").innerHTML = active.map(g => {
       const cur = Math.min(g.cur(S), g.target);
-      return `<div class="goal" data-id="${g.id}"><div class="label"><span>${g.text}</span><span>${fmt(cur)} / ${fmt(g.target)}</span></div><div class="gbar"><i style="width:${(cur / g.target) * 100}%"></i></div></div>`;
+      return `<div class="goal" data-id="${g.id}"><div class="label"><span>${goalText(g)}</span><span>${fmt(cur)} / ${fmt(g.target)}</span></div><div class="gbar"><i style="width:${(cur / g.target) * 100}%"></i></div></div>`;
     }).join("") || "<p>All goals cleared.</p>";
     $("goalsNote").innerHTML = `Cleared <b>${clearedCount()}</b> of the <b>${GOALS_NEEDED}</b> needed to open the finale.`;
   }
@@ -578,12 +724,12 @@
       const r = rows[i], def = SCHEMES[i];
       const open = unlocked(i);
       r.el.classList.toggle("locked", !open);
-      r.nm.textContent = open ? def.name : "Locked shop";
-      r.icon.textContent = open ? def.icon : "🔒";
+      r.nm.textContent = open ? shop(i).name : "Locked shop";
+      r.icon.textContent = open ? shop(i).icon : "🔒";
       r.icon.disabled = !open || isAuto(i);
       r.meta.hidden = r.bar.hidden = !open;
       r.locked.hidden = open;
-      r.locked.textContent = open ? "" : "Open one " + SCHEMES[i - 1].name.toLowerCase() + " customer to unlock.";
+      r.locked.textContent = open ? "" : "Open one " + shop(i - 1).name.toLowerCase() + " customer to unlock.";
       r.n.textContent = open ? sc.n + " customers" : "";
     });
     update(true);
@@ -599,6 +745,7 @@
     $("offlineNote").textContent = "Your shops keep earning while the tab is closed (up to " + offlineCap() / 3600 + " hours).";
     updateChests();
     const s0 = S.schemes[0];
+    $("hint").textContent = "Tap the " + shop(0).name.toLowerCase() + " (the icon or its bar) to earn your first dollars. Every $1 gets you closer to a second customer.";
     $("hint").hidden = !(s0.n === 1 && !isAuto(0) && S.cash < nextCost(0) && S.episode === 0);
     let total = 0;
     S.schemes.forEach((sc, i) => {
@@ -624,13 +771,13 @@
     const ready = finaleReady();
     const btn = $("finBtn");
     btn.disabled = !ready;
-    const nextEp = EPISODES[(S.episode + 1) % EPISODES.length];
-    btn.textContent = ready ? "Cut the mall's power" : "Locked";
+    const nextEp = nameOf(S.episode + 1);
+    btn.textContent = ready ? EP().finale.button : "Locked";
     $("finText").innerHTML = ready
-      ? `Bramble is ready to pull the big switch. This resets your cash and shops, keeps your beer and cards, adds <b>+${Math.round(finaleGain() * 100)}%</b> permanent income and <b>${EGGS_PER_FINALE} eggs</b>, and moves you to the <b>${nextEp}</b>.`
+      ? `${EP().finale.ready} This resets your cash and shops, keeps your beer and cards, adds <b>+${Math.round(finaleGain() * 100)}%</b> permanent income and <b>${EGGS_PER_FINALE} eggs</b>, and moves you to the <b>${nextEp}</b>.`
       : "Still needed: " + [
           clearedCount() < GOALS_NEEDED ? `${GOALS_NEEDED - clearedCount()} more goal${GOALS_NEEDED - clearedCount() > 1 ? "s" : ""}` : "",
-          S.schemes[SCHEMES.length - 1].n < 1 ? "a dragon lease" : "",
+          S.schemes[SCHEMES.length - 1].n < 1 ? "a " + EP().lease : "",
         ].filter(Boolean).join(" and ") + ".";
     // refresh goal progress a few times a second, not every frame
     const t = Math.floor(performance.now() / 250);
@@ -668,11 +815,11 @@
     try { localStorage.setItem(VIEW_KEY, b.dataset.view); } catch {}
   }));
   try { setView(localStorage.getItem(VIEW_KEY)); } catch { setView("shops"); }
-  $("finBtn").addEventListener("click", finish);
+  $("finBtn").addEventListener("click", openFinale);
   $("resetBtn").addEventListener("click", () => {
     if (confirm("Wipe your save and start over?")) {
       try { localStorage.removeItem(SAVE_KEY); } catch {}
-      S = fresh(); build();
+      S = fresh(); build(); maybeShowIntro();
     }
   });
   addEventListener("beforeunload", save);
@@ -691,8 +838,9 @@
   S.schemes.forEach((sc, i) => { if (isAuto(i) && sc.n > 0) sc.running = true; });
   build();
   buildChests();
+  maybeShowIntro();
   // ?debug exposes the state for testing in the console
-  if (new URLSearchParams(location.search).has("debug")) window.__game = { get S() { return S; }, openChest, renderCards, update, offline, tap };
+  if (new URLSearchParams(location.search).has("debug")) window.__game = { get S() { return S; }, openChest, renderCards, update, offline, tap, maybeShowIntro, openFinale, finish };
   requestAnimationFrame(frame);
 })();
 </script>

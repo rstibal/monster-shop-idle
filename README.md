@@ -14,12 +14,24 @@ To host it, enable GitHub Pages on the `main` branch (root folder).
 
 ## How it plays
 
-- Six shops unlock in order, from the pretzel kiosk of mystery to the dragon anchor-store lease.
+- Six shops unlock in order. Each episode has its own six (episode 1 runs from the pretzel kiosk of mystery to the dragon anchor-store lease).
 - Buy customers (x1, x10 or Max) to raise a shop's income. Cost grows geometrically.
 - Tap a shop to run it once, or pay to automate it.
 - Owning 10, 25, 50, 100 and 150 customers of a shop doubles its income and gives 1 beer.
 - Clear 5 of the 9 goals and sign a dragon lease to unlock the episode finale. It resets cash and shops, keeps beer, eggs, crystals and cards, and adds a permanent 50% income bonus plus 3 eggs.
 - Shops keep earning while the tab is closed, up to 8 hours.
+
+### Episodes and story
+
+Each episode has its own district, shops, goal wording and a short story scene at the start and at the finale.
+
+| Episode | District | Shops (first to last) |
+| --- | --- | --- |
+| 1 | Haunted Mall | Pretzel kiosk, phone-case cart, perfume counter, arcade, elevator toll, dragon lease |
+| 2 | Swamp Market | Mushroom stall, bog-water bottler, lucky charms, fog boat tours, stilt-house timeshare, kraken ferry monopoly |
+| 3 | Crypt Quarter | Grave-flower cart, coffin showroom, seance parlor, ghost tours, bone-china antiques, mausoleum condos |
+
+After episode 3 the list repeats (shown as "Haunted Mall 2" and so on), and the permanent bonus keeps carrying over. All episodes share the same six shop slots and numbers, so later episodes get faster as the bonus and cards build up.
 
 ### Cards and chests
 
@@ -41,14 +53,14 @@ Cards survive episode resets. Duplicates level a card up to level 5 (1, 3, 6, 11
 
 ## Tuning
 
-Everything lives at the top of the script in `index.html`: `SCHEMES` (costs, payouts, run times), `MILESTONES`, `GOALS`, `CARDS`, `CHESTS`, `LEVEL_AT`, `PERM_PER_EPISODE` and `OFFLINE_CAP_S`.
+Everything lives at the top of the script in `index.html`: `SCHEMES` (costs, payouts, run times), `EPISODES` (shop names and story text), `MILESTONES`, `GOALS`, `CARDS`, `CHESTS`, `LEVEL_AT`, `PERM_PER_EPISODE` and `OFFLINE_CAP_S`.
 
 Balance check: `node tools/sim.mjs` reads the numbers from `index.html`, plays a greedy player who taps every shop the moment it's idle, and prints when each shop opens and when the finale unlocks. Episode 1 currently takes about 26 minutes that way, with the fifth goal landing a few minutes before the lease. It also prints when each goal clears. Real players are less efficient, so expect 30 to 40.
 
 ## Roadmap
 
 - [x] Cards and chests (permanent, survive episode resets)
-- [ ] Episode-specific shops and story beats
+- [x] Episode-specific shops and story beats (3 episodes)
 - [x] Balance pass targeting about 30 minutes for episode 1
 - [ ] Art and sound
 - [ ] Optional rewarded-ad boosts

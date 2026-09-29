@@ -10,6 +10,9 @@ const grab = re => { const m = html.match(re); if (!m) throw new Error("not foun
 const SCHEMES = new Function(grab(/const SCHEMES = \[[\s\S]*?\n  \];/).replace("const SCHEMES =", "return"))();
 const MILESTONES = new Function(grab(/const MILESTONES = \[[^\]]*\]/).replace("const MILESTONES =", "return"))();
 
+const EPISODES = new Function(grab(/const EPISODES = \[[\s\S]*?\n  \];/).replace("const EPISODES =", "return"))();
+const shopName = i => EPISODES[0].shops[i].name;
+const goalText = g => g.text.replace(/\{(\d)\}/g, (m, i) => EPISODES[0].shops[i].noun);
 const GOALS_NEEDED = Number(grab(/const GOALS_NEEDED = \d+/).match(/\d+/)[0]);
 let autoFlags = [];
 const GOALS = new Function("isAuto", grab(/const GOALS = \[[\s\S]*?\n  \];/).replace("const GOALS =", "return"))(i => autoFlags[i]);
@@ -62,9 +65,9 @@ function play({ tick = 0.25, limit = 4 * 3600 } = {}) {
       if (best.kind === "auto") { auto[best.i] = true; continue; }
       const before = n[best.i];
       n[best.i]++;
-      if (before === 0) mark("opened " + SCHEMES[best.i].name);
+      if (before === 0) mark("opened " + shopName(best.i));
       const crossed = MILESTONES.filter(m => before < m && n[best.i] >= m);
-      if (crossed.length) { beer += crossed.length; mark(`${SCHEMES[best.i].name} hit ${crossed[0]}`); }
+      if (crossed.length) { beer += crossed.length; mark(`${shopName(best.i)} hit ${crossed[0]}`); }
     }
 
     const state = { cash, schemes: n.map(x => ({ n: x })) };
@@ -79,6 +82,6 @@ const fmtT = s => `${Math.floor(s / 60)}m${String(Math.round(s % 60)).padStart(2
 const r = play();
 for (const [t, s] of r.log) if (!/hit (25|50|100|150)$/.test(s)) console.log(fmtT(t).padStart(7), s);
 console.log("\nGoals (need " + GOALS_NEEDED + " plus the dragon lease):");
-for (const g of GOALS) console.log("  " + (r.goals[g.id] == null ? "      -" : fmtT(r.goals[g.id]).padStart(7)), g.text);
+for (const g of GOALS) console.log("  " + (r.goals[g.id] == null ? "      -" : fmtT(r.goals[g.id]).padStart(7)), goalText(g));
 console.log("Beer earned:", r.beer, "| customers:", r.n.join(", "));
 console.log(r.timedOut ? "DID NOT FINISH" : "Finale ready at " + fmtT(r.t));
