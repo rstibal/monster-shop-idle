@@ -280,15 +280,20 @@
   const SAVE_KEY = "grizzle-haunted-mall-v1";
   const SPEED = Math.max(1, Number(new URLSearchParams(location.search).get("speed")) || 1); // ?speed=10 for testing
 
+  // Listed roughly in the order a player reaches them; the first three uncleared ones are shown.
+  // The finale also needs a dragon lease (see finaleReady).
   const GOALS = [
-    { id: "g1", text: "Own 25 pretzel customers",       cur: s => s.schemes[0].n, target: 25 },
-    { id: "g2", text: "Automate 3 shops",               cur: s => s.schemes.filter((x, i) => isAuto(i)).length, target: 3 },
-    { id: "g3", text: "Own 10 perfume customers",       cur: s => s.schemes[2].n, target: 10 },
-    { id: "g4", text: "Hold $100K at once",             cur: s => s.cash, target: 1e5 },
-    { id: "g5", text: "Own 5 arcade customers",         cur: s => s.schemes[3].n, target: 5 },
-    { id: "g6", text: "Sign a dragon lease",            cur: s => s.schemes[5].n, target: 1 },
+    { id: "h1", text: "Own 25 pretzel customers",       cur: s => s.schemes[0].n, target: 25 },
+    { id: "h2", text: "Own 10 perfume customers",       cur: s => s.schemes[2].n, target: 10 },
+    { id: "h3", text: "Automate 3 shops",               cur: s => s.schemes.filter((x, i) => isAuto(i)).length, target: 3 },
+    { id: "h4", text: "Own 25 arcade customers",        cur: s => s.schemes[3].n, target: 25 },
+    { id: "h5", text: "Own 10 elevator customers",      cur: s => s.schemes[4].n, target: 10 },
+    { id: "h6", text: "Hold $3M at once",               cur: s => s.cash, target: 3e6 },
+    { id: "h7", text: "Own 50 arcade customers",        cur: s => s.schemes[3].n, target: 50 },
+    { id: "h8", text: "Own 25 elevator customers",      cur: s => s.schemes[4].n, target: 25 },
+    { id: "h9", text: "Automate 5 shops",               cur: s => s.schemes.filter((x, i) => isAuto(i)).length, target: 5 },
   ];
-  const GOALS_NEEDED = 2;
+  const GOALS_NEEDED = 5;
 
   // ---------- State ----------
   const fresh = () => ({
@@ -409,8 +414,10 @@
     render();
   }
 
+  // only count goals that still exist, so saves from older goal lists don't inflate it
+  const clearedCount = () => GOALS.filter(g => S.goalsDone.includes(g.id)).length;
   function finaleReady() {
-    return S.goalsDone.length >= GOALS_NEEDED && S.schemes[SCHEMES.length - 1].n >= 1;
+    return clearedCount() >= GOALS_NEEDED && S.schemes[SCHEMES.length - 1].n >= 1;
   }
   function finish() {
     if (!finaleReady()) return;
@@ -563,7 +570,7 @@
       const cur = Math.min(g.cur(S), g.target);
       return `<div class="goal" data-id="${g.id}"><div class="label"><span>${g.text}</span><span>${fmt(cur)} / ${fmt(g.target)}</span></div><div class="gbar"><i style="width:${(cur / g.target) * 100}%"></i></div></div>`;
     }).join("") || "<p>All goals cleared.</p>";
-    $("goalsNote").innerHTML = `Cleared <b>${S.goalsDone.length}</b> of the <b>${GOALS_NEEDED}</b> needed to open the finale.`;
+    $("goalsNote").innerHTML = `Cleared <b>${clearedCount()}</b> of the <b>${GOALS_NEEDED}</b> needed to open the finale.`;
   }
 
   function render() {
@@ -621,7 +628,10 @@
     btn.textContent = ready ? "Cut the mall's power" : "Locked";
     $("finText").innerHTML = ready
       ? `Bramble is ready to pull the big switch. This resets your cash and shops, keeps your beer and cards, adds <b>+${Math.round(finaleGain() * 100)}%</b> permanent income and <b>${EGGS_PER_FINALE} eggs</b>, and moves you to the <b>${nextEp}</b>.`
-      : `Clear ${GOALS_NEEDED} goals and sign a dragon lease to open the finale.`;
+      : "Still needed: " + [
+          clearedCount() < GOALS_NEEDED ? `${GOALS_NEEDED - clearedCount()} more goal${GOALS_NEEDED - clearedCount() > 1 ? "s" : ""}` : "",
+          S.schemes[SCHEMES.length - 1].n < 1 ? "a dragon lease" : "",
+        ].filter(Boolean).join(" and ") + ".";
     // refresh goal progress a few times a second, not every frame
     const t = Math.floor(performance.now() / 250);
     if (force || t !== update.t) { update.t = t; renderGoals(); }

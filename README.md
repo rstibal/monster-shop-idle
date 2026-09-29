@@ -18,7 +18,7 @@ To host it, enable GitHub Pages on the `main` branch (root folder).
 - Buy customers (x1, x10 or Max) to raise a shop's income. Cost grows geometrically.
 - Tap a shop to run it once, or pay to automate it.
 - Owning 10, 25, 50, 100 and 150 customers of a shop doubles its income and gives 1 beer.
-- Clear 2 goals and sign a dragon lease to unlock the episode finale. It resets cash and shops, keeps beer, eggs, crystals and cards, and adds a permanent 50% income bonus plus 3 eggs.
+- Clear 5 of the 9 goals and sign a dragon lease to unlock the episode finale. It resets cash and shops, keeps beer, eggs, crystals and cards, and adds a permanent 50% income bonus plus 3 eggs.
 - Shops keep earning while the tab is closed, up to 8 hours.
 
 ### Cards and chests
@@ -43,7 +43,7 @@ Cards survive episode resets. Duplicates level a card up to level 5 (1, 3, 6, 11
 
 Everything lives at the top of the script in `index.html`: `SCHEMES` (costs, payouts, run times), `MILESTONES`, `GOALS`, `CARDS`, `CHESTS`, `LEVEL_AT`, `PERM_PER_EPISODE` and `OFFLINE_CAP_S`.
 
-Balance check: `node tools/sim.mjs` reads the numbers from `index.html`, plays a greedy player who taps every shop the moment it's idle, and prints when each shop opens and when the finale unlocks. Episode 1 currently takes about 26 minutes that way. Real players are less efficient, so expect 30 to 40.
+Balance check: `node tools/sim.mjs` reads the numbers from `index.html`, plays a greedy player who taps every shop the moment it's idle, and prints when each shop opens and when the finale unlocks. Episode 1 currently takes about 26 minutes that way, with the fifth goal landing a few minutes before the lease. It also prints when each goal clears. Real players are less efficient, so expect 30 to 40.
 
 ## Roadmap
 
