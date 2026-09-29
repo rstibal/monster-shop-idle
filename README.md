@@ -33,6 +33,10 @@ Everything lives at the top of the script in `index.html`: `SCHEMES` (costs, pay
 - [ ] Art and sound
 - [ ] Optional rewarded-ad boosts
 
+## License
+
+[MIT](LICENSE)
+
 ## Inspiration
 
 Structure inspired by the discontinued mobile game *It's Always Sunny: The Gang Goes Mobile* (schemes, episode-style prestige, character cards). This project uses an original setting and cast and is not affiliated with that game or its owners.
