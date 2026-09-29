@@ -639,13 +639,19 @@
     update(true);
   }));
   showBuyMode();
-  document.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", () => {
-    const cards = b.dataset.view === "cards";
-    document.querySelectorAll("[data-view]").forEach(x => x.setAttribute("aria-pressed", x === b));
+  const VIEW_KEY = "grizzle-haunted-mall-view";
+  function setView(view) {
+    const cards = view === "cards";
+    document.querySelectorAll("[data-view]").forEach(x => x.setAttribute("aria-pressed", x.dataset.view === (cards ? "cards" : "shops")));
     $("signs").hidden = cards;
     $("buyBar").hidden = cards;
     $("cardsView").hidden = !cards;
+  }
+  document.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", () => {
+    setView(b.dataset.view);
+    try { localStorage.setItem(VIEW_KEY, b.dataset.view); } catch {}
   }));
+  try { setView(localStorage.getItem(VIEW_KEY)); } catch { setView("shops"); }
   $("finBtn").addEventListener("click", finish);
   $("resetBtn").addEventListener("click", () => {
     if (confirm("Wipe your save and start over?")) {
