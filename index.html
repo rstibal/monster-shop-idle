@@ -86,12 +86,18 @@
   .icon {
     grid-row: span 3; width: 60px; height: 60px; border-radius: 12px; border: 0;
     font-size: 2rem; display: grid; place-items: center;
-    background: hsl(var(--hue) 45% 26%);
-    box-shadow: inset 0 -4px 0 hsl(var(--hue) 45% 18%);
-    transition: transform 80ms;
+    /* raised, brightly colored so it reads as a button like Buy and Automate */
+    background: hsl(var(--hue) 70% 58%);
+    box-shadow: 0 4px 0 hsl(var(--hue) 65% 30%), inset 0 2px 0 rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: transform 80ms, box-shadow 80ms;
+    align-self: start;
+    margin-bottom: 4px;
   }
-  .icon:active:not(:disabled) { transform: translateY(2px); }
-  .icon:disabled { cursor: default; }
+  .icon:hover:not(:disabled) { background: hsl(var(--hue) 75% 64%); }
+  .icon:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 hsl(var(--hue) 65% 30%), inset 0 2px 0 rgba(255, 255, 255, 0.3); }
+  /* automated or locked: nothing to tap, so it looks flat and quiet */
+  .icon:disabled { cursor: default; background: hsl(var(--hue) 25% 30%); box-shadow: inset 0 -4px 0 hsl(var(--hue) 25% 20%); filter: saturate(0.7); }
   .sign h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 1.15rem; display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
   .sign h3 .n { color: var(--gold); font-size: 1rem; white-space: nowrap; }
   .bar { cursor: pointer; height: 18px; background: var(--moss-deep); border-radius: 999px; overflow: hidden; position: relative; }
