@@ -49,6 +49,7 @@
   .brand h1 { font-family: var(--display); font-weight: 400; font-size: 1.15rem; margin: 0; color: var(--ink-dim); letter-spacing: 0.02em; }
   .cash { font-family: var(--display); font-size: clamp(2.6rem, 9vw, 4.6rem); line-height: 1; color: var(--gold); text-shadow: 0 3px 0 var(--gold-dark); margin: 4px 0 0; }
   .cash small { font-size: 0.45em; color: var(--gold-dark); text-shadow: none; margin-left: 6px; }
+  .hint { margin: 8px 0 0; padding: 8px 12px; max-width: 34ch; background: var(--gold); color: #2a1c00; font-weight: 600; border-radius: 12px; font-size: 0.95rem; }
   .stats { display: flex; gap: 20px; flex-wrap: wrap; color: var(--ink-dim); font-size: 0.95rem; }
   .stats b { color: var(--ink); font-weight: 700; }
   .stats .beer b { color: var(--beer); }
@@ -93,7 +94,7 @@
   .icon:disabled { cursor: default; }
   .sign h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 1.15rem; display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
   .sign h3 .n { color: var(--gold); font-size: 1rem; white-space: nowrap; }
-  .bar { height: 18px; background: var(--moss-deep); border-radius: 999px; overflow: hidden; position: relative; }
+  .bar { cursor: pointer; height: 18px; background: var(--moss-deep); border-radius: 999px; overflow: hidden; position: relative; }
   .bar i { position: absolute; inset: 0 auto 0 0; width: 0; background: hsl(var(--hue) 65% 55%); border-radius: 999px; }
   .bar span { position: absolute; inset: 0; display: grid; place-items: center; font-size: 0.78rem; font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.7); }
   .meta { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; grid-column: 2; }
@@ -176,6 +177,7 @@
     <div class="brand">
       <h1 id="episodeName">Grizzle's Haunted Mall</h1>
       <div class="cash" id="cash">$0</div>
+      <p class="hint" id="hint" hidden>Tap the pretzel kiosk (the icon or its bar) to earn your first dollars. Every $1 gets you closer to a second customer.</p>
     </div>
     <div class="stats">
       <span>Income <b id="ips">$0/s</b></span>
@@ -497,6 +499,10 @@
         meta: el.querySelector(".meta"), bar: el.querySelector(".bar"),
       };
       r.icon.addEventListener("click", ev => tap(i, ev));
+      r.bar.addEventListener("click", ev => tap(i, ev));
+      r.bar.setAttribute("role", "button");
+      r.bar.tabIndex = 0;
+      r.bar.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); tap(i, ev); } });
       r.buy.addEventListener("click", () => buy(i));
       r.auto.addEventListener("click", () => automate(i));
       return r;
@@ -578,6 +584,8 @@
     $("perm").textContent = "x" + S.perm.toFixed(1);
     $("offlineNote").textContent = "Your shops keep earning while the tab is closed (up to " + offlineCap() / 3600 + " hours).";
     updateChests();
+    const s0 = S.schemes[0];
+    $("hint").hidden = !(s0.n === 1 && !isAuto(0) && S.cash < nextCost(0) && S.episode === 0);
     let total = 0;
     S.schemes.forEach((sc, i) => {
       const r = rows[i], def = SCHEMES[i];
@@ -642,7 +650,14 @@
     }
   });
   addEventListener("beforeunload", save);
-  document.addEventListener("visibilitychange", () => { if (document.hidden) save(); });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) { save(); return; }
+    // browsers pause the game loop in background tabs, so credit the time away (S.seen was saved on hide)
+    last = performance.now();
+    offline();
+    S.seen = Date.now();
+    render();
+  });
   setInterval(save, 5000);
 
   offline();
@@ -651,7 +666,7 @@
   build();
   buildChests();
   // ?debug exposes the state for testing in the console
-  if (new URLSearchParams(location.search).has("debug")) window.__game = { get S() { return S; }, openChest, renderCards, update };
+  if (new URLSearchParams(location.search).has("debug")) window.__game = { get S() { return S; }, openChest, renderCards, update, offline, tap };
   requestAnimationFrame(frame);
 })();
 </script>
