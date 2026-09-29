@@ -291,7 +291,8 @@
     seen: Date.now(),
   });
   let S = load() || fresh();
-  let buyMode = "1";
+  const PREF_KEY = "grizzle-haunted-mall-buymode";
+  let buyMode = (() => { try { const m = localStorage.getItem(PREF_KEY); return ["1", "10", "max"].includes(m) ? m : "1"; } catch { return "1"; } })();
 
   function load() {
     try {
@@ -630,11 +631,14 @@
   }
 
   // ---------- Wiring ----------
+  const showBuyMode = () => document.querySelectorAll("#buyBar .seg button").forEach(x => x.setAttribute("aria-pressed", x.dataset.mode === buyMode));
   document.querySelectorAll("#buyBar .seg button").forEach(b => b.addEventListener("click", () => {
     buyMode = b.dataset.mode;
-    document.querySelectorAll("#buyBar .seg button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    try { localStorage.setItem(PREF_KEY, buyMode); } catch {}
+    showBuyMode();
     update(true);
   }));
+  showBuyMode();
   document.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", () => {
     const cards = b.dataset.view === "cards";
     document.querySelectorAll("[data-view]").forEach(x => x.setAttribute("aria-pressed", x === b));
