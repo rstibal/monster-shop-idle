@@ -25,6 +25,7 @@
     --body: "Figtree", system-ui, sans-serif;
   }
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   html { -webkit-text-size-adjust: 100%; }
   body {
     margin: 0;
@@ -126,6 +127,34 @@
   .small-btn { background: transparent; border: 2px solid var(--plum-edge); border-radius: 10px; padding: 4px 10px; color: var(--ink-dim); font-size: 0.85rem; }
   .small-btn:hover { color: var(--ink); border-color: var(--ink-dim); }
 
+  /* Cards and chests */
+  .views { margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .views .seg button { padding: 6px 18px; }
+  .views .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--gold); margin-left: 6px; vertical-align: middle; }
+  .chests { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 14px; }
+  .chest { background: var(--plum); border: 3px solid var(--plum-edge); border-radius: var(--radius); padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+  .chest h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 1.05rem; }
+  .chest p { margin: 0; font-size: 0.85rem; color: var(--ink-dim); flex: 1; }
+  .pull { min-height: 64px; margin-bottom: 14px; padding: 10px 12px; border: 2px dashed var(--plum-edge); border-radius: var(--radius); color: var(--ink-dim); font-size: 0.92rem; }
+  .pull ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .pull li { background: var(--moss-deep); border-radius: 999px; padding: 4px 12px; color: var(--ink); font-weight: 600; }
+  .pull li em { font-style: normal; color: var(--gold); margin-left: 6px; }
+  .cardgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+  .card { --hue: 100; background: var(--plum); border: 3px solid var(--plum-edge); border-radius: var(--radius); padding: 12px; display: grid; grid-template-columns: 56px 1fr; gap: 4px 12px; align-content: start; }
+  .card.none { opacity: 0.6; }
+  .card.max { border-color: var(--gold); }
+  .card .portrait { grid-row: span 2; width: 56px; height: 56px; border-radius: 12px; display: grid; place-items: center; font-size: 1.9rem; background: hsl(var(--hue) 45% 26%); box-shadow: inset 0 -4px 0 hsl(var(--hue) 45% 18%); }
+  .card h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 1.05rem; display: flex; justify-content: space-between; gap: 6px; align-items: baseline; }
+  .card h3 .lv { color: var(--gold); font-size: 0.95rem; white-space: nowrap; }
+  .card .role { font-size: 0.82rem; color: var(--ink-dim); }
+  .card .copies { grid-column: 1 / -1; }
+  .card .copies .gbar { height: 8px; background: var(--moss-deep); border-radius: 999px; overflow: hidden; }
+  .card .copies .gbar i { display: block; height: 100%; background: hsl(var(--hue) 65% 55%); }
+  .card .copies span { font-size: 0.8rem; color: var(--ink-dim); }
+  .card .perk { grid-column: 1 / -1; font-size: 0.88rem; margin: 0; }
+  .card .perk b { color: var(--slime); }
+  .card .perk small { display: block; color: var(--ink-dim); font-size: 0.8rem; }
+
   .toast {
     position: fixed; left: 50%; bottom: 20px; transform: translate(-50%, 30px); opacity: 0;
     background: var(--gold); color: #2a1c00; font-weight: 700; padding: 10px 16px; border-radius: 12px;
@@ -151,21 +180,34 @@
     <div class="stats">
       <span>Income <b id="ips">$0/s</b></span>
       <span class="beer">Beer <b id="beer">0</b></span>
+      <span>Eggs <b id="eggs">0</b></span>
+      <span>Crystals <b id="crystals">0</b></span>
       <span>Permanent bonus <b id="perm">x1</b></span>
     </div>
   </header>
 
   <div class="layout">
     <main>
-      <div class="toolbar">
-        <span>Buy</span>
-        <div class="seg" role="group" aria-label="Buy amount">
-          <button data-mode="1" aria-pressed="true">x1</button>
-          <button data-mode="10" aria-pressed="false">x10</button>
-          <button data-mode="max" aria-pressed="false">Max</button>
+      <div class="views">
+        <div class="seg" role="group" aria-label="View">
+          <button data-view="shops" aria-pressed="true">Shops</button>
+          <button data-view="cards" aria-pressed="false">Cards<i class="dot" id="cardDot" hidden></i></button>
+        </div>
+        <div class="toolbar" id="buyBar">
+          <span>Buy</span>
+          <div class="seg" role="group" aria-label="Buy amount">
+            <button data-mode="1" aria-pressed="true">x1</button>
+            <button data-mode="10" aria-pressed="false">x10</button>
+            <button data-mode="max" aria-pressed="false">Max</button>
+          </div>
         </div>
       </div>
       <div class="signs" id="signs"></div>
+      <section id="cardsView" hidden aria-label="Cards and chests">
+        <div class="chests" id="chests"></div>
+        <div class="pull" id="pull" aria-live="polite">Open a chest to draw cards. Duplicates level a card up.</div>
+        <div class="cardgrid" id="cardgrid"></div>
+      </section>
     </main>
 
     <aside>
@@ -180,7 +222,7 @@
         <button class="btn alt" id="finBtn" disabled>Locked</button>
       </section>
       <section class="panel">
-        <p>Your shops keep earning while the tab is closed (up to 8 hours).</p>
+        <p id="offlineNote">Your shops keep earning while the tab is closed.</p>
         <button class="small-btn" id="resetBtn">Wipe save</button>
       </section>
     </aside>
@@ -202,16 +244,37 @@
     { name: "Dragon anchor-store lease", icon: "🐉", hue: 10,  base: 1244160, growth: 1.11, payout: 622080, time: 96, auto: 5e7 },
   ];
   const MILESTONES = [10, 25, 50, 100, 150];   // each doubles that scheme's income and gives 1 beer
-  const BEER_BONUS = 0.02;                      // +2% global income per beer (stand-in until cards exist)
-  const PERM_PER_EPISODE = 0.5;                 // +50% per finished episode
-  const OFFLINE_CAP_S = 8 * 3600;
+  const PERM_PER_EPISODE = 0.5;                 // +50% per finished episode (Bramble boosts this)
+  const OFFLINE_CAP_S = 8 * 3600;               // base cap (Countess Vex extends it)
+
+  // Cards: permanent, survive episode resets. Copies needed for levels 1..5 (cumulative).
+  const LEVEL_AT = [1, 3, 6, 11, 19];
+  const MAX_LEVEL = LEVEL_AT.length;
+  const CARDS = [
+    { id: "grizzle", name: "Grizzle", role: "Scrappy owner",       icon: "👺", hue: 100, weight: 30,
+      perk: l => `Pretzel kiosk income x${(1 + 0.5 * l).toFixed(1)}`, unit: "Pretzel kiosk income +50%" },
+    { id: "mort",    name: "Mort",    role: "Night-shift ghoul",   icon: "🧟", hue: 160, weight: 25,
+      perk: l => `Runs the first ${l} shop${l > 1 ? "s" : ""} for free`, unit: "Automates one more shop" },
+    { id: "vex",     name: "Countess Vex", role: "Vampire bookkeeper", icon: "🧛", hue: 340, weight: 20,
+      perk: l => `Offline cap ${8 + 2 * l} hours`, unit: "Offline cap +2 hours" },
+    { id: "bramble", name: "Bramble", role: "Bouncer and collector", icon: "🧌", hue: 30, weight: 15,
+      perk: l => `Finale bonus +${Math.round(PERM_PER_EPISODE * (1 + 0.2 * l) * 100)}%`, unit: "Finale bonus x1.2 more" },
+    { id: "witch",   name: "Old Bog Witch", role: "Rival across the street", icon: "🧙", hue: 285, weight: 10,
+      perk: l => `All income +${l * 10}%`, unit: "All income +10%" },
+  ];
+  const CHESTS = [
+    { id: "egg",    name: "Egg chest",     cur: "eggs",     cost: 2,  pulls: 3, blurb: "Eggs come from clearing goals and finishing episodes." },
+    { id: "beer",   name: "Beer chest",    cur: "beer",     cost: 5,  pulls: 2, blurb: "Beer comes from shop milestones." },
+    { id: "barrel", name: "Crystal barrel", cur: "crystals", cost: 12, pulls: 4, blurb: "Crystals come from duplicates of maxed cards." },
+  ];
+  const EGGS_PER_GOAL = 1, EGGS_PER_FINALE = 3;
   const EPISODES = ["Haunted Mall", "Swamp Market", "Crypt Quarter", "Sewer Bazaar", "Moonlit Docks"];
   const SAVE_KEY = "grizzle-haunted-mall-v1";
   const SPEED = Math.max(1, Number(new URLSearchParams(location.search).get("speed")) || 1); // ?speed=10 for testing
 
   const GOALS = [
     { id: "g1", text: "Own 25 pretzel customers",       cur: s => s.schemes[0].n, target: 25 },
-    { id: "g2", text: "Automate 3 shops",               cur: s => s.schemes.filter(x => x.auto).length, target: 3 },
+    { id: "g2", text: "Automate 3 shops",               cur: s => s.schemes.filter((x, i) => isAuto(i)).length, target: 3 },
     { id: "g3", text: "Own 10 perfume customers",       cur: s => s.schemes[2].n, target: 10 },
     { id: "g4", text: "Hold $100K at once",             cur: s => s.cash, target: 1e5 },
     { id: "g5", text: "Own 5 arcade customers",         cur: s => s.schemes[3].n, target: 5 },
@@ -221,7 +284,7 @@
 
   // ---------- State ----------
   const fresh = () => ({
-    cash: 0, beer: 0, episode: 0, perm: 1, goalsDone: [],
+    cash: 0, beer: 0, eggs: 0, crystals: 0, cards: {}, episode: 0, perm: 1, goalsDone: [],
     schemes: SCHEMES.map((_, i) => ({ n: i === 0 ? 1 : 0, auto: false, running: false, progress: 0 })),
     seen: Date.now(),
   });
@@ -234,6 +297,8 @@
       if (!raw) return null;
       const s = JSON.parse(raw);
       if (!s || !Array.isArray(s.schemes) || s.schemes.length !== SCHEMES.length) return null;
+      // saves from before cards existed
+      s.eggs = s.eggs || 0; s.crystals = s.crystals || 0; s.cards = s.cards || {};
       return s;
     } catch { return null; }
   }
@@ -243,8 +308,14 @@
 
   // ---------- Math ----------
   const milestoneMult = n => Math.pow(2, MILESTONES.filter(m => n >= m).length);
-  const globalMult = () => S.perm * (1 + BEER_BONUS * S.beer);
-  const runIncome = i => S.schemes[i].n * SCHEMES[i].payout * milestoneMult(S.schemes[i].n) * globalMult();
+  const copies = id => S.cards[id] || 0;
+  const cardLevel = id => LEVEL_AT.filter(c => copies(id) >= c).length;
+  const globalMult = () => S.perm * (1 + 0.1 * cardLevel("witch"));
+  const shopMult = i => (i === 0 ? 1 + 0.5 * cardLevel("grizzle") : 1);
+  const isAuto = i => S.schemes[i].auto || i < cardLevel("mort");
+  const offlineCap = () => OFFLINE_CAP_S + cardLevel("vex") * 2 * 3600;
+  const finaleGain = () => PERM_PER_EPISODE * (1 + 0.2 * cardLevel("bramble"));
+  const runIncome = i => S.schemes[i].n * SCHEMES[i].payout * milestoneMult(S.schemes[i].n) * shopMult(i) * globalMult();
   const perSecond = i => S.schemes[i].n ? runIncome(i) / SCHEMES[i].time : 0;
   const nextCost = i => SCHEMES[i].base * Math.pow(SCHEMES[i].growth, S.schemes[i].n);
   function bulkCost(i, k) {
@@ -291,7 +362,7 @@
   }
   function automate(i) {
     const sc = S.schemes[i];
-    if (sc.auto || S.cash < SCHEMES[i].auto || sc.n < 1) return;
+    if (isAuto(i) || S.cash < SCHEMES[i].auto || sc.n < 1) return;
     S.cash -= SCHEMES[i].auto;
     sc.auto = true;
     if (!sc.running) sc.running = true;
@@ -299,8 +370,34 @@
   }
   function tap(i, ev) {
     const sc = S.schemes[i];
-    if (sc.n < 1 || sc.auto || sc.running) return;
+    if (sc.n < 1 || isAuto(i) || sc.running) return;
     sc.running = true;
+  }
+
+  // ---------- Chests ----------
+  function pickCard() {
+    const total = CARDS.reduce((a, c) => a + c.weight, 0);
+    let roll = Math.random() * total;
+    for (const c of CARDS) { roll -= c.weight; if (roll < 0) return c; }
+    return CARDS[0];
+  }
+  function openChest(id) {
+    const ch = CHESTS.find(c => c.id === id);
+    if (!ch || S[ch.cur] < ch.cost) return;
+    S[ch.cur] -= ch.cost;
+    const got = [];
+    for (let k = 0; k < ch.pulls; k++) {
+      const c = pickCard();
+      const before = cardLevel(c.id);
+      if (copies(c.id) >= LEVEL_AT[MAX_LEVEL - 1]) { S.crystals += 1; got.push({ c, tag: "+1 crystal" }); continue; }
+      S.cards[c.id] = copies(c.id) + 1;
+      const after = cardLevel(c.id);
+      got.push({ c, tag: before === 0 ? "new" : after > before ? "level " + after : "" });
+    }
+    S.schemes.forEach((sc, i) => { if (isAuto(i) && sc.n > 0) sc.running = true; });
+    $("pull").innerHTML = "<ul>" + got.map(g => `<li>${g.c.icon} ${g.c.name}${g.tag ? `<em>${g.tag}</em>` : ""}</li>`).join("") + "</ul>";
+    renderCards();
+    render();
   }
 
   function finaleReady() {
@@ -310,11 +407,14 @@
     if (!finaleReady()) return;
     const next = fresh();
     next.episode = S.episode + 1;
-    next.perm = S.perm + PERM_PER_EPISODE;
+    next.perm = S.perm + finaleGain();
     next.beer = S.beer;
+    next.eggs = S.eggs + EGGS_PER_FINALE;
+    next.crystals = S.crystals;
+    next.cards = S.cards;
     S = next;
     save();
-    toast("Episode " + (S.episode + 1) + ": " + episodeName() + ". Permanent bonus is now x" + S.perm.toFixed(1));
+    toast("Episode " + (S.episode + 1) + ": " + episodeName() + ". Permanent bonus is now x" + S.perm.toFixed(1) + ", +" + EGGS_PER_FINALE + " eggs");
     build();
   }
   const episodeName = () => EPISODES[S.episode % EPISODES.length] + (S.episode >= EPISODES.length ? " " + (Math.floor(S.episode / EPISODES.length) + 1) : "");
@@ -326,13 +426,15 @@
     last = now;
     for (let i = 0; i < SCHEMES.length; i++) {
       const sc = S.schemes[i];
+      const auto = isAuto(i);
+      if (auto && !sc.running && sc.n >= 1) sc.running = true;
       if (!sc.running || sc.n < 1) continue;
       sc.progress += dt / SCHEMES[i].time;
       if (sc.progress >= 1) {
-        const runs = sc.auto ? Math.floor(sc.progress) : 1;
+        const runs = auto ? Math.floor(sc.progress) : 1;
         S.cash += runIncome(i) * runs;
-        sc.progress = sc.auto ? sc.progress - runs : 0;
-        sc.running = sc.auto;
+        sc.progress = auto ? sc.progress - runs : 0;
+        sc.running = auto;
       }
     }
     checkGoals();
@@ -344,7 +446,8 @@
     for (const g of GOALS) {
       if (!S.goalsDone.includes(g.id) && g.cur(S) >= g.target) {
         S.goalsDone.push(g.id);
-        toast("Goal cleared: " + g.text);
+        S.eggs += EGGS_PER_GOAL;
+        toast("Goal cleared: " + g.text + " (+" + EGGS_PER_GOAL + " egg)");
         renderGoals();
       }
     }
@@ -352,10 +455,10 @@
 
   // ---------- Offline ----------
   function offline() {
-    const secs = Math.min((Date.now() - (S.seen || Date.now())) / 1000, OFFLINE_CAP_S);
+    const secs = Math.min((Date.now() - (S.seen || Date.now())) / 1000, offlineCap());
     if (secs < 30) return;
     let gain = 0;
-    SCHEMES.forEach((_, i) => { if (S.schemes[i].auto) gain += perSecond(i) * secs; });
+    SCHEMES.forEach((_, i) => { if (isAuto(i)) gain += perSecond(i) * secs; });
     if (gain > 0) {
       S.cash += gain;
       toast("Welcome back. Your shops earned " + money(gain) + " in " + (secs >= 3600 ? (secs / 3600).toFixed(1) + " hours" : Math.round(secs / 60) + " minutes"));
@@ -399,7 +502,46 @@
       return r;
     });
     renderGoals();
+    renderCards();
     render();
+  }
+
+  // ---------- Cards view ----------
+  function buildChests() {
+    $("chests").innerHTML = CHESTS.map(c => `
+      <div class="chest">
+        <h3>${c.name}</h3>
+        <p>${c.blurb} Draws ${c.pulls} cards.</p>
+        <button class="btn alt" data-chest="${c.id}">Open<span class="sub">${c.cost} ${c.cur}</span></button>
+      </div>`).join("");
+    $("chests").querySelectorAll("[data-chest]").forEach(b => b.addEventListener("click", () => openChest(b.dataset.chest)));
+  }
+  function updateChests() {
+    let any = false;
+    CHESTS.forEach(c => {
+      const b = document.querySelector(`[data-chest="${c.id}"]`);
+      if (!b) return;
+      const can = S[c.cur] >= c.cost;
+      b.disabled = !can;
+      any = any || can;
+    });
+    $("cardDot").hidden = !any;
+  }
+  function renderCards() {
+    $("cardgrid").innerHTML = CARDS.map(c => {
+      const n = copies(c.id), lv = cardLevel(c.id), max = lv >= MAX_LEVEL;
+      const lo = lv ? LEVEL_AT[lv - 1] : 0, hi = max ? lo : LEVEL_AT[lv];
+      const pct = max ? 100 : ((n - lo) / (hi - lo)) * 100;
+      const now = lv ? c.perk(lv) : "Not found yet";
+      const next = max ? "Max level" : `Next: ${c.perk(lv + 1)}`;
+      return `<article class="card${lv ? "" : " none"}${max ? " max" : ""}" style="--hue:${c.hue}">
+        <div class="portrait">${lv ? c.icon : "❔"}</div>
+        <h3><span>${c.name}</span><span class="lv">${lv ? "Level " + lv : ""}</span></h3>
+        <div class="role">${c.role}</div>
+        <div class="copies"><div class="gbar"><i style="width:${pct}%"></i></div><span>${max ? n + " copies" : `${n} of ${hi} copies`}</span></div>
+        <p class="perk"><b>${now}</b><small>${next}</small></p>
+      </article>`;
+    }).join("");
   }
 
   function renderGoals() {
@@ -418,7 +560,7 @@
       r.el.classList.toggle("locked", !open);
       r.nm.textContent = open ? def.name : "Locked shop";
       r.icon.textContent = open ? def.icon : "🔒";
-      r.icon.disabled = !open || sc.auto;
+      r.icon.disabled = !open || isAuto(i);
       r.meta.hidden = r.bar.hidden = !open;
       r.locked.hidden = open;
       r.locked.textContent = open ? "" : "Open one " + SCHEMES[i - 1].name.toLowerCase() + " customer to unlock.";
@@ -431,24 +573,29 @@
   function update(force) {
     $("cash").textContent = money(S.cash);
     $("beer").textContent = S.beer;
+    $("eggs").textContent = S.eggs;
+    $("crystals").textContent = S.crystals;
     $("perm").textContent = "x" + S.perm.toFixed(1);
+    $("offlineNote").textContent = "Your shops keep earning while the tab is closed (up to " + offlineCap() / 3600 + " hours).";
+    updateChests();
     let total = 0;
     S.schemes.forEach((sc, i) => {
       const r = rows[i], def = SCHEMES[i];
       if (!unlocked(i)) return;
-      if (sc.auto) total += perSecond(i);
-      const fast = sc.auto && def.time / SPEED < 0.25;
+      const auto = isAuto(i);
+      if (auto) total += perSecond(i);
+      const fast = auto && def.time / SPEED < 0.25;
       r.fill.style.width = ((fast ? 1 : sc.progress) * 100) + "%";
       const income = runIncome(i);
-      r.label.textContent = sc.n < 1 ? "Buy a customer to open" : sc.auto ? money(perSecond(i)) + "/s" : (sc.running ? money(income) : "Tap to run: " + money(income));
+      r.label.textContent = sc.n < 1 ? "Buy a customer to open" : auto ? money(perSecond(i)) + "/s" : (sc.running ? money(income) : "Tap to run: " + money(income));
       const k = buyCount(i), cost = bulkCost(i, k);
       const nextM = MILESTONES.find(m => m > sc.n);
       r.info.innerHTML = `Runs every <b>${fmtTime(def.time)}</b>` + (nextM ? ` · next bonus at <b>${nextM}</b>` : " · all bonuses earned");
       r.buy.innerHTML = `Buy x${k}<span class="sub">${money(cost)}</span>`;
       r.buy.disabled = S.cash < cost;
-      if (sc.auto) r.auto.hidden = true;
+      if (auto) r.auto.hidden = true;
       else { r.auto.hidden = false; r.auto.innerHTML = `Automate<span class="sub">${money(def.auto)}</span>`; r.auto.disabled = S.cash < def.auto || sc.n < 1; }
-      r.n.textContent = sc.n + " customers" + (sc.auto ? " · auto" : "");
+      r.n.textContent = sc.n + " customers" + (auto ? " · auto" : "");
     });
     $("ips").textContent = money(total) + "/s";
     // finale
@@ -458,7 +605,7 @@
     const nextEp = EPISODES[(S.episode + 1) % EPISODES.length];
     btn.textContent = ready ? "Cut the mall's power" : "Locked";
     $("finText").innerHTML = ready
-      ? `Bramble is ready to pull the big switch. This resets your cash and shops, keeps your beer, adds <b>+${PERM_PER_EPISODE * 100}%</b> permanent income, and moves you to the <b>${nextEp}</b>.`
+      ? `Bramble is ready to pull the big switch. This resets your cash and shops, keeps your beer and cards, adds <b>+${Math.round(finaleGain() * 100)}%</b> permanent income and <b>${EGGS_PER_FINALE} eggs</b>, and moves you to the <b>${nextEp}</b>.`
       : `Clear ${GOALS_NEEDED} goals and sign a dragon lease to open the finale.`;
     // refresh goal progress a few times a second, not every frame
     const t = Math.floor(performance.now() / 250);
@@ -475,10 +622,17 @@
   }
 
   // ---------- Wiring ----------
-  document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll("#buyBar .seg button").forEach(b => b.addEventListener("click", () => {
     buyMode = b.dataset.mode;
-    document.querySelectorAll(".seg button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    document.querySelectorAll("#buyBar .seg button").forEach(x => x.setAttribute("aria-pressed", x === b));
     update(true);
+  }));
+  document.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", () => {
+    const cards = b.dataset.view === "cards";
+    document.querySelectorAll("[data-view]").forEach(x => x.setAttribute("aria-pressed", x === b));
+    $("signs").hidden = cards;
+    $("buyBar").hidden = cards;
+    $("cardsView").hidden = !cards;
   }));
   $("finBtn").addEventListener("click", finish);
   $("resetBtn").addEventListener("click", () => {
@@ -493,8 +647,11 @@
 
   offline();
   // resume any automated shops
-  S.schemes.forEach(sc => { if (sc.auto && sc.n > 0) sc.running = true; });
+  S.schemes.forEach((sc, i) => { if (isAuto(i) && sc.n > 0) sc.running = true; });
   build();
+  buildChests();
+  // ?debug exposes the state for testing in the console
+  if (new URLSearchParams(location.search).has("debug")) window.__game = { get S() { return S; }, openChest, renderCards, update };
   requestAnimationFrame(frame);
 })();
 </script>
