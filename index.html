@@ -341,7 +341,7 @@
   // A skin is everything a player reads or sees: setting, cast, currencies, episodes and colors. Mechanics above are shared,
   // so saves work in any skin. To add one, copy a skin and change it; the Setting picker lists them all. ?skin=<id> forces one.
   // episodes repeat after the last one (shown as "Haunted Mall 2" and so on). shops[i] fills SCHEMES[i]:
-  // noun is used in goal text ("Own 25 pretzel customers"), hue colors its icon tile, lease is the last shop's name in short.
+  // noun is used in goal text ("Get 25 pretzel customers"), hue colors its icon tile, lease is the last shop's name in short.
   // theme sets the CSS variables at the top of the stylesheet; fonts is a Google Fonts URL.
   // sound picks the synth voice for every effect: waveform, root pitch in Hz, scale in semitones, vibrato depth, loudness.
   const SKINS = [
@@ -685,14 +685,14 @@
   // {n} in the text is filled with that shop's noun for the current episode, {c} with the skin's word for customers, {$} with the target as money.
   // scaled goals grow with episode costs (see costMult). The finale also needs the last shop (see finaleReady).
   const GOALS = [
-    { id: "h1", text: "Own 25 {0} {c}",       cur: s => s.schemes[0].n, target: 25 },
-    { id: "h2", text: "Own 10 {2} {c}",       cur: s => s.schemes[2].n, target: 10 },
+    { id: "h1", text: "Get 25 {0} {c}",       cur: s => s.schemes[0].n, target: 25 },
+    { id: "h2", text: "Get 10 {2} {c}",       cur: s => s.schemes[2].n, target: 10 },
     { id: "h3", text: "Automate 3 shops",               cur: s => s.schemes.filter((x, i) => isAuto(i)).length, target: 3 },
-    { id: "h4", text: "Own 25 {3} {c}",        cur: s => s.schemes[3].n, target: 25 },
-    { id: "h5", text: "Own 10 {4} {c}",      cur: s => s.schemes[4].n, target: 10 },
+    { id: "h4", text: "Get 25 {3} {c}",        cur: s => s.schemes[3].n, target: 25 },
+    { id: "h5", text: "Get 10 {4} {c}",      cur: s => s.schemes[4].n, target: 10 },
     { id: "h6", text: "Hold {$} at once",               cur: s => s.cash, target: 3e6, scaled: true },
-    { id: "h7", text: "Own 50 {3} {c}",        cur: s => s.schemes[3].n, target: 50 },
-    { id: "h8", text: "Own 25 {4} {c}",      cur: s => s.schemes[4].n, target: 25 },
+    { id: "h7", text: "Get 50 {3} {c}",        cur: s => s.schemes[3].n, target: 50 },
+    { id: "h8", text: "Get 25 {4} {c}",      cur: s => s.schemes[4].n, target: 25 },
     { id: "h9", text: "Automate 5 shops",               cur: s => s.schemes.filter((x, i) => isAuto(i)).length, target: 5 },
   ];
   const GOALS_NEEDED = 5;
@@ -1130,7 +1130,7 @@
       r.icon.disabled = !open || isAuto(i);
       r.meta.hidden = r.bar.hidden = !open;
       r.locked.hidden = open;
-      r.locked.textContent = open ? "" : "Open one " + shop(i - 1).name.toLowerCase() + " " + customers(1) + " to unlock.";
+      r.locked.textContent = open ? "" : "Get one " + shop(i - 1).name.toLowerCase() + " " + customers(1) + " to unlock.";
       r.n.textContent = open ? sc.n + " " + customers(sc.n) : "";
     });
     update(true);
@@ -1157,7 +1157,7 @@
       const fast = auto && runTime(i) / SPEED < 0.25;
       r.fill.style.width = ((fast ? 1 : sc.progress) * 100) + "%";
       const income = runIncome(i);
-      r.label.textContent = sc.n < 1 ? "Buy a " + customers(1) + " to open" : auto ? money(perSecond(i)) + "/s" : (sc.running ? money(income) : "Tap to run: " + money(income));
+      r.label.textContent = sc.n < 1 ? "Get a " + customers(1) + " to open" : auto ? money(perSecond(i)) + "/s" : (sc.running ? money(income) : "Tap to run: " + money(income));
       const k = buyCount(i), cost = bulkCost(i, k);
       const nextM = MILESTONES.find(m => m > sc.n);
       const prevM = MILESTONES.filter(m => m <= sc.n).pop() || 0;
