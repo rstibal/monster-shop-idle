@@ -192,6 +192,8 @@
   .small-btn { background: transparent; border: 2px solid var(--edge); border-radius: 10px; padding: 4px 10px; color: var(--ink-dim); font-size: 0.85rem; }
   .small-btn:hover { color: var(--ink); border-color: var(--ink-dim); }
   .skin-pick { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; font-size: 0.92rem; color: var(--ink-dim); }
+  .vol { display: grid; grid-template-columns: 5.5em 1fr; align-items: center; gap: 8px; margin: 0 0 10px; font-size: 0.92rem; color: var(--ink-dim); }
+  .vol input { width: 100%; margin: 0; accent-color: var(--accent); }
   .skin-pick select { flex: 1; min-width: 0; font: inherit; color: var(--ink); background: var(--deep); border: 2px solid var(--edge); border-radius: 10px; padding: 4px 8px; }
 
   /* Cards and chests */
@@ -302,6 +304,8 @@
       </section>
       <section class="panel">
         <label class="skin-pick">Setting <select id="skinSel"></select></label>
+        <label class="vol">Effects <input type="range" id="fxVol" min="0" max="100" step="5"></label>
+        <label class="vol">Ambience <input type="range" id="ambVol" min="0" max="100" step="5"></label>
         <p id="offlineNote">Automated shops keep earning while you're away.</p>
         <button class="small-btn" id="resetBtn">Wipe save</button>
       </section>
@@ -362,7 +366,8 @@
   // episodes repeat after the last one (shown as "Haunted Mall 2" and so on). shops[i] fills SCHEMES[i]:
   // noun is used in goal text ("Get 25 pretzel customers"), hue colors its icon tile, lease is the last shop's name in short.
   // theme sets the CSS variables at the top of the stylesheet; fonts is a Google Fonts URL.
-  // sound picks the synth voice for every effect: waveform, root pitch in Hz, scale in semitones, vibrato depth, loudness.
+  // sound picks the synth voice for every effect: waveform, root pitch in Hz, scale in semitones, vibrato depth, loudness,
+  // and the background loop (a recipe in AMBIENCES).
   const SKINS = [
     {
       id: "mall",
@@ -384,7 +389,7 @@
         beer:      { name: "Fang",          role: "Werewolf barkeep",        icon: "🐺", hue: 205 },
       },
       hues: [150, 170, 135, 265, 185, 280],
-      sound: { wave: "triangle", root: 220, scale: [0, 3, 5, 7, 10], vibrato: 0.012, vol: 1.4 },   // soft and a little eerie: minor pentatonic with a wobble
+      sound: { wave: "triangle", root: 220, scale: [0, 3, 5, 7, 10], vibrato: 0.012, vol: 1.4, ambience: "mall" },   // soft and a little eerie: minor pentatonic with a wobble
       // Dripping ectoplasm: slime green and spectral lilac on green-black (Rob's pick on 2026-09-29, replacing Moonlit graveyard)
       theme: {
         fonts: "https://fonts.googleapis.com/css2?family=Rubik+Wet+Paint&family=Rubik:wght@400;500;700&display=swap",
@@ -552,7 +557,7 @@
         beer:      { name: "Scav",            role: "Scrap-hauling raccoon",      icon: "🦝", hue: 330 },
       },
       hues: [30, 185, 270, 150, 330, 205],
-      sound: { wave: "square", root: 262, scale: [0, 2, 4, 7, 9], vibrato: 0, vol: 0.6 },       // arcade blips: bright major pentatonic
+      sound: { wave: "square", root: 262, scale: [0, 2, 4, 7, 9], vibrato: 0, vol: 0.6, ambience: "starport" },       // arcade blips: bright major pentatonic
       theme: {
         fonts: "https://fonts.googleapis.com/css2?family=Russo+One&family=Space+Grotesk:wght@400;500;700&display=swap",
         display: '"Russo One", "Trebuchet MS", sans-serif', "display-weight": "400", body: '"Space Grotesk", system-ui, sans-serif',
@@ -718,7 +723,7 @@
         beer:      { name: "Pinch",             role: "Crab who brews the grog",   icon: "🦀", hue: 5 },
       },
       hues: [30, 195, 350, 45, 170, 210],
-      sound: { wave: "triangle", root: 196, scale: [0, 2, 4, 5, 7, 9], vibrato: 0.008, vol: 1.3 },   // a squeezebox shanty: major with a wobble
+      sound: { wave: "triangle", root: 196, scale: [0, 2, 4, 5, 7, 9], vibrato: 0.008, vol: 1.3, ambience: "ship" },   // a squeezebox shanty: major with a wobble
       theme: {
         fonts: "https://fonts.googleapis.com/css2?family=Pirata+One&family=Nunito+Sans:wght@400;600;700&display=swap",
         display: '"Pirata One", Georgia, serif', "display-weight": "400", body: '"Nunito Sans", system-ui, sans-serif',
@@ -884,7 +889,7 @@
         beer:      { name: "Volt",        role: "Cat who runs the charging bar", icon: "🐈‍⬛", hue: 280 },
       },
       hues: [320, 185, 280, 50, 200, 340],
-      sound: { wave: "sawtooth", root: 147, scale: [0, 2, 3, 5, 7, 8, 10], vibrato: 0, vol: 0.35 },   // buzzy synth, natural minor
+      sound: { wave: "sawtooth", root: 147, scale: [0, 2, 3, 5, 7, 8, 10], vibrato: 0, vol: 0.35, ambience: "neon" },   // buzzy synth, natural minor
       theme: {
         fonts: "https://fonts.googleapis.com/css2?family=Audiowide&family=Chakra+Petch:wght@400;500;700&display=swap",
         display: '"Audiowide", "Trebuchet MS", sans-serif', "display-weight": "400", body: '"Chakra Petch", system-ui, sans-serif',
@@ -1050,7 +1055,7 @@
         beer:      { name: "Sparky",         role: "Oil-bar tender",                icon: "🛢️", hue: 160 },
       },
       hues: [95, 25, 200, 55, 160, 10],
-      sound: { wave: "sine", root: 392, scale: [0, 2, 4, 6, 8, 10], vibrato: 0, vol: 1.6 },   // clean beeps on a whole-tone scale
+      sound: { wave: "sine", root: 392, scale: [0, 2, 4, 6, 8, 10], vibrato: 0, vol: 1.6, ambience: "robot" },   // clean beeps on a whole-tone scale
       theme: {
         fonts: "https://fonts.googleapis.com/css2?family=Tilt+Warp&family=Rubik:wght@400;500;700&display=swap",
         display: '"Tilt Warp", "Trebuchet MS", sans-serif', "display-weight": "400", body: '"Rubik", system-ui, sans-serif',
@@ -1269,7 +1274,16 @@
   // so the audio context starts on the first one; until then effects are silently skipped.
   const SOUND_KEY = "grizzle-haunted-mall-sound";
   let soundOn = (() => { try { return localStorage.getItem(SOUND_KEY) !== "off"; } catch { return true; } })();
-  let actx = null, master = null;
+  // two volumes (0-100), kept with the other UI prefs: effects and the background ambience
+  const VOL_KEY = "grizzle-haunted-mall-volume";
+  const levels = (() => { try { return { fx: 100, amb: 50, ...JSON.parse(localStorage.getItem(VOL_KEY) || "{}") }; } catch { return { fx: 100, amb: 50 }; } })();
+  const loud = v => Math.pow(v / 100, 2);   // sliders feel even when the gain is squared
+  let actx = null, master = null, fxBus = null, ambBus = null;
+  function setVolumes() {
+    if (!actx) return;
+    fxBus.gain.setTargetAtTime(loud(levels.fx), actx.currentTime, 0.05);
+    ambBus.gain.setTargetAtTime(loud(levels.amb), actx.currentTime, 0.05);
+  }
   function unlockAudio() {
     if (!soundOn) return;
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -1280,14 +1294,18 @@
       const comp = actx.createDynamicsCompressor();
       comp.threshold.value = -14; comp.knee.value = 6; comp.ratio.value = 4; comp.attack.value = 0.003; comp.release.value = 0.15;
       master.connect(comp).connect(actx.destination);
+      fxBus = actx.createGain(); fxBus.connect(master);
+      ambBus = actx.createGain(); ambBus.connect(master);
+      setVolumes();
     }
-    if (actx.state === "suspended") actx.resume();
+    if (actx.state === "suspended") actx.resume().then(() => { if (!amb) startAmbience(); });
+    else if (!amb) startAmbience();
   }
   addEventListener("pointerdown", unlockAudio, true);
   addEventListener("keydown", unlockAudio, true);
   // one note: deg is a step in the skin's scale (0 = root, 5 = root an octave up for a 5-note scale)
   function note(deg, { at = 0, dur = 0.12, vol = 0.3, oct = 0, slide = 0 } = {}) {
-    if (!soundOn || !actx || actx.state !== "running") return;
+    if (!soundOn || !actx || actx.state !== "running" || !levels.fx) return;
     const v = SK.sound, sc = v.scale, n = sc.length;
     const semi = sc[((deg % n) + n) % n] + 12 * (Math.floor(deg / n) + oct);
     const f = v.root * Math.pow(2, semi / 12), t = actx.currentTime + at;
@@ -1303,7 +1321,7 @@
     g.gain.setValueAtTime(0.0001, t);
     g.gain.exponentialRampToValueAtTime(vol * v.vol, t + 0.01);
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(g).connect(master);
+    o.connect(g).connect(fxBus);
     o.start(t); o.stop(t + dur + 0.05);
   }
   const arp = (degs, opts = {}) => degs.forEach((d, k) => note(d, { ...opts, at: (opts.at || 0) + k * (opts.gap || 0.07) }));
@@ -1324,6 +1342,115 @@
     lastSfx[name] = now;
     try { SOUNDS[name](arg); } catch {}
   }
+
+  // ---------- Ambience ----------
+  // A quiet background loop per skin (skin.sound.ambience names a recipe below): a steady bed of hums and filtered
+  // noise, plus the odd event on a timer. It fades in, switches with the skin, and stops while muted or hidden.
+  let amb = null, noiseBuf = null;
+  function ambienceKit() {
+    const t0 = actx.currentTime, out = actx.createGain(), nodes = [], timers = [];
+    out.gain.setValueAtTime(0, t0); out.gain.linearRampToValueAtTime(1, t0 + 2.5); out.connect(ambBus);
+    if (!noiseBuf) {
+      noiseBuf = actx.createBuffer(1, actx.sampleRate * 2, actx.sampleRate);
+      const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    const k = {
+      out,
+      gain(v, dest = out) { const g = actx.createGain(); g.gain.value = v; g.connect(dest); return g; },
+      filter(type, freq, q = 1, dest = out) { const f = actx.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q; f.connect(dest); return f; },
+      osc(type, freq, dest) { const o = actx.createOscillator(); o.type = type; o.frequency.value = freq; o.connect(dest); o.start(); nodes.push(o); return o; },
+      noise(dest) { const n = actx.createBufferSource(); n.buffer = noiseBuf; n.loop = true; n.loopStart = Math.random(); n.connect(dest); n.start(0, Math.random() * 2); nodes.push(n); return n; },
+      lfo(rate, depth, param) { const o = actx.createOscillator(), g = actx.createGain(); o.frequency.value = rate; g.gain.value = depth; o.connect(g).connect(param); o.start(); nodes.push(o); },
+      // a one-off sound: gain envelope (attack, hold, release in seconds) on whatever make() connects into it
+      once(vol, a, h, r, make) {
+        const t = actx.currentTime, g = actx.createGain();
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + a);
+        g.gain.setValueAtTime(vol, t + a + h); g.gain.exponentialRampToValueAtTime(0.0001, t + a + h + r);
+        g.connect(out);
+        for (const n of [].concat(make(g, t))) { n.start(t); n.stop(t + a + h + r + 0.05); }
+      },
+      every(min, max, fn) {
+        const next = () => timers.push(setTimeout(() => { if (actx.state === "running") fn(); next(); }, (min + Math.random() * (max - min)) * 1000));
+        next();
+      },
+      stop() {
+        timers.forEach(clearTimeout);
+        const t = actx.currentTime;
+        out.gain.cancelScheduledValues(t); out.gain.setValueAtTime(out.gain.value, t); out.gain.linearRampToValueAtTime(0, t + 0.8);
+        setTimeout(() => { nodes.forEach(n => { try { n.stop(); } catch {} }); out.disconnect(); }, 1000);
+      },
+    };
+    return k;
+  }
+  // pitch of a step in the skin's scale, like note() uses
+  const pitch = (deg, oct = 0) => { const v = SK.sound, n = v.scale.length; return v.root * Math.pow(2, (v.scale[((deg % n) + n) % n] + 12 * (Math.floor(deg / n) + oct)) / 12); };
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  const AMBIENCES = {
+    // fluorescent hum, a draft through the empty halls, and now and then a ghostly note from somewhere upstairs
+    mall(k) {
+      const hum = k.gain(0.018); k.osc("sine", 60, hum); k.osc("sine", 120, k.gain(0.6, hum)); k.lfo(0.3, 0.006, hum.gain);
+      const air = k.filter("lowpass", 420, 0.7); k.noise(k.gain(0.05, air)); k.lfo(0.05, 160, air.frequency);
+      k.every(7, 16, () => k.once(0.05, 1.4, 0.6, 2.4, (g, t) => {
+        const o = actx.createOscillator(), lfo = actx.createOscillator(), d = actx.createGain(), f = pitch(pick([0, 2, 3, 4, 5]));
+        o.type = "triangle"; o.frequency.value = f; lfo.frequency.value = 5; d.gain.value = f * 0.012;
+        lfo.connect(d).connect(o.frequency); o.connect(g); return [o, lfo];
+      }));
+    },
+    // engine drone with a slow beat, ventilation, and the station computer chirping to itself
+    starport(k) {
+      const lp = k.filter("lowpass", 180, 1), drone = k.gain(0.035, lp); k.osc("sawtooth", 55, drone); k.osc("sawtooth", 55.4, drone);
+      const vent = k.filter("bandpass", 900, 0.7); k.noise(k.gain(0.02, vent)); k.lfo(0.08, 200, vent.frequency);
+      k.every(5, 12, () => [0, 0.12].forEach((at, i) => setTimeout(() => k.once(0.03, 0.005, 0.05, 0.06, g => {
+        const o = actx.createOscillator(); o.type = "square"; o.frequency.value = pitch(pick([5, 7, 8]) + i); o.connect(g); return o;
+      }), at * 1000)));
+    },
+    // waves that swell and fall back, timbers creaking, and the ship's bell once in a while
+    ship(k) {
+      const sea = k.gain(0.11, k.filter("lowpass", 500, 0.5)); k.noise(sea); k.lfo(0.11, 0.08, sea.gain);
+      const spray = k.gain(0.025, k.filter("lowpass", 1400, 0.5)); k.noise(spray); k.lfo(0.07, 0.02, spray.gain);
+      k.every(6, 14, () => k.once(0.035, 0.08, 0.2, 0.5, (g, t) => {
+        const o = actx.createOscillator(), bp = actx.createBiquadFilter(), f = 110 + Math.random() * 60;
+        o.type = "sawtooth"; o.frequency.setValueAtTime(f, t); o.frequency.exponentialRampToValueAtTime(f * 0.7, t + 0.7);
+        bp.type = "bandpass"; bp.frequency.value = 700; bp.Q.value = 8; o.connect(bp).connect(g); return o;
+      }));
+      k.every(18, 35, () => [0, 0.5].forEach(at => setTimeout(() => k.once(0.025, 0.005, 0.02, 2.2, g => {
+        const o = actx.createOscillator(), o2 = actx.createOscillator(); o.type = o2.type = "sine";
+        o.frequency.value = pitch(0, 2); o2.frequency.value = pitch(0, 2) * 2.76; const soft = actx.createGain(); soft.gain.value = 0.3; o.connect(g); o2.connect(soft).connect(g); return [o, o2];
+      }), at * 1000)));
+    },
+    // rain on the awnings, a slow minor pad from a bar somewhere, and hover-cars going by
+    neon(k) {
+      k.noise(k.gain(0.022, k.filter("highpass", 3000, 0.5))); k.noise(k.gain(0.012, k.filter("bandpass", 1200, 0.8)));
+      const lp = k.filter("lowpass", 700, 2), pad = k.gain(0.02, lp);
+      k.osc("sawtooth", pitch(0, -1), pad); k.osc("sawtooth", pitch(0, -1) * 1.003, pad); k.osc("sawtooth", pitch(4, -1), pad);
+      k.lfo(0.03, 350, lp.frequency);
+      k.every(8, 18, () => k.once(0.035, 1.2, 0.2, 1.4, (g, t) => {
+        const n = actx.createBufferSource(), bp = actx.createBiquadFilter(); n.buffer = noiseBuf;
+        bp.type = "bandpass"; bp.Q.value = 3; bp.frequency.setValueAtTime(300, t); bp.frequency.exponentialRampToValueAtTime(1600, t + 1.3); bp.frequency.exponentialRampToValueAtTime(300, t + 2.8);
+        n.connect(bp).connect(g); return n;
+      }));
+    },
+    // a machine whirring, the planet's power hum, clanks from the line, and robots beeping at each other
+    robot(k) {
+      const lp = k.filter("lowpass", 320, 1), whir = k.osc("sawtooth", 90, k.gain(0.025, lp)); k.lfo(0.2, 8, whir.frequency);
+      k.osc("sine", 50, k.gain(0.02));
+      k.every(2.5, 7, () => k.once(0.05, 0.002, 0.01, 0.12, g => {
+        const n = actx.createBufferSource(), bp = actx.createBiquadFilter(); n.buffer = noiseBuf;
+        bp.type = "bandpass"; bp.frequency.value = 2000 + Math.random() * 1500; bp.Q.value = 6; n.connect(bp).connect(g); return n;
+      }));
+      k.every(9, 20, () => [0, 0.14, 0.28].forEach(at => setTimeout(() => k.once(0.025, 0.005, 0.06, 0.05, g => {
+        const o = actx.createOscillator(); o.type = "sine"; o.frequency.value = pitch(pick([0, 2, 3, 5]), 1); o.connect(g); return o;
+      }), at * 1000)));
+    },
+  };
+  function startAmbience() {
+    stopAmbience();
+    if (!soundOn || !actx || actx.state !== "running" || !levels.amb || document.hidden) return;
+    const recipe = AMBIENCES[SK.sound.ambience];
+    if (!recipe) return;
+    amb = ambienceKit(); recipe(amb);
+  }
+  function stopAmbience() { if (amb) { amb.stop(); amb = null; } }
 
   // ---------- Episode content ----------
   const EP = () => SK.episodes[S.episode % SK.episodes.length];
@@ -1756,6 +1883,7 @@
     SK = skinById(id) || SKINS[0];
     try { localStorage.setItem(SKIN_KEY, SK.id); } catch {}
     applySkin(); build(); buildChests();
+    if (amb) startAmbience();
   }
 
   // ---------- Wiring ----------
@@ -1789,9 +1917,20 @@
     soundOn = !soundOn;
     try { localStorage.setItem(SOUND_KEY, soundOn ? "on" : "off"); } catch {}
     showSound();
-    if (soundOn) { unlockAudio(); sfx("buy"); }
+    if (soundOn) { unlockAudio(); sfx("buy"); } else stopAmbience();
   });
   showSound();
+  for (const [id, key] of [["fxVol", "fx"], ["ambVol", "amb"]]) {
+    $(id).value = levels[key];
+    $(id).addEventListener("input", e => {
+      const was = levels[key];
+      levels[key] = +e.target.value;
+      try { localStorage.setItem(VOL_KEY, JSON.stringify(levels)); } catch {}
+      setVolumes();
+      if (key === "amb" && !was !== !levels.amb) levels.amb ? startAmbience() : stopAmbience();
+    });
+    $(id).addEventListener("change", () => { if (key === "fx") sfx("buy"); });   // a sample at the new level
+  }
   $("resetBtn").addEventListener("click", () => {
     if (confirm("Wipe your save and start over?")) {
       try { localStorage.removeItem(SAVE_KEY); } catch {}
@@ -1800,7 +1939,8 @@
   });
   addEventListener("beforeunload", save);
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) { save(); return; }
+    if (document.hidden) { save(); stopAmbience(); return; }
+    startAmbience();
     // browsers pause the game loop in background tabs, so credit the time away (S.seen was saved on hide)
     last = performance.now();
     offline();
@@ -1817,7 +1957,7 @@
   buildChests();
   maybeShowIntro();
   // ?debug exposes the state for testing in the console
-  if (new URLSearchParams(location.search).has("debug")) window.__game = { get S() { return S; }, get SK() { return SK; }, setSkin, welcomeBack, sfx, get audio() { return actx && actx.state; }, openChest, renderCards, update, offline, tap, maybeShowIntro, openFinale, finish };
+  if (new URLSearchParams(location.search).has("debug")) window.__game = { get S() { return S; }, get SK() { return SK; }, get amb() { return amb; }, setSkin, welcomeBack, sfx, get audio() { return actx && actx.state; }, openChest, renderCards, update, offline, tap, maybeShowIntro, openFinale, finish };
   requestAnimationFrame(frame);
   // offline support for the home-screen app (http(s) only; file:// can't register one)
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});

@@ -46,7 +46,7 @@ The rules below use the Haunted Mall's names.
 - Owning 10, 25, 50, 100 and 150 customers of a shop doubles its income and gives 1 beer.
 - Clear 5 of the 9 goals and sign a dragon lease to unlock the episode finale. It resets cash and shops, keeps beer, eggs, crystals and cards, and gives 3 eggs plus a permanent income bonus: each finale multiplies it by 1.5 (x1.5, x2.25, x3.4 and so on), so it keeps pace with the rising costs.
 - Automated shops keep earning while you're away, up to 8 hours. After a break of 5 minutes or more, a welcome-back popup shows what they earned and any chests ready to open.
-- Sound effects for tapping, payouts, buying, milestones, automating, goals, chests and the finale, synthesized in the browser (no audio files). Each setting has its own voice: eerie in the Haunted Mall, arcade blips on Starport Nine. The Sound button in the header mutes it.
+- Sound effects for tapping, payouts, buying, milestones, automating, goals, chests and the finale, synthesized in the browser (no audio files). Each setting has its own voice: eerie in the Haunted Mall, arcade blips on Starport Nine. Each setting also has a quiet background loop, synthesized too: a humming, drafty mall, a station's engine drone and computer chirps, waves and creaking timbers on the ship, rain and a synth pad in the night market, and clanking machines on Planet Cog. The side panel has Effects and Ambience volume sliders; the Sound button in the header mutes everything.
 
 ### Episodes and story
 
