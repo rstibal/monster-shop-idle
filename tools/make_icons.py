@@ -7,8 +7,8 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFilter
 
 S = 1024                      # drawn big, then scaled down for smooth edges
-BG, GLOW, DEEP, PANEL, EDGE = "#141a26", "#243049", "#0e131c", "#1d2536", "#3a4763"
-MOON, STRIPE_A, STRIPE_B, TRIM, EYE = "#cfe3ff", "#cfe3ff", "#6fd1e0", "#7f9cc7", "#e6c07b"
+BG, GLOW, DEEP, PANEL, EDGE = "#0e1614", "#163a30", "#08100e", "#15201d", "#2d4a42"
+MOON, STRIPE_A, STRIPE_B, TRIM, EYE = "#e4f5ee", "#7dffb2", "#c7a6ff", "#2fa86a", "#e6f07a"
 
 
 def draw():

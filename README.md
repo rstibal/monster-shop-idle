@@ -29,7 +29,7 @@ The side panel has a Setting picker. Each setting has its own cast, shops, story
 
 | Setting | Owner | Episodes | Currencies | Look |
 | --- | --- | --- | --- | --- |
-| Haunted Mall | Grizzle, a goblin | Haunted Mall, Swamp Market, Crypt Quarter, Midnight Carnival, Sunken Casino | Beer, eggs, crystals | Moonlit graveyard: silver and blue, Alegreya |
+| Haunted Mall | Grizzle, a goblin | Haunted Mall, Swamp Market, Crypt Quarter, Midnight Carnival, Sunken Casino | Beer, eggs, crystals | Dripping ectoplasm: slime green and lilac on green-black, Rubik Wet Paint |
 | Starport Nine | Juno Vance, an ex-smuggler | Docking Ring, Hydroponics Deck, Reactor Row, Zero-G Stadium, Pirate Moon | Scrap, keycards, stardust | Deep space navy with amber and teal, Russo One |
 | The Salty Gull | Captain Nell, a pirate | Barnacle Harbor, Smuggler's Cove, Skull Island, Floating Fair, Treasure Reef | Grog, doubloons, pearls | Night sea with gold and red, rope instead of chains, Pirata One |
 | Neon Night Market | Kix, a street vendor | Gutter Street, Rain Bazaar, Chrome Row, Overdrive Circuit, Skyline Tower | Batteries, tokens, shards | Black-violet with magenta and cyan, Audiowide |

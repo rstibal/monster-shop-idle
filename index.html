@@ -6,7 +6,7 @@
 <title>Monster Shop Idle</title>
 <!-- installable as a home-screen app (manifest.webmanifest, sw.js; icons drawn by tools/make_icons.py) -->
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#141a26">
+<meta name="theme-color" content="#0e1614">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes">
@@ -14,43 +14,43 @@
 <meta name="apple-mobile-web-app-title" content="Monster Shop">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link id="skinFonts" href="https://fonts.googleapis.com/css2?family=Alegreya:wght@700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link id="skinFonts" href="https://fonts.googleapis.com/css2?family=Rubik+Wet+Paint&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   /* Colors and fonts come from the active skin (SKINS[].theme sets these same names).
      The defaults here are the Haunted Mall skin, so the first paint looks right before the script runs. */
   :root {
-    --bg: #141a26;            /* page */
-    --bg-glow: #243049;       /* soft light at the top of the page */
-    --deep: #0e131c;          /* bar tracks and drop shadows */
-    --panel: #1d2536;         /* shop signs, side panels, cards */
-    --edge: #3a4763;          /* panel borders */
-    --chain: #3a4763;         /* the little chains the shop signs hang from; transparent hides them */
-    --accent: #cfe3ff;        /* cash, Buy, highlights */
-    --accent-dark: #7f9cc7;
-    --on-accent: #14223a;
-    --alt: #6fd1e0;           /* Automate, goals, milestone badge */
-    --alt-dark: #2f8fa0;
-    --on-alt: #062228;
-    --ink: #e6ecf5;
-    --ink-dim: #9aa6bd;
-    --stat: #e6c07b;          /* the milestone currency in the header */
-    --off: #2a3346;           /* disabled Buy */
-    --off-ink: #7f8aa3;
-    --off-dark: #1a2130;
-    --alt-off: #23393f;       /* disabled Automate */
-    --alt-off-ink: #7d9aa0;
-    --alt-off-dark: #16262a;
-    --badge-off: #5a9aa5;
-    --badge-off-dark: #2a5a62;
-    --backdrop: rgba(6, 9, 16, 0.78);
-    --tile-s: 32%;            /* shop icon tiles and bars: hsl(shop hue, these) */
-    --tile-l: 46%;
-    --bar-s: 55%;
-    --bar-l: 62%;
+    --bg: #0e1614;            /* page */
+    --bg-glow: #163a30;       /* soft light at the top of the page */
+    --deep: #08100e;          /* bar tracks and drop shadows */
+    --panel: #15201d;         /* shop signs, side panels, cards */
+    --edge: #2d4a42;          /* panel borders */
+    --chain: #2d4a42;         /* the little chains the shop signs hang from; transparent hides them */
+    --accent: #7dffb2;        /* cash, Buy, highlights */
+    --accent-dark: #2fa86a;
+    --on-accent: #042014;
+    --alt: #c7a6ff;           /* Automate, goals, milestone badge */
+    --alt-dark: #7a58c0;
+    --on-alt: #1a0c33;
+    --ink: #e4f5ee;
+    --ink-dim: #93b0a6;
+    --stat: #e6f07a;          /* the milestone currency in the header */
+    --off: #1f2a27;           /* disabled Buy */
+    --off-ink: #7a8f88;
+    --off-dark: #131c19;
+    --alt-off: #2a2438;       /* disabled Automate */
+    --alt-off-ink: #9488ac;
+    --alt-off-dark: #1a1624;
+    --badge-off: #8a78b0;
+    --badge-off-dark: #4a3c6a;
+    --backdrop: rgba(4, 10, 8, 0.8);
+    --tile-s: 45%;            /* shop icon tiles and bars: hsl(shop hue, these) */
+    --tile-l: 40%;
+    --bar-s: 70%;
+    --bar-l: 58%;
     --radius: 14px;
-    --display: "Alegreya", Georgia, serif;
-    --display-weight: 700;
-    --body: "Alegreya Sans", system-ui, sans-serif;
+    --display: "Rubik Wet Paint", system-ui, sans-serif;
+    --display-weight: 400;
+    --body: "Rubik", system-ui, sans-serif;
   }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
@@ -377,18 +377,19 @@
         milestone: { name: "Old Bog Witch", role: "Rival across the street", icon: "🧙", hue: 265 },
         beer:      { name: "Fang",          role: "Werewolf barkeep",        icon: "🐺", hue: 205 },
       },
-      hues: [205, 225, 190, 250, 175, 265],
+      hues: [150, 170, 135, 265, 185, 280],
       sound: { wave: "triangle", root: 220, scale: [0, 3, 5, 7, 10], vibrato: 0.012, vol: 1.4 },   // soft and a little eerie: minor pentatonic with a wobble
+      // Dripping ectoplasm: slime green and spectral lilac on green-black (Rob's pick on 2026-09-29, replacing Moonlit graveyard)
       theme: {
-        fonts: "https://fonts.googleapis.com/css2?family=Alegreya:wght@700&family=Alegreya+Sans:wght@400;500;700&display=swap",
-        display: '"Alegreya", Georgia, serif', "display-weight": "700", body: '"Alegreya Sans", system-ui, sans-serif',
-        bg: "#141a26", "bg-glow": "#243049", deep: "#0e131c", panel: "#1d2536", edge: "#3a4763", chain: "#3a4763",
-        accent: "#cfe3ff", "accent-dark": "#7f9cc7", "on-accent": "#14223a",
-        alt: "#6fd1e0", "alt-dark": "#2f8fa0", "on-alt": "#062228",
-        ink: "#e6ecf5", "ink-dim": "#9aa6bd", stat: "#e6c07b",
-        off: "#2a3346", "off-ink": "#7f8aa3", "off-dark": "#1a2130",
-        "alt-off": "#23393f", "alt-off-ink": "#7d9aa0", "alt-off-dark": "#16262a", "badge-off": "#5a9aa5", "badge-off-dark": "#2a5a62",
-        backdrop: "rgba(6, 9, 16, 0.78)", "tile-s": "32%", "tile-l": "46%", "bar-s": "55%", "bar-l": "62%",
+        fonts: "https://fonts.googleapis.com/css2?family=Rubik+Wet+Paint&family=Rubik:wght@400;500;700&display=swap",
+        display: '"Rubik Wet Paint", system-ui, sans-serif', "display-weight": "400", body: '"Rubik", system-ui, sans-serif',
+        bg: "#0e1614", "bg-glow": "#163a30", deep: "#08100e", panel: "#15201d", edge: "#2d4a42", chain: "#2d4a42",
+        accent: "#7dffb2", "accent-dark": "#2fa86a", "on-accent": "#042014",
+        alt: "#c7a6ff", "alt-dark": "#7a58c0", "on-alt": "#1a0c33",
+        ink: "#e4f5ee", "ink-dim": "#93b0a6", stat: "#e6f07a",
+        off: "#1f2a27", "off-ink": "#7a8f88", "off-dark": "#131c19",
+        "alt-off": "#2a2438", "alt-off-ink": "#9488ac", "alt-off-dark": "#1a1624", "badge-off": "#8a78b0", "badge-off-dark": "#4a3c6a",
+        backdrop: "rgba(4, 10, 8, 0.8)", "tile-s": "45%", "tile-l": "40%", "bar-s": "70%", "bar-l": "58%",
       },
       episodes: [
         {
