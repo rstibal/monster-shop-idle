@@ -284,7 +284,7 @@
       </section>
       <section class="panel">
         <label class="skin-pick">Setting <select id="skinSel"></select></label>
-        <p id="offlineNote">Your shops keep earning while the tab is closed.</p>
+        <p id="offlineNote">Automated shops keep earning while you're away.</p>
         <button class="small-btn" id="resetBtn">Wipe save</button>
       </section>
     </aside>
@@ -354,7 +354,7 @@
       chests: {
         egg:    { name: "Egg chest",      blurb: "Eggs come from clearing goals and finishing episodes." },
         beer:   { name: "Beer chest",     blurb: "Beer comes from shop milestones." },
-        barrel: { name: "Crystal barrel", blurb: "Crystals come from duplicates of maxed cards." },
+        barrel: { name: "Crystal barrel", blurb: "Crystals come from extra copies of max-level cards." },
       },
       cards: {
         money:     { name: "Grizzle",       role: "Scrappy owner",           icon: "👺", hue: 140 },
@@ -390,7 +390,7 @@
           ],
           intro: [
             "The mall closed in 1994. Nobody told the ghosts, the goblins, or Grizzle.",
-            "Grizzle has a pretzel kiosk, a dream, and a lease that says AS-IS in very large letters. Mort has the night shift and no complaints. Countess Vex is doing the books, in a manner of speaking.",
+            "Grizzle has a pretzel kiosk, a dream, and a lease stamped \"as is\" in very large letters. Mort has the night shift and no complaints. Countess Vex is doing the books, in a manner of speaking.",
             "Sell something. Anything.",
           ],
           finale: {
@@ -425,7 +425,7 @@
             text: [
               "The Witch offers a truce and a very small pie. Grizzle declines the pie. She takes this personally.",
               "So Bramble unhooks the market from its moorings, on purpose, with the kraken's blessing. The whole thing floats, and drifts downriver toward the next district.",
-              "It smells like old stone and expensive candles.",
+              "The next district smells like old stone and expensive candles.",
             ],
             ready: "The market is straining at its moorings.",
             button: "Cut the moorings",
@@ -450,11 +450,11 @@
             title: "Fine print",
             text: [
               "By dawn every mausoleum is a condo and every ghost has a timeshare. Then the Old Bog Witch turns up with an offer to buy the whole street.",
-              "Grizzle laughs. She shows him the paperwork. Bramble reads it twice. \"Boss,\" says Bramble, \"it's not a contract. It's a ticket.\"",
+              "Grizzle laughs. The Witch slides the paperwork across the desk. Bramble reads it twice. \"Boss,\" says Bramble, \"it's not a contract. It's a ticket.\"",
               "One admission, Grizzle only, to the Old Bog Witch's midnight carnival. Bring cash.",
             ],
-            ready: "The Witch's paperwork is on your desk.",
-            button: "Burn the paperwork",
+            ready: "The Witch has sent over some paperwork.",
+            button: "Read the paperwork",
           },
         },
         {
@@ -475,7 +475,7 @@
           finale: {
             title: "Last ride",
             text: [
-              "By two in the morning Grizzle owns every booth but the big top, and the Witch owns a very large grudge.",
+              "By two in the morning Grizzle owns every booth, the big top included, and the Witch owns a very large grudge.",
               "Bramble finds the carousel's brake. \"Boss,\" says Bramble, \"if I pull this, the whole carnival keeps spinning until it's somewhere else.\" \"Then pull it,\" says Grizzle.",
               "The carnival spins right off the map and lands, with a splash, somewhere much wetter.",
             ],
@@ -520,7 +520,7 @@
       chests: {
         egg:    { name: "Keycard locker", blurb: "Keycards come from clearing goals and finishing episodes." },
         beer:   { name: "Scrap crate",    blurb: "Scrap comes from shop milestones." },
-        barrel: { name: "Stardust vault", blurb: "Stardust comes from duplicates of maxed cards." },
+        barrel: { name: "Stardust vault", blurb: "Stardust comes from extra copies of max-level cards." },
       },
       cards: {
         money:     { name: "Juno Vance",      role: "Ex-smuggler, current owner", icon: "🧑‍🚀", hue: 35 },
@@ -660,7 +660,7 @@
             { name: "Moon charter",          icon: "🌕", noun: "charter" },
           ],
           intro: [
-            "The Pirate Moon has no laws, no taxes and no customer service, which makes it the fastest-growing market in the sector. Glint is here too, and has declared a promotion to Admiral.",
+            "The Pirate Moon has no laws, no taxes and no customer service, which makes it the fastest-growing market in the sector. Glint is here too, and now insists on being called Admiral.",
             "Juno parks the noodle cart next to the only rum stand on the moon. By evening it is the only noodle-and-rum stand on the moon.",
           ],
           finale: {
@@ -690,7 +690,7 @@
     { id: "h3", text: "Automate 3 shops",               cur: s => s.schemes.filter((x, i) => isAuto(i)).length, target: 3 },
     { id: "h4", text: "Get 25 {3} {c}",        cur: s => s.schemes[3].n, target: 25 },
     { id: "h5", text: "Get 10 {4} {c}",      cur: s => s.schemes[4].n, target: 10 },
-    { id: "h6", text: "Hold {$} at once",               cur: s => s.cash, target: 3e6, scaled: true },
+    { id: "h6", text: "Have {$} in cash",               cur: s => s.cash, target: 3e6, scaled: true },
     { id: "h7", text: "Get 50 {3} {c}",        cur: s => s.schemes[3].n, target: 50 },
     { id: "h8", text: "Get 25 {4} {c}",      cur: s => s.schemes[4].n, target: 25 },
     { id: "h9", text: "Automate 5 shops",               cur: s => s.schemes.filter((x, i) => isAuto(i)).length, target: 5 },
@@ -1143,7 +1143,7 @@
     $("eggs").textContent = S.eggs;
     $("crystals").textContent = S.crystals;
     $("perm").textContent = "x" + S.perm.toFixed(1);
-    $("offlineNote").textContent = "Your shops keep earning while the tab is closed (up to " + offlineCap() / 3600 + " hours).";
+    $("offlineNote").textContent = "Automated shops keep earning while you're away (up to " + offlineCap() / 3600 + " hours).";
     updateChests();
     const s0 = S.schemes[0];
     $("hint").textContent = "Tap the " + shop(0).name.toLowerCase() + " (the icon or its bar) to earn your first dollars. Every $1 gets you closer to a second " + customers(1) + ".";
@@ -1183,7 +1183,7 @@
     const nextEp = nameOf(S.episode + 1);
     btn.textContent = ready ? EP().finale.button : "Locked";
     $("finText").innerHTML = ready
-      ? `${EP().finale.ready} This resets your cash and shops, keeps your ${cur("beer", 2)} and cards, adds <b>+${Math.round(finaleGain() * 100)}%</b> permanent income and <b>${EGGS_PER_FINALE} ${cur("eggs", EGGS_PER_FINALE)}</b>, and moves you to the <b>${nextEp}</b>.`
+      ? `${EP().finale.ready} Finishing the episode resets your cash and shops, adds <b>+${Math.round(finaleGain() * 100)}%</b> permanent income and <b>${EGGS_PER_FINALE} ${cur("eggs", EGGS_PER_FINALE)}</b>, and moves on to <b>${nextEp}</b>. You keep your ${cur("beer", 2)}, ${cur("eggs", 2)}, ${cur("crystals", 2)} and cards.`
       : "Still needed: " + [
           clearedCount() < GOALS_NEEDED ? `${GOALS_NEEDED - clearedCount()} more goal${GOALS_NEEDED - clearedCount() > 1 ? "s" : ""}` : "",
           S.schemes[SCHEMES.length - 1].n < 1 ? "a " + EP().lease : "",
