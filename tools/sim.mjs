@@ -23,9 +23,11 @@ const CHESTS = block("CHESTS")();
 const LEVEL_AT = new Function(grab(/const LEVEL_AT = \[[^\]]*\]/).replace("const LEVEL_AT =", "return"))();
 const GOALS_NEEDED = num("GOALS_NEEDED");
 const PERM_PER_EPISODE = num("PERM_PER_EPISODE");
+const FREE_AUTO_SHOPS = process.env.FREEAUTO ? Number(process.env.FREEAUTO) : num("FREE_AUTO_SHOPS");
 const EPISODE_COST_GROWTH = process.env.GROWTH ? Number(process.env.GROWTH) : num("EPISODE_COST_GROWTH");
 const OFFLINE_CAP_S = process.env.OFFCAP ? Number(process.env.OFFCAP) * 3600 : new Function("return " + grab(/const OFFLINE_CAP_S = [^;]+/).split("= ")[1])();
-// what-ifs: OFFCAP=4 tries a 4-hour offline cap, OFFRATE=0.25 pays 25% while away (the game pays 100%)
+// what-ifs: OFFCAP=4 tries a 4-hour offline cap, OFFRATE=0.25 pays 25% while away (the game pays 100%),
+// FREEAUTO=0 starts later episodes with no automated shops
 const OFFLINE_RATE = process.env.OFFRATE ? Number(process.env.OFFRATE) : 1;
 const [EGGS_PER_GOAL, EGGS_PER_FINALE] = grab(/const EGGS_PER_GOAL = \d+, EGGS_PER_FINALE = \d+/).match(/\d+/g).map(Number);
 // GOALS reference isAuto, so they're built with the simulator's automation flags
@@ -66,13 +68,17 @@ function openChests(meta, rand) {
 // How a player spends their time. While in a session they tap every idle shop and spend greedily;
 // between sessions the tab is closed and only automated shops earn (up to the offline cap).
 // autoFirst: buys automation as soon as it can afford it, since that's what earns while away.
+// tapWait: seconds a finished shop sits before the player taps it again (engaged players tap at once;
+// session players glance at the game every few seconds between buying things).
 const PROFILES = {
   engaged: { label: "Engaged (plays nonstop)" },
-  casual:  { label: "Casual (10 min every 2 hours)", session: 600, gap: 7200 - 600, autoFirst: true },
-  idle:    { label: "Idle (3 min, 3 times a day)", session: 180, gap: 8 * 3600 - 180, autoFirst: true },
+  casual:  { label: "Casual (10 min every 2 hours)", session: 600, gap: 7200 - 600, autoFirst: true, tapWait: 3 },
+  idle:    { label: "Idle (3 min, 3 times a day)", session: 180, gap: 8 * 3600 - 180, autoFirst: true, tapWait: 5 },
 };
 
-function play(ep, meta, { tick = 0.25, limit = 30 * 86400, session = Infinity, gap = 0, autoFirst = false } = {}) {
+// sessionLeft carries the rest of the session the previous finale happened in (a player who returns,
+// runs the finale and starts the next episode is still in that same visit).
+function play(ep, meta, { tick = 0.25, limit = 30 * 86400, session = Infinity, gap = 0, autoFirst = false, tapWait = 0 } = {}, sessionLeft = session) {
   const cm = costMult(ep);
   // same formulas as the Math section of index.html
   const global = meta.perm * (1 + bonus(meta, "money"));
@@ -82,9 +88,9 @@ function play(ep, meta, { tick = 0.25, limit = 30 * 86400, session = Infinity, g
   const rate = (i, n) => n ? n * SCHEMES[i].payout * mult(n) * global * speed / SCHEMES[i].time : 0;
   const cost = (i, n) => SCHEMES[i].base * cm * disc * Math.pow(SCHEMES[i].growth, n);
   const autoCost = i => SCHEMES[i].auto * cm * disc;
-  let t = 0, cash = 0, active = 0, sessionLeft = session, sessions = 1;
+  let t = 0, cash = 0, active = 0, sessions = 1;
   const n = SCHEMES.map((_, i) => (i === 0 ? 1 : 0));
-  const auto = SCHEMES.map(() => false);
+  const auto = SCHEMES.map((_, i) => ep > 0 && i < FREE_AUTO_SHOPS);
   const log = [];
   const goals = Object.fromEntries(GOALS_SIM.map(g => [g.id, null]));
   autoFlags = auto;
@@ -105,9 +111,9 @@ function play(ep, meta, { tick = 0.25, limit = 30 * 86400, session = Infinity, g
     }
     sessionLeft -= tick;
     active += tick;
-    // income this tick (in a session the player taps every shop, so every shop is running)
+    // income this tick: automated shops run nonstop, the rest lose tapWait seconds per run
     let ips = 0;
-    for (let i = 0; i < n.length; i++) ips += rate(i, n[i]);
+    for (let i = 0; i < n.length; i++) ips += rate(i, n[i]) * (auto[i] ? 1 : SCHEMES[i].time / speed / (SCHEMES[i].time / speed + tapWait));
     cash += ips * tick;
     t += tick;
 
@@ -142,7 +148,7 @@ function play(ep, meta, { tick = 0.25, limit = 30 * 86400, session = Infinity, g
 
     check({ cash, schemes: n.map(x => ({ n: x })) });
     const done = Object.values(goals).filter(v => v !== null).length;
-    if (done >= GOALS_NEEDED && n[n.length - 1] >= 1) { mark("FINALE READY"); return { t, active, sessions, log, goals, n }; }
+    if (done >= GOALS_NEEDED && n[n.length - 1] >= 1) { mark("FINALE READY"); return { t, active, sessions, sessionLeft, log, goals, n }; }
   }
   return { t, active, sessions, log, goals, n, timedOut: true };
 }
@@ -170,11 +176,14 @@ for (const [id, prof] of Object.entries(PROFILES)) {
   const res = Array.from({ length: EPS }, () => []), perms = Array(EPS).fill(0), lvls = Array(EPS).fill(0);
   for (let run = 0; run < RUNS; run++) {
     const meta = newMeta(), rand = rng(run + 1);
+    let left = prof.session ?? Infinity;
     for (let ep = 0; ep < EPS; ep++) {
       openChests(meta, rand);
       perms[ep] += meta.perm / RUNS;
       lvls[ep] += CARDS.reduce((a, c) => a + level(meta, c.id), 0) / RUNS;
-      res[ep].push(play(ep, meta, prof));
+      const r = play(ep, meta, prof, left);
+      res[ep].push(r);
+      left = r.sessionLeft;
       finale(meta);
     }
   }

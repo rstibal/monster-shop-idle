@@ -359,6 +359,7 @@
   const PERM_PER_EPISODE = 0.5;                 // each finale multiplies the permanent bonus by 1.5 (the finale card boosts this); multiplying keeps pace with the growing costs
   const EPISODE_COST_GROWTH = 2.5;              // costs x2.5 per finished episode (x2.5, x6.25, x15.6...): customers, automation, cash goals
   const OFFLINE_CAP_S = 8 * 3600;               // shops earn for at most this long while the tab is closed
+  const FREE_AUTO_SHOPS = 1;                    // from episode 2 on, this many shops start automated, so a new episode earns while you're away from the start
 
   // Cards: permanent, survive episode resets. Copies needed for levels 1..5 (cumulative).
   // Each card is one multiplier, keyed by what it does; per is its strength per level (see the Math section).
@@ -1603,6 +1604,9 @@
     next.eggs = S.eggs + EGGS_PER_FINALE;
     next.crystals = S.crystals;
     next.cards = S.cards;
+    // without this, players who drop in a few times a day start each later episode earning nothing while away,
+    // because the first automation costs as much as the episode's prices (see FREE_AUTO_SHOPS)
+    next.schemes.slice(0, FREE_AUTO_SHOPS).forEach(sc => { sc.auto = true; sc.running = true; });
     S = next;
     sfx("finale");
     save();
