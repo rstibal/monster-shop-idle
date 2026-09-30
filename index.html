@@ -46,6 +46,8 @@
   /* Header: the cash counter is the one loud thing */
   header.top { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px 24px; padding: 8px 0 16px; }
   .brand { flex: 1 1 260px; }
+  .ep-line { margin: 0 0 2px; font-size: 0.85rem; color: var(--ink-dim); display: flex; gap: 10px; }
+  .ep-line b { color: var(--gold); font-weight: 700; }
   .brand h1 { font-family: var(--display); font-weight: 400; font-size: 1.15rem; margin: 0; color: var(--ink-dim); letter-spacing: 0.02em; }
   .cash { font-family: var(--display); font-size: clamp(2.6rem, 9vw, 4.6rem); line-height: 1; color: var(--gold); text-shadow: 0 3px 0 var(--gold-dark); margin: 4px 0 0; }
   .cash small { font-size: 0.45em; color: var(--gold-dark); text-shadow: none; margin-left: 6px; }
@@ -206,6 +208,7 @@
 <div class="wrap">
   <header class="top">
     <div class="brand">
+      <p class="ep-line"><b id="epNum">Episode 1</b><span id="epPrices" hidden></span></p>
       <h1 id="episodeName">Grizzle's Haunted Mall</h1>
       <div class="cash" id="cash">$0</div>
       <p class="hint" id="hint" hidden></p>
@@ -669,6 +672,11 @@
 
   function build() {
     $("episodeName").textContent = document.title = "Grizzle's " + episodeName();
+    $("epNum").textContent = "Episode " + (S.episode + 1);
+    // later episodes cost more (see costMult); say so, so the higher prices have a visible reason
+    const cm = costMult();
+    $("epPrices").hidden = S.episode === 0;
+    $("epPrices").textContent = "Prices x" + (cm < 1000 ? +cm.toPrecision(3) : fmt(cm));
     signsEl.innerHTML = "";
     rows = SCHEMES.map((sc, i) => {
       const el = document.createElement("article");
