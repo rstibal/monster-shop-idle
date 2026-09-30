@@ -382,6 +382,11 @@
     { id: "barrel", cur: "crystals", cost: 12, pulls: 4 },
   ];
   const EGGS_PER_GOAL = 1, EGGS_PER_FINALE = 3;
+  // one chest a day opens free, from the second calendar day on (a new game starts with today used, so episode 1's
+  // balance doesn't change); S.dailyDay is the last local day it was used. Saves from before this get one right away.
+  const DAILY_CHEST = "egg";
+  const today = () => { const d = new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); };
+  const dailyReady = () => S.dailyDay !== today();
 
   // ---------- Skins ----------
   // A skin is everything a player reads or sees: setting, cast, currencies, episodes and colors. Mechanics above are shared,
@@ -1249,7 +1254,7 @@
 
   // ---------- State ----------
   const fresh = () => ({
-    cash: 0, beer: 0, eggs: 0, crystals: 0, cards: {}, cardsV2: true, episode: 0, storySeen: -1, perm: 1, goalsDone: [],
+    cash: 0, beer: 0, eggs: 0, crystals: 0, cards: {}, cardsV2: true, episode: 0, storySeen: -1, perm: 1, goalsDone: [], dailyDay: today(),
     schemes: SCHEMES.map((_, i) => ({ n: i === 0 ? 1 : 0, auto: false, running: false, progress: 0 })),
     seen: Date.now(),
   });
@@ -1572,8 +1577,10 @@
   }
   function openChest(id) {
     const ch = CHESTS.find(c => c.id === id);
-    if (!ch || S[ch.cur] < ch.cost) return;
-    S[ch.cur] -= ch.cost;
+    if (!ch) return;
+    if (id === DAILY_CHEST && dailyReady()) S.dailyDay = today();
+    else if (S[ch.cur] >= ch.cost) S[ch.cur] -= ch.cost;
+    else return;
     const got = [];
     for (let k = 0; k < ch.pulls; k++) {
       const c = pickCard();
@@ -1604,6 +1611,7 @@
     next.eggs = S.eggs + EGGS_PER_FINALE;
     next.crystals = S.crystals;
     next.cards = S.cards;
+    next.dailyDay = S.dailyDay;
     // without this, players who drop in a few times a day start each later episode earning nothing while away,
     // because the first automation costs as much as the episode's prices (see FREE_AUTO_SHOPS)
     next.schemes.slice(0, FREE_AUTO_SHOPS).forEach(sc => { sc.auto = true; sc.running = true; });
@@ -2173,7 +2181,8 @@
       ? ["You were away for " + fmtAway(away) + ". Your automated shops earned <span class=\"big-cash\">" + money(gain) + "</span>"]
       : ["You were away for " + fmtAway(away) + ". Only automated shops earn while you're away, so automate one to come back to cash."];
     if (gain > 0 && away > offlineCap()) text.push("Shops earn for up to " + offlineCap() / 3600 + " hours while you're away, so that's where they stopped.");
-    const ready = CHESTS.filter(c => S[c.cur] >= c.cost).map(c => "<b>" + SK.chests[c.id].name + "</b>");
+    const ready = CHESTS.filter(c => S[c.cur] >= c.cost || (c.id === DAILY_CHEST && dailyReady()))
+      .map(c => "<b>" + SK.chests[c.id].name + "</b>" + (c.id === DAILY_CHEST && dailyReady() ? " (free today)" : ""));
     if (ready.length) text.push("Ready to open: " + (ready.length > 1 ? ready.slice(0, -1).join(", ") + " and " : "") + ready[ready.length - 1] + ".");
     if (finaleReady()) text.push("The <b>finale</b> is ready. " + EP().finale.ready);
     const actions = [{ label: gain > 0 ? "Collect " + money(gain) : "Back to work", run: () => sfx(gain > 0 ? "milestone" : "buy") }];
@@ -2237,8 +2246,8 @@
     $("chests").innerHTML = CHESTS.map(c => `
       <div class="chest">
         <h3>${SK.chests[c.id].name}</h3>
-        <p>${SK.chests[c.id].blurb} Draws ${c.pulls} cards.</p>
-        <button class="btn alt" data-chest="${c.id}">Open<span class="sub">${c.cost} ${cur(c.cur, c.cost)}</span></button>
+        <p>${SK.chests[c.id].blurb}${c.id === DAILY_CHEST ? " Free once a day." : ""} Draws ${c.pulls} cards.</p>
+        <button class="btn alt" data-chest="${c.id}"></button>
       </div>`).join("");
     $("chests").querySelectorAll("[data-chest]").forEach(b => b.addEventListener("click", () => openChest(b.dataset.chest)));
   }
@@ -2247,8 +2256,12 @@
     CHESTS.forEach(c => {
       const b = document.querySelector(`[data-chest="${c.id}"]`);
       if (!b) return;
-      const can = S[c.cur] >= c.cost;
+      const free = c.id === DAILY_CHEST && dailyReady();
+      const can = free || S[c.cur] >= c.cost;
       b.disabled = !can;
+      // only rewrite the label when it changes; rewriting a button every frame drops taps
+      const label = free ? `Open free<span class="sub">Daily chest</span>` : `Open<span class="sub">${c.cost} ${cur(c.cur, c.cost)}</span>`;
+      if (b.dataset.label !== label) { b.dataset.label = label; b.innerHTML = label; }
       any = any || can;
     });
     $("cardDot").hidden = !any;

@@ -30,6 +30,8 @@ const OFFLINE_CAP_S = process.env.OFFCAP ? Number(process.env.OFFCAP) * 3600 : n
 // FREEAUTO=0 starts later episodes with no automated shops
 const OFFLINE_RATE = process.env.OFFRATE ? Number(process.env.OFFRATE) : 1;
 const [EGGS_PER_GOAL, EGGS_PER_FINALE] = grab(/const EGGS_PER_GOAL = \d+, EGGS_PER_FINALE = \d+/).match(/\d+/g).map(Number);
+// one chest a day is free; DAILY=0 turns it off
+const DAILY = process.env.DAILY === "0" ? null : CHESTS.find(c => c.id === grab(/const DAILY_CHEST = "\w+"/).split('"')[1]);
 // GOALS reference isAuto, so they're built with the simulator's automation flags
 let autoFlags = [];
 const GOALS_SIM = new Function("isAuto", grab(/const GOALS = \[[\s\S]*?\n  \];/).replace("const GOALS =", "return"))(i => autoFlags[i]);
@@ -176,14 +178,17 @@ for (const [id, prof] of Object.entries(PROFILES)) {
   const res = Array.from({ length: EPS }, () => []), perms = Array(EPS).fill(0), lvls = Array(EPS).fill(0);
   for (let run = 0; run < RUNS; run++) {
     const meta = newMeta(), rand = rng(run + 1);
-    let left = prof.session ?? Infinity;
+    let left = prof.session ?? Infinity, elapsed = 0, days = 1;
     for (let ep = 0; ep < EPS; ep++) {
+      // the daily chest from day 2 on, counted in 24-hour steps of elapsed time and opened at the next episode start (paid as its cost)
+      for (; DAILY && days <= elapsed / 86400; days++) meta[DAILY.cur] += DAILY.cost;
       openChests(meta, rand);
       perms[ep] += meta.perm / RUNS;
       lvls[ep] += CARDS.reduce((a, c) => a + level(meta, c.id), 0) / RUNS;
       const r = play(ep, meta, prof, left);
       res[ep].push(r);
       left = r.sessionLeft;
+      elapsed += r.t;
       finale(meta);
     }
   }

@@ -83,13 +83,15 @@ Each card is one multiplier that grows with its level.
 | Beer chest / Scrap crate | 5 beer / scrap | 2 | Shop milestones |
 | Crystal barrel / Stardust vault | 12 crystals / stardust | 4 | Duplicates of maxed cards |
 
+Daily chest: once a day, from your second day on, the egg chest opens free.
+
 ## Tuning
 
 Everything lives at the top of the script in `index.html`. The numbers: `SCHEMES` (costs, payouts, run times), `MILESTONES`, `GOALS`, `CARDS` (weights and strength per level), `CHESTS`, `LEVEL_AT`, `PERM_PER_EPISODE`, `EPISODE_COST_GROWTH` (how much costs multiply per episode), `OFFLINE_CAP_S` and `FREE_AUTO_SHOPS` (shops that start automated from episode 2 on). Everything players read or see is in `SKINS`: to add a setting, copy a skin, change its words, episodes and `theme` colors, and it shows up in the Setting picker.
 
 Balance check: `node tools/sim.mjs` reads the numbers from `index.html`, plays a greedy player who taps every shop the moment it's idle, and prints when each shop opens and when the finale unlocks. Episode 1 currently takes about 26 minutes that way, with the fifth goal landing a few minutes before the lease. It also prints when each goal clears. Real players are less efficient, so expect 30 to 40.
 
-It then plays several episodes in a row (carrying over the bonus, beer, eggs and cards, opening chests as soon as it can) and prints the median time per episode. `node tools/sim.mjs 9 50` plays 9 episodes over 50 runs, and `GROWTH=3 node tools/sim.mjs` tries a different per-episode cost growth without editing the game.
+It then plays several episodes in a row (carrying over the bonus, beer, eggs and cards, opening chests as soon as it can, plus the free daily chest for every 24 hours played; `DAILY=0` turns that off) and prints the median time per episode. `node tools/sim.mjs 9 50` plays 9 episodes over 50 runs, and `GROWTH=3 node tools/sim.mjs` tries a different per-episode cost growth without editing the game.
 
 The same table is printed for a casual player (10 minutes every 2 hours) and an idle one (3 minutes, 3 times a day), who only earn from automated shops while away and, while playing, leave a finished shop idle for a few seconds before tapping it again (3 seconds casual, 5 idle). Current real time to unlock each finale:
 
