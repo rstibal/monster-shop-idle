@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Grizzle's Haunted Mall</title>
+<title>Monster Shop Idle</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link id="skinFonts" href="https://fonts.googleapis.com/css2?family=Alegreya:wght@700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -1028,7 +1028,8 @@
   let rows = [];
 
   function build() {
-    $("episodeName").textContent = document.title = SK.owner + "'s " + episodeName();
+    $("episodeName").textContent = SK.owner + "'s " + episodeName();
+    document.title = SK.owner + "'s " + episodeName() + " · Monster Shop Idle";
     $("epNum").textContent = "Episode " + (S.episode + 1);
     // later episodes cost more (see costMult); say so, so the higher prices have a visible reason
     const cm = costMult();

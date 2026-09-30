@@ -1,10 +1,10 @@
-# Grizzle's Haunted Mall (monster-shop-idle)
+# Monster Shop Idle (monster-shop-idle)
 
-An idle clicker: a goblin shopkeeper runs dodgy shops in monster districts. Hobby project by Rob Stibal, inspired by the structure of the discontinued mobile game *It's Always Sunny: The Gang Goes Mobile* (schemes, episode-style prestige, character cards) but with an original setting and cast. Do not use that show's names or characters.
+An idle clicker about running dodgy shops, named Monster Shop Idle (Rob's choice for the app as a whole; "Grizzle's Haunted Mall" is now just the first setting). Settings: a goblin in a haunted mall, or an ex-smuggler on a space station. Hobby project by Rob Stibal, inspired by the structure of the discontinued mobile game *It's Always Sunny: The Gang Goes Mobile* (schemes, episode-style prestige, character cards) but with an original setting and cast. Do not use that show's names or characters.
 
 - Live game: https://rstibal.github.io/monster-shop-idle/ (GitHub Pages, `main` branch root)
 - Repo: https://github.com/rstibal/monster-shop-idle (public, MIT)
-- Design doc (Claude Doc, may be out of date on details): https://claude.ai/code/artifact/ed3d4d4e-00f2-4b59-96d1-5bb5188baf4f
+- Design doc (Claude Doc, rewritten 2026-09-29; the older doc at ed3d4d4e-... couldn't be opened from the second machine): https://claude.ai/code/artifact/8873543b-fa27-461d-9383-63a426faa78e
 
 ## Layout
 

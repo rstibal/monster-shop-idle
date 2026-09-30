@@ -1,4 +1,4 @@
-# Grizzle's Haunted Mall
+# Monster Shop Idle
 
 A small idle clicker about running dodgy shops, in two settings: a goblin shopkeeper in a haunted mall, or an ex-smuggler on a decommissioned space station. Plain HTML, CSS and JavaScript in one file, with no build step and no dependencies.
 
