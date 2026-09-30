@@ -74,6 +74,8 @@
   .hint { margin: 8px 0 0; padding: 8px 12px; max-width: 34ch; background: var(--accent); color: var(--on-accent); font-weight: 600; border-radius: 12px; font-size: 0.95rem; }
   .stats { display: flex; gap: 20px; flex-wrap: wrap; color: var(--ink-dim); font-size: 0.95rem; }
   .stats b { color: var(--ink); font-weight: 700; }
+  .stats { align-items: center; }
+  .sound-btn { padding: 2px 10px; }
   .stats .stat b { color: var(--stat); }
 
   .layout { display: grid; grid-template-columns: 1fr; gap: 16px; }
@@ -241,6 +243,7 @@
       <span><span id="eggsLabel">Eggs</span> <b id="eggs">0</b></span>
       <span><span id="crystalsLabel">Crystals</span> <b id="crystals">0</b></span>
       <span>Permanent bonus <b id="perm">x1</b></span>
+      <button class="small-btn sound-btn" id="soundBtn"></button>
     </div>
   </header>
 
@@ -340,6 +343,7 @@
   // episodes repeat after the last one (shown as "Haunted Mall 2" and so on). shops[i] fills SCHEMES[i]:
   // noun is used in goal text ("Own 25 pretzel customers"), hue colors its icon tile, lease is the last shop's name in short.
   // theme sets the CSS variables at the top of the stylesheet; fonts is a Google Fonts URL.
+  // sound picks the synth voice for every effect: waveform, root pitch in Hz, scale in semitones, vibrato depth, loudness.
   const SKINS = [
     {
       id: "mall",
@@ -360,6 +364,7 @@
         milestone: { name: "Old Bog Witch", role: "Rival across the street", icon: "🧙", hue: 265 },
       },
       hues: [205, 225, 190, 250, 175, 265],
+      sound: { wave: "triangle", root: 220, scale: [0, 3, 5, 7, 10], vibrato: 0.012, vol: 1 },   // soft and a little eerie: minor pentatonic with a wobble
       theme: {
         fonts: "https://fonts.googleapis.com/css2?family=Alegreya:wght@700&family=Alegreya+Sans:wght@400;500;700&display=swap",
         display: '"Alegreya", Georgia, serif', "display-weight": "700", body: '"Alegreya Sans", system-ui, sans-serif',
@@ -473,6 +478,7 @@
         milestone: { name: "Commodore Glint", role: "Rival across the ring",      icon: "🎖️", hue: 280 },
       },
       hues: [30, 185, 270, 150, 330, 205],
+      sound: { wave: "square", root: 262, scale: [0, 2, 4, 7, 9], vibrato: 0, vol: 0.45 },       // arcade blips: bright major pentatonic
       theme: {
         fonts: "https://fonts.googleapis.com/css2?family=Russo+One&family=Space+Grotesk:wght@400;500;700&display=swap",
         display: '"Russo One", "Trebuchet MS", sans-serif', "display-weight": "400", body: '"Space Grotesk", system-ui, sans-serif',
@@ -632,6 +638,62 @@
   const customers = n => n === 1 ? SK.words.customer : SK.words.customers;
   const cast = c => ({ ...c, ...SK.cards[c.id] });                        // a card's mechanics plus who is on it in this skin
 
+  // ---------- Sound ----------
+  // Every effect is a few synthesized notes (no audio files). Notes are steps in the skin's scale, so the same
+  // effect sounds eerie in one skin and like an arcade in another. Browsers only allow audio after a tap or key,
+  // so the audio context starts on the first one; until then effects are silently skipped.
+  const SOUND_KEY = "grizzle-haunted-mall-sound";
+  let soundOn = (() => { try { return localStorage.getItem(SOUND_KEY) !== "off"; } catch { return true; } })();
+  let actx = null, master = null;
+  function unlockAudio() {
+    if (!soundOn) return;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    if (!actx) { actx = new AC(); master = actx.createGain(); master.gain.value = 0.22; master.connect(actx.destination); }
+    if (actx.state === "suspended") actx.resume();
+  }
+  addEventListener("pointerdown", unlockAudio, true);
+  addEventListener("keydown", unlockAudio, true);
+  // one note: deg is a step in the skin's scale (0 = root, 5 = root an octave up for a 5-note scale)
+  function note(deg, { at = 0, dur = 0.12, vol = 0.3, oct = 0, slide = 0 } = {}) {
+    if (!soundOn || !actx || actx.state !== "running") return;
+    const v = SK.sound, sc = v.scale, n = sc.length;
+    const semi = sc[((deg % n) + n) % n] + 12 * (Math.floor(deg / n) + oct);
+    const f = v.root * Math.pow(2, semi / 12), t = actx.currentTime + at;
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = v.wave;
+    o.frequency.setValueAtTime(f, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(f * Math.pow(2, slide / 12), t + dur);
+    if (v.vibrato) {
+      const lfo = actx.createOscillator(), depth = actx.createGain();
+      lfo.frequency.value = 6; depth.gain.value = f * v.vibrato;
+      lfo.connect(depth).connect(o.frequency); lfo.start(t); lfo.stop(t + dur + 0.05);
+    }
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol * v.vol, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(master);
+    o.start(t); o.stop(t + dur + 0.05);
+  }
+  const arp = (degs, opts = {}) => degs.forEach((d, k) => note(d, { ...opts, at: (opts.at || 0) + k * (opts.gap || 0.07) }));
+  const SOUNDS = {
+    tap:       i => note(i, { dur: 0.06, vol: 0.18 }),                                   // starting a run by hand; higher shops sit higher
+    cash:      i => arp([i + 4, i + 6], { dur: 0.1, vol: 0.2, gap: 0.05 }),              // that run paying out
+    buy:       () => arp([4, 7], { dur: 0.07, vol: 0.2, gap: 0.035 }),
+    milestone: () => arp([0, 2, 4, 5, 7], { dur: 0.2, vol: 0.28, gap: 0.06, oct: 1 }),
+    automate:  () => { note(0, { dur: 0.3, vol: 0.22, slide: 12 }); note(5, { at: 0.18, dur: 0.25, vol: 0.2 }); },
+    goal:      () => arp([2, 4, 7], { dur: 0.18, vol: 0.26, gap: 0.08, oct: 1 }),
+    chest:     got => got.forEach((x, k) => note(x.tag ? 7 + k : 2 + k, { at: 0.1 * k, dur: x.tag ? 0.3 : 0.14, vol: x.tag ? 0.28 : 0.2, oct: 1 })),
+    finale:    () => { arp([7, 5, 4, 2, 0], { dur: 0.22, vol: 0.25, gap: 0.09 }); arp([0, 2, 4, 7, 10], { at: 0.55, dur: 0.5, vol: 0.28, gap: 0.08, oct: 1 }); },
+  };
+  const lastSfx = {};
+  function sfx(name, arg) {
+    const now = performance.now();
+    if (now - (lastSfx[name] || 0) < 45) return;   // x10 and Max buys, or fast taps, shouldn't stack into noise
+    lastSfx[name] = now;
+    try { SOUNDS[name](arg); } catch {}
+  }
+
   // ---------- Episode content ----------
   const EP = () => SK.episodes[S.episode % SK.episodes.length];
   const shop = i => EP().shops[i];
@@ -693,6 +755,7 @@
     S.cash -= cost;
     S.schemes[i].n += k;
     const crossed = MILESTONES.filter(m => before < m && S.schemes[i].n >= m).length;
+    sfx(crossed ? "milestone" : "buy");
     if (crossed) {
       S.beer += crossed;
       toast(shop(i).name + ": income x" + +Math.pow(2 + cardBonus("milestone"), crossed).toFixed(2) + " and +" + crossed + " " + cur("beer", crossed));
@@ -704,6 +767,7 @@
     if (isAuto(i) || S.cash < autoCost(i) || sc.n < 1) return;
     S.cash -= autoCost(i);
     sc.auto = true;
+    sfx("automate");
     if (!sc.running) sc.running = true;
     render();
   }
@@ -711,6 +775,7 @@
     const sc = S.schemes[i];
     if (sc.n < 1 || isAuto(i) || sc.running) return;
     sc.running = true;
+    sfx("tap", i);
   }
 
   // ---------- Chests ----------
@@ -734,6 +799,7 @@
       got.push({ c, tag: before === 0 ? "new" : after > before ? "level " + after : "" });
     }
     S.schemes.forEach((sc, i) => { if (isAuto(i) && sc.n > 0) sc.running = true; });
+    sfx("chest", got);
     $("pull").innerHTML = "<ul>" + got.map(g => `<li>${cast(g.c).icon} ${cast(g.c).name}${g.tag ? `<em>${g.tag}</em>` : ""}</li>`).join("") + "</ul>";
     renderCards();
     render();
@@ -754,6 +820,7 @@
     next.crystals = S.crystals;
     next.cards = S.cards;
     S = next;
+    sfx("finale");
     save();
     build();
     maybeShowIntro();
@@ -811,6 +878,7 @@
       if (sc.progress >= 1) {
         const runs = auto ? Math.floor(sc.progress) : 1;
         S.cash += runIncome(i) * runs;
+        if (!auto) sfx("cash", i);
         sc.progress = auto ? sc.progress - runs : 0;
         sc.running = auto;
       }
@@ -825,6 +893,7 @@
       if (!S.goalsDone.includes(g.id) && g.cur(S) >= goalTarget(g)) {
         S.goalsDone.push(g.id);
         S.eggs += EGGS_PER_GOAL;
+        sfx("goal");
         toast("Goal cleared: " + goalText(g) + " (+" + EGGS_PER_GOAL + " " + cur("eggs", EGGS_PER_GOAL) + ")");
         renderGoals();
       }
@@ -1061,6 +1130,14 @@
   }));
   try { setView(localStorage.getItem(VIEW_KEY)); } catch { setView("shops"); }
   $("finBtn").addEventListener("click", openFinale);
+  const showSound = () => { $("soundBtn").textContent = soundOn ? "🔊 Sound on" : "🔇 Sound off"; $("soundBtn").setAttribute("aria-pressed", soundOn); };
+  $("soundBtn").addEventListener("click", () => {
+    soundOn = !soundOn;
+    try { localStorage.setItem(SOUND_KEY, soundOn ? "on" : "off"); } catch {}
+    showSound();
+    if (soundOn) { unlockAudio(); sfx("buy"); }
+  });
+  showSound();
   $("resetBtn").addEventListener("click", () => {
     if (confirm("Wipe your save and start over?")) {
       try { localStorage.removeItem(SAVE_KEY); } catch {}
@@ -1086,7 +1163,7 @@
   buildChests();
   maybeShowIntro();
   // ?debug exposes the state for testing in the console
-  if (new URLSearchParams(location.search).has("debug")) window.__game = { get S() { return S; }, get SK() { return SK; }, setSkin, openChest, renderCards, update, offline, tap, maybeShowIntro, openFinale, finish };
+  if (new URLSearchParams(location.search).has("debug")) window.__game = { get S() { return S; }, get SK() { return SK; }, setSkin, sfx, get audio() { return actx && actx.state; }, openChest, renderCards, update, offline, tap, maybeShowIntro, openFinale, finish };
   requestAnimationFrame(frame);
 })();
 </script>

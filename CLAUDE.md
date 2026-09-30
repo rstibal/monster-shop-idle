@@ -19,8 +19,9 @@ An idle clicker: a goblin shopkeeper runs dodgy shops in monster districts. Hobb
 - Prestige = episode finale. Needs `GOALS_NEEDED` (5) of the 9 goals plus one customer of the sixth shop. Resets cash and shops; keeps beer, eggs, crystals and cards; adds a permanent +50% income and 3 eggs.
 - Episodes: three per skin (mall: Haunted Mall, Swamp Market, Crypt Quarter), then they repeat ("Haunted Mall 2"). All episodes share the same `SCHEMES`, but customer costs, automation costs and goals marked `scaled: true` (the cash goal, `{$}` in its text) multiply by `costMult()` = `EPISODE_COST_GROWTH ^ episode` (2.5, so x2.5, x6.25, x15.6, ...).
 - Cards level 1 to 5 by duplicates and survive resets. Each is one multiplier, strength per level in its `per` field, applied through `cardBonus(id)` in the Math section (the simulator mirrors those formulas). Card ids are the effect: `money` all income, `speed` run speed, `discount` cost discount, `finale` finale bonus, `milestone` milestone multiplier (2 + bonus); the skin says who is on each (mall: Grizzle, Mort, Countess Vex, Bramble, Old Bog Witch). Saves from before skins used the mall cast as ids and are migrated in `load()`. Rob prefers multiplier cards (speed, money, finale bonus) over rule-changing perks like free automation or offline caps. Saves from before this (no `cardsV2`) keep shops Mort used to automate. Chests: egg (2 eggs, 3 cards), beer (5 beer, 2 cards), crystal barrel (12 crystals, 4 cards). Duplicates of maxed cards give crystals.
+- Sound: a small Web Audio synth in the Sound section (`sfx(name)` plays one of `SOUNDS`: tap, cash, buy, milestone, automate, goal, chest, finale). Notes are steps in the skin's `sound` scale, so each skin has its own voice. Automated shops are silent on purpose. Audio only starts after the first tap or key (browser rule); mute pref key `...-sound`, button in the header.
 - Story: a `<dialog>` shows an intro per episode (once, tracked by `S.storySeen`) and a finale scene when the finale button is pressed.
-- Saves: localStorage key `grizzle-haunted-mall-v1` (game; the name predates skins and stays for old saves), `...-buymode`, `...-view` and `...-skin` (UI prefs, kept separate so resets don't wipe them). Offline earnings are credited on load and when a background tab becomes visible.
+- Saves: localStorage key `grizzle-haunted-mall-v1` (game; the name predates skins and stays for old saves), `...-buymode`, `...-view`, `...-skin` and `...-sound` (UI prefs, kept separate so resets don't wipe them). Offline earnings are credited on load and when a background tab becomes visible.
 - URL flags: `?speed=10` runs faster, `?skin=starport` forces a skin, `?debug` exposes `window.__game` (state, skin, `setSkin` and a few functions).
 
 ## Balance target
@@ -46,6 +47,6 @@ The simulator also plays casual (10 min every 2 h) and idle (3 min, 3x a day) pr
 ## Ideas not done yet
 
 - More episodes (the loop after episode 3 reuses episode 1)
-- Art and sound
+- Art
 - Optional rewarded-ad boosts (the design doc has the plan; not needed for a hobby project)
 - Second tuning pass for the idle player (the simulator only models an always-tapping player)

@@ -32,6 +32,7 @@ The rules below use the Haunted Mall's names.
 - Owning 10, 25, 50, 100 and 150 customers of a shop doubles its income and gives 1 beer.
 - Clear 5 of the 9 goals and sign a dragon lease to unlock the episode finale. It resets cash and shops, keeps beer, eggs, crystals and cards, and adds a permanent 50% income bonus plus 3 eggs.
 - Shops keep earning while the tab is closed, up to 8 hours.
+- Sound effects for tapping, payouts, buying, milestones, automating, goals, chests and the finale, synthesized in the browser (no audio files). Each setting has its own voice: eerie in the Haunted Mall, arcade blips on Starport Nine. The Sound button in the header mutes it.
 
 ### Episodes and story
 
@@ -93,7 +94,8 @@ Early on, one break's offline earnings cover the rest of an episode, so session 
 - [x] Episode-specific shops and story beats (3 episodes)
 - [x] Balance pass targeting about 30 minutes for episode 1
 - [x] Costs scale per episode so later episodes stay a challenge
-- [ ] Art and sound
+- [x] Sound effects (synthesized, per setting)
+- [ ] Art
 - [ ] Optional rewarded-ad boosts
 
 ## License
