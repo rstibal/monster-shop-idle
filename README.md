@@ -1,6 +1,6 @@
 # Grizzle's Haunted Mall
 
-A small idle clicker about a goblin shopkeeper running dodgy kiosks in a haunted mall. Plain HTML, CSS and JavaScript in one file, with no build step and no dependencies.
+A small idle clicker about running dodgy shops, in two settings: a goblin shopkeeper in a haunted mall, or an ex-smuggler on a decommissioned space station. Plain HTML, CSS and JavaScript in one file, with no build step and no dependencies.
 
 Status: early prototype. All numbers are placeholders.
 
@@ -8,11 +8,22 @@ Status: early prototype. All numbers are placeholders.
 
 Open `index.html` in a browser. Progress saves to the browser's local storage.
 
-Add `?speed=10` to the URL to run the game 10 times faster while tuning. Add `?debug` to expose the game state as `window.__game` in the console.
+Add `?speed=10` to the URL to run the game 10 times faster while tuning. Add `?debug` to expose the game state as `window.__game` in the console. Add `?skin=starport` (or `?skin=mall`) to force a setting.
 
 To host it, enable GitHub Pages on the `main` branch (root folder).
 
+## Settings (skins)
+
+The side panel has a Setting picker. Each setting has its own cast, shops, story, currency names and colors; the numbers are the same, so one save works in both and you can switch at any time.
+
+| Setting | Owner | Episodes | Currencies | Look |
+| --- | --- | --- | --- | --- |
+| Haunted Mall | Grizzle, a goblin | Haunted Mall, Swamp Market, Crypt Quarter | Beer, eggs, crystals | Moonlit graveyard: silver and blue, Alegreya |
+| Starport Nine | Juno Vance, an ex-smuggler | Docking Ring, Hydroponics Deck, Reactor Row | Scrap, keycards, stardust | Deep space navy with amber and teal, Russo One |
+
 ## How it plays
+
+The rules below use the Haunted Mall's names.
 
 - Six shops unlock in order. Each episode has its own six (episode 1 runs from the pretzel kiosk of mystery to the dragon anchor-store lease).
 - Buy customers (x1, x10 or Max) to raise a shop's income. Cost grows geometrically.
@@ -40,23 +51,23 @@ Cards survive episode resets. Duplicates level a card up to level 5 (1, 3, 6, 11
 
 Each card is one multiplier that grows with its level.
 
-| Card | Perk per level | At level 5 |
-| --- | --- | --- |
-| Grizzle | All income +10% | x1.5 income |
-| Mort | Shops run 10% faster | x1.5 speed |
-| Countess Vex | Customers and automation 4% cheaper | 20% off |
-| Bramble | Finale bonus +20% | +100% instead of +50% |
-| Old Bog Witch | Each milestone multiplies income by 0.05 more | x2.25 per milestone instead of x2 |
+| Effect | Haunted Mall | Starport Nine | Perk per level | At level 5 |
+| --- | --- | --- | --- | --- |
+| Money | Grizzle | Juno Vance | All income +10% | x1.5 income |
+| Speed | Mort | Sprocket | Shops run 10% faster | x1.5 speed |
+| Discount | Countess Vex | Madame Ossa | Customers and automation 4% cheaper | 20% off |
+| Finale | Bramble | Brick | Finale bonus +20% | +100% instead of +50% |
+| Milestone | Old Bog Witch | Commodore Glint | Each milestone multiplies income by 0.05 more | x2.25 per milestone instead of x2 |
 
-| Chest | Cost | Cards | Where the currency comes from |
+| Chest (Haunted Mall / Starport Nine) | Cost | Cards | Where the currency comes from |
 | --- | --- | --- | --- |
-| Egg chest | 2 eggs | 3 | 1 egg per goal, 3 per finale |
-| Beer chest | 5 beer | 2 | Shop milestones |
-| Crystal barrel | 12 crystals | 4 | Duplicates of maxed cards |
+| Egg chest / Keycard locker | 2 eggs / keycards | 3 | 1 per goal, 3 per finale |
+| Beer chest / Scrap crate | 5 beer / scrap | 2 | Shop milestones |
+| Crystal barrel / Stardust vault | 12 crystals / stardust | 4 | Duplicates of maxed cards |
 
 ## Tuning
 
-Everything lives at the top of the script in `index.html`: `SCHEMES` (costs, payouts, run times), `EPISODES` (shop names and story text), `MILESTONES`, `GOALS`, `CARDS`, `CHESTS`, `LEVEL_AT`, `PERM_PER_EPISODE`, `EPISODE_COST_GROWTH` (how much costs multiply per episode) and `OFFLINE_CAP_S`.
+Everything lives at the top of the script in `index.html`. The numbers: `SCHEMES` (costs, payouts, run times), `MILESTONES`, `GOALS`, `CARDS` (weights and strength per level), `CHESTS`, `LEVEL_AT`, `PERM_PER_EPISODE`, `EPISODE_COST_GROWTH` (how much costs multiply per episode) and `OFFLINE_CAP_S`. Everything players read or see is in `SKINS`: to add a setting, copy a skin, change its words, episodes and `theme` colors, and it shows up in the Setting picker.
 
 Balance check: `node tools/sim.mjs` reads the numbers from `index.html`, plays a greedy player who taps every shop the moment it's idle, and prints when each shop opens and when the finale unlocks. Episode 1 currently takes about 26 minutes that way, with the fifth goal landing a few minutes before the lease. It also prints when each goal clears. Real players are less efficient, so expect 30 to 40.
 

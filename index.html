@@ -6,23 +6,43 @@
 <title>Grizzle's Haunted Mall</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+<link id="skinFonts" href="https://fonts.googleapis.com/css2?family=Alegreya:wght@700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
+  /* Colors and fonts come from the active skin (SKINS[].theme sets these same names).
+     The defaults here are the Haunted Mall skin, so the first paint looks right before the script runs. */
   :root {
-    --moss: #22362c;
-    --moss-deep: #182820;
-    --plum: #3b2748;
-    --plum-edge: #6b4a7c;
-    --gold: #f2b632;
-    --gold-dark: #b8841a;
-    --slime: #9be15d;
-    --ink: #f4ebd9;
-    --ink-dim: #b9b3c4;
-    --beer: #e8923a;
-    --danger: #ff7a6b;
+    --bg: #141a26;            /* page */
+    --bg-glow: #243049;       /* soft light at the top of the page */
+    --deep: #0e131c;          /* bar tracks and drop shadows */
+    --panel: #1d2536;         /* shop signs, side panels, cards */
+    --edge: #3a4763;          /* panel borders */
+    --chain: #3a4763;         /* the little chains the shop signs hang from; transparent hides them */
+    --accent: #cfe3ff;        /* cash, Buy, highlights */
+    --accent-dark: #7f9cc7;
+    --on-accent: #14223a;
+    --alt: #6fd1e0;           /* Automate, goals, milestone badge */
+    --alt-dark: #2f8fa0;
+    --on-alt: #062228;
+    --ink: #e6ecf5;
+    --ink-dim: #9aa6bd;
+    --stat: #e6c07b;          /* the milestone currency in the header */
+    --off: #2a3346;           /* disabled Buy */
+    --off-ink: #7f8aa3;
+    --off-dark: #1a2130;
+    --alt-off: #23393f;       /* disabled Automate */
+    --alt-off-ink: #7d9aa0;
+    --alt-off-dark: #16262a;
+    --badge-off: #5a9aa5;
+    --badge-off-dark: #2a5a62;
+    --backdrop: rgba(6, 9, 16, 0.78);
+    --tile-s: 32%;            /* shop icon tiles and bars: hsl(shop hue, these) */
+    --tile-l: 46%;
+    --bar-s: 55%;
+    --bar-l: 62%;
     --radius: 14px;
-    --display: "Bagel Fat One", "Trebuchet MS", sans-serif;
-    --body: "Figtree", system-ui, sans-serif;
+    --display: "Alegreya", Georgia, serif;
+    --display-weight: 700;
+    --body: "Alegreya Sans", system-ui, sans-serif;
   }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
@@ -30,8 +50,8 @@
   body {
     margin: 0;
     background:
-      radial-gradient(1200px 500px at 50% -10%, #34503f 0%, transparent 70%),
-      var(--moss);
+      radial-gradient(1200px 500px at 50% -10%, var(--bg-glow) 0%, transparent 70%),
+      var(--bg);
     color: var(--ink);
     font-family: var(--body);
     font-size: 16px;
@@ -39,7 +59,7 @@
     min-height: 100vh;
   }
   button { font: inherit; color: inherit; cursor: pointer; }
-  :focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
   .wrap { max-width: 1000px; margin: 0 auto; padding: 16px; }
 
@@ -47,40 +67,40 @@
   header.top { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px 24px; padding: 8px 0 16px; }
   .brand { flex: 1 1 260px; }
   .ep-line { margin: 0 0 2px; font-size: 0.85rem; color: var(--ink-dim); display: flex; gap: 10px; }
-  .ep-line b { color: var(--gold); font-weight: 700; }
-  .brand h1 { font-family: var(--display); font-weight: 400; font-size: 1.15rem; margin: 0; color: var(--ink-dim); letter-spacing: 0.02em; }
-  .cash { font-family: var(--display); font-size: clamp(2.6rem, 9vw, 4.6rem); line-height: 1; color: var(--gold); text-shadow: 0 3px 0 var(--gold-dark); margin: 4px 0 0; }
-  .cash small { font-size: 0.45em; color: var(--gold-dark); text-shadow: none; margin-left: 6px; }
-  .hint { margin: 8px 0 0; padding: 8px 12px; max-width: 34ch; background: var(--gold); color: #2a1c00; font-weight: 600; border-radius: 12px; font-size: 0.95rem; }
+  .ep-line b { color: var(--accent); font-weight: 700; }
+  .brand h1 { font-family: var(--display); font-weight: var(--display-weight); font-size: 1.15rem; margin: 0; color: var(--ink-dim); letter-spacing: 0.02em; }
+  .cash { font-family: var(--display); font-weight: var(--display-weight); font-size: clamp(2.6rem, 9vw, 4.6rem); line-height: 1; color: var(--accent); text-shadow: 0 3px 0 var(--accent-dark); margin: 4px 0 0; }
+  .cash small { font-size: 0.45em; color: var(--accent-dark); text-shadow: none; margin-left: 6px; }
+  .hint { margin: 8px 0 0; padding: 8px 12px; max-width: 34ch; background: var(--accent); color: var(--on-accent); font-weight: 600; border-radius: 12px; font-size: 0.95rem; }
   .stats { display: flex; gap: 20px; flex-wrap: wrap; color: var(--ink-dim); font-size: 0.95rem; }
   .stats b { color: var(--ink); font-weight: 700; }
-  .stats .beer b { color: var(--beer); }
+  .stats .stat b { color: var(--stat); }
 
   .layout { display: grid; grid-template-columns: 1fr; gap: 16px; }
   @media (min-width: 820px) { .layout { grid-template-columns: minmax(0, 1fr) 300px; align-items: start; } }
 
   .toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: var(--ink-dim); font-size: 0.95rem; }
-  .seg { display: inline-flex; border: 2px solid var(--plum-edge); border-radius: 999px; overflow: hidden; }
+  .seg { display: inline-flex; border: 2px solid var(--edge); border-radius: 999px; overflow: hidden; }
   .seg button { background: transparent; border: 0; padding: 4px 14px; font-weight: 600; color: var(--ink-dim); }
-  .seg button[aria-pressed="true"] { background: var(--plum-edge); color: var(--ink); }
+  .seg button[aria-pressed="true"] { background: var(--edge); color: var(--ink); }
 
   /* Shop signs */
   .signs { display: flex; flex-direction: column; gap: 14px; }
   .sign {
     --hue: 100;
     position: relative;
-    background: var(--plum);
-    border: 3px solid var(--plum-edge);
+    background: var(--panel);
+    border: 3px solid var(--edge);
     border-radius: var(--radius);
     padding: 12px 14px 14px;
     display: grid;
     grid-template-columns: 60px 1fr;
     gap: 4px 12px;
-    box-shadow: 0 6px 0 var(--moss-deep);
+    box-shadow: 0 6px 0 var(--deep);
   }
   /* hanging chains */
   .sign::before, .sign::after {
-    content: ""; position: absolute; top: -13px; width: 4px; height: 12px; background: var(--plum-edge); border-radius: 2px;
+    content: ""; position: absolute; top: -13px; width: 4px; height: 12px; background: var(--chain); border-radius: 2px;
   }
   .sign::before { left: 26px; }
   .sign::after { right: 26px; }
@@ -89,114 +109,116 @@
     grid-row: span 3; width: 60px; height: 60px; border-radius: 12px; border: 0;
     font-size: 2rem; display: grid; place-items: center;
     /* raised, brightly colored so it reads as a button like Buy and Automate */
-    background: hsl(var(--hue) 70% 58%);
-    box-shadow: 0 4px 0 hsl(var(--hue) 65% 30%), inset 0 2px 0 rgba(255, 255, 255, 0.3);
+    background: hsl(var(--hue) var(--tile-s) var(--tile-l));
+    box-shadow: 0 4px 0 hsl(var(--hue) var(--tile-s) calc(var(--tile-l) - 26%)), inset 0 2px 0 rgba(255, 255, 255, 0.3);
     cursor: pointer;
     transition: transform 80ms, box-shadow 80ms;
     align-self: start;
     margin-bottom: 4px;
   }
-  .icon:hover:not(:disabled) { background: hsl(var(--hue) 75% 64%); }
-  .icon:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 hsl(var(--hue) 65% 30%), inset 0 2px 0 rgba(255, 255, 255, 0.3); }
+  .icon:hover:not(:disabled) { background: hsl(var(--hue) var(--tile-s) calc(var(--tile-l) + 6%)); }
+  .icon:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 transparent, inset 0 2px 0 rgba(255, 255, 255, 0.3); }
   /* automated or locked: nothing to tap, so it looks flat and quiet */
   .icon:disabled { cursor: default; background: hsl(var(--hue) 25% 30%); box-shadow: inset 0 -4px 0 hsl(var(--hue) 25% 20%); filter: saturate(0.7); }
-  .sign h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 1.15rem; display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
-  .sign h3 .n { color: var(--gold); font-size: 1rem; white-space: nowrap; }
+  .sign h3 { margin: 0; font-family: var(--display); font-weight: var(--display-weight); font-size: 1.15rem; display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .sign h3 .n { color: var(--accent); font-size: 1rem; white-space: nowrap; }
   /* phones: shop name on its own line, customer count underneath */
   @media (max-width: 560px) { .sign h3 { flex-direction: column; align-items: flex-start; gap: 0; } }
-  .bar { cursor: pointer; height: 18px; background: var(--moss-deep); border-radius: 999px; overflow: hidden; position: relative; }
-  .bar i { position: absolute; inset: 0 auto 0 0; width: 0; background: hsl(var(--hue) 65% 55%); border-radius: 999px; }
+  .bar { cursor: pointer; height: 18px; background: var(--deep); border-radius: 999px; overflow: hidden; position: relative; }
+  .bar i { position: absolute; inset: 0 auto 0 0; width: 0; background: hsl(var(--hue) var(--bar-s) var(--bar-l)); border-radius: 999px; }
   .bar span { position: absolute; inset: 0; display: grid; place-items: center; font-size: 0.78rem; font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.7); }
   .meta { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; grid-column: 2; }
   .meta .info { font-size: 0.85rem; color: var(--ink-dim); flex: 1 1 150px; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
   .meta .info b { color: var(--ink); }
   /* progress toward the next milestone */
-  .mbar { height: 6px; max-width: 220px; margin-top: 5px; background: var(--moss-deep); border-radius: 999px; overflow: hidden; }
-  .mbar i { display: block; height: 100%; background: var(--gold); border-radius: 999px; }
+  .mbar { height: 6px; max-width: 220px; margin-top: 5px; background: var(--deep); border-radius: 999px; overflow: hidden; }
+  .mbar i { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
   .buys { display: flex; gap: 8px; flex-wrap: wrap; }
   .btn {
-    background: var(--gold); color: #2a1c00; border: 0; border-radius: 10px; padding: 7px 12px; font-weight: 700;
-    box-shadow: 0 3px 0 var(--gold-dark); transition: transform 80ms, box-shadow 80ms;
+    background: var(--accent); color: var(--on-accent); border: 0; border-radius: 10px; padding: 7px 12px; font-weight: 700;
+    box-shadow: 0 3px 0 var(--accent-dark); transition: transform 80ms, box-shadow 80ms;
   }
-  .btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 0 0 var(--gold-dark); }
+  .btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 0 0 var(--accent-dark); }
   /* Raised buttons move down 3-4px when pressed. Stretch the hit area over the ledge below and the gap left above,
      so a press anywhere on what looks like the button lands on it; child spans never become the press target. */
   .btn, .icon { position: relative; }
   .btn::after, .icon::after { content: ""; position: absolute; inset: -4px 0; }
   .btn > *, .icon > * { pointer-events: none; }
-  .btn:disabled { background: #5a4e66; color: #a79fb3; box-shadow: 0 3px 0 #40364b; cursor: not-allowed; }
-  .btn.alt { background: var(--slime); box-shadow: 0 3px 0 #5f9a30; color: #12250a; }
-  .btn.alt:disabled { background: #4c5a4f; color: #9aa89d; box-shadow: 0 3px 0 #38443a; }
+  .btn:disabled { background: var(--off); color: var(--off-ink); box-shadow: 0 3px 0 var(--off-dark); cursor: not-allowed; }
+  .btn.alt { background: var(--alt); box-shadow: 0 3px 0 var(--alt-dark); color: var(--on-alt); }
+  .btn.alt:disabled { background: var(--alt-off); color: var(--alt-off-ink); box-shadow: 0 3px 0 var(--alt-off-dark); }
   .btn .sub { display: block; font-size: 0.75rem; font-weight: 600; opacity: 0.8; }
   .btn.buy .sub { font-weight: 700; opacity: 1; }
   /* what a purchase adds; the corner badge marks purchases that cross a milestone */
   .btn .gain { display: block; font-size: 0.72rem; font-weight: 600; opacity: 0.8; white-space: nowrap; }
   .btn .badge {
-    position: absolute; top: -9px; right: -7px; background: var(--slime); color: #12250a; border-radius: 999px;
-    padding: 0 6px; font-size: 0.72rem; font-weight: 700; line-height: 1.5; box-shadow: 0 2px 0 #5f9a30;
+    position: absolute; top: -9px; right: -7px; background: var(--alt); color: var(--on-alt); border-radius: 999px;
+    padding: 0 6px; font-size: 0.72rem; font-weight: 700; line-height: 1.5; box-shadow: 0 2px 0 var(--alt-dark);
   }
-  .btn:disabled .badge { background: #8fb86d; box-shadow: 0 2px 0 #4c6e38; }
-  .auto-tag { color: var(--slime); font-weight: 700; font-size: 0.9rem; }
+  .btn:disabled .badge { background: var(--badge-off); box-shadow: 0 2px 0 var(--badge-off-dark); }
+  .auto-tag { color: var(--alt); font-weight: 700; font-size: 0.9rem; }
   .locked-msg { grid-column: 2; color: var(--ink-dim); margin: 0; }
 
   /* Side panel */
   aside { display: flex; flex-direction: column; gap: 16px; }
-  .panel { background: var(--plum); border: 3px solid var(--plum-edge); border-radius: var(--radius); padding: 14px; }
-  .panel h2 { font-family: var(--display); font-weight: 400; font-size: 1.15rem; margin: 0 0 8px; }
+  .panel { background: var(--panel); border: 3px solid var(--edge); border-radius: var(--radius); padding: 14px; }
+  .panel h2 { font-family: var(--display); font-weight: var(--display-weight); font-size: 1.15rem; margin: 0 0 8px; }
   .goal { margin: 0 0 10px; }
-  .goal .gbar { height: 8px; background: var(--moss-deep); border-radius: 999px; margin-top: 4px; overflow: hidden; }
-  .goal .gbar i { display: block; height: 100%; background: var(--slime); }
+  .goal .gbar { height: 8px; background: var(--deep); border-radius: 999px; margin-top: 4px; overflow: hidden; }
+  .goal .gbar i { display: block; height: 100%; background: var(--alt); }
   .goal .label { font-size: 0.92rem; display: flex; justify-content: space-between; gap: 8px; }
   .goal .label span:last-child { color: var(--ink-dim); white-space: nowrap; }
   .panel p { margin: 0 0 10px; font-size: 0.92rem; color: var(--ink-dim); }
   .panel p b { color: var(--ink); }
   .finale .btn { width: 100%; padding: 10px; }
-  .small-btn { background: transparent; border: 2px solid var(--plum-edge); border-radius: 10px; padding: 4px 10px; color: var(--ink-dim); font-size: 0.85rem; }
+  .small-btn { background: transparent; border: 2px solid var(--edge); border-radius: 10px; padding: 4px 10px; color: var(--ink-dim); font-size: 0.85rem; }
   .small-btn:hover { color: var(--ink); border-color: var(--ink-dim); }
+  .skin-pick { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; font-size: 0.92rem; color: var(--ink-dim); }
+  .skin-pick select { flex: 1; min-width: 0; font: inherit; color: var(--ink); background: var(--deep); border: 2px solid var(--edge); border-radius: 10px; padding: 4px 8px; }
 
   /* Cards and chests */
   .views { margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   .views .seg button { padding: 6px 18px; }
-  .views .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--gold); margin-left: 6px; vertical-align: middle; }
+  .views .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-left: 6px; vertical-align: middle; }
   .chests { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 14px; }
-  .chest { background: var(--plum); border: 3px solid var(--plum-edge); border-radius: var(--radius); padding: 12px; display: flex; flex-direction: column; gap: 6px; }
-  .chest h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 1.05rem; }
+  .chest { background: var(--panel); border: 3px solid var(--edge); border-radius: var(--radius); padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+  .chest h3 { margin: 0; font-family: var(--display); font-weight: var(--display-weight); font-size: 1.05rem; }
   .chest p { margin: 0; font-size: 0.85rem; color: var(--ink-dim); flex: 1; }
-  .pull { min-height: 64px; margin-bottom: 14px; padding: 10px 12px; border: 2px dashed var(--plum-edge); border-radius: var(--radius); color: var(--ink-dim); font-size: 0.92rem; }
+  .pull { min-height: 64px; margin-bottom: 14px; padding: 10px 12px; border: 2px dashed var(--edge); border-radius: var(--radius); color: var(--ink-dim); font-size: 0.92rem; }
   .pull ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
-  .pull li { background: var(--moss-deep); border-radius: 999px; padding: 4px 12px; color: var(--ink); font-weight: 600; }
-  .pull li em { font-style: normal; color: var(--gold); margin-left: 6px; }
+  .pull li { background: var(--deep); border-radius: 999px; padding: 4px 12px; color: var(--ink); font-weight: 600; }
+  .pull li em { font-style: normal; color: var(--accent); margin-left: 6px; }
   .cardgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
-  .card { --hue: 100; background: var(--plum); border: 3px solid var(--plum-edge); border-radius: var(--radius); padding: 12px; display: grid; grid-template-columns: 56px 1fr; gap: 4px 12px; align-content: start; }
+  .card { --hue: 100; background: var(--panel); border: 3px solid var(--edge); border-radius: var(--radius); padding: 12px; display: grid; grid-template-columns: 56px 1fr; gap: 4px 12px; align-content: start; }
   .card.none { opacity: 0.6; }
-  .card.max { border-color: var(--gold); }
-  .card .portrait { grid-row: span 2; width: 56px; height: 56px; border-radius: 12px; display: grid; place-items: center; font-size: 1.9rem; background: hsl(var(--hue) 45% 26%); box-shadow: inset 0 -4px 0 hsl(var(--hue) 45% 18%); }
-  .card h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 1.05rem; display: flex; justify-content: space-between; gap: 6px; align-items: baseline; }
-  .card h3 .lv { color: var(--gold); font-size: 0.95rem; white-space: nowrap; }
+  .card.max { border-color: var(--accent); }
+  .card .portrait { grid-row: span 2; width: 56px; height: 56px; border-radius: 12px; display: grid; place-items: center; font-size: 1.9rem; background: hsl(var(--hue) var(--tile-s) 26%); box-shadow: inset 0 -4px 0 hsl(var(--hue) var(--tile-s) 18%); }
+  .card h3 { margin: 0; font-family: var(--display); font-weight: var(--display-weight); font-size: 1.05rem; display: flex; justify-content: space-between; gap: 6px; align-items: baseline; }
+  .card h3 .lv { color: var(--accent); font-size: 0.95rem; white-space: nowrap; }
   .card .role { font-size: 0.82rem; color: var(--ink-dim); }
   .card .copies { grid-column: 1 / -1; }
-  .card .copies .gbar { height: 8px; background: var(--moss-deep); border-radius: 999px; overflow: hidden; }
-  .card .copies .gbar i { display: block; height: 100%; background: hsl(var(--hue) 65% 55%); }
+  .card .copies .gbar { height: 8px; background: var(--deep); border-radius: 999px; overflow: hidden; }
+  .card .copies .gbar i { display: block; height: 100%; background: hsl(var(--hue) var(--bar-s) var(--bar-l)); }
   .card .copies span { font-size: 0.8rem; color: var(--ink-dim); }
   .card .perk { grid-column: 1 / -1; font-size: 0.88rem; margin: 0; }
-  .card .perk b { color: var(--slime); }
+  .card .perk b { color: var(--alt); }
   .card .perk small { display: block; color: var(--ink-dim); font-size: 0.8rem; }
 
-  dialog#story { border: 3px solid var(--plum-edge); border-radius: var(--radius); background: var(--plum); color: var(--ink); padding: 20px 22px; width: min(520px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow-x: hidden; overflow-y: auto; overflow-wrap: anywhere; box-shadow: 0 8px 0 var(--moss-deep); }
-  dialog#story::backdrop { background: rgba(10, 20, 15, 0.72); }
-  dialog#story h2 { font-family: var(--display); font-weight: 400; font-size: 1.4rem; margin: 0 0 10px; color: var(--gold); }
+  dialog#story { border: 3px solid var(--edge); border-radius: var(--radius); background: var(--panel); color: var(--ink); padding: 20px 22px; width: min(520px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow-x: hidden; overflow-y: auto; overflow-wrap: anywhere; box-shadow: 0 8px 0 var(--deep); }
+  dialog#story::backdrop { background: var(--backdrop); }
+  dialog#story h2 { font-family: var(--display); font-weight: var(--display-weight); font-size: 1.4rem; margin: 0 0 10px; color: var(--accent); }
   dialog#story p { margin: 0 0 10px; line-height: 1.55; }
-  dialog#story b { color: var(--gold); }
+  dialog#story b { color: var(--accent); }
   .story-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
 
   .toast {
     position: fixed; left: 50%; bottom: 20px; transform: translate(-50%, 30px); opacity: 0;
-    background: var(--gold); color: #2a1c00; font-weight: 700; padding: 10px 16px; border-radius: 12px;
+    background: var(--accent); color: var(--on-accent); font-weight: 700; padding: 10px 16px; border-radius: 12px;
     max-width: calc(100vw - 32px); text-align: center; transition: opacity 200ms, transform 200ms; pointer-events: none;
-    box-shadow: 0 4px 0 var(--gold-dark);
+    box-shadow: 0 4px 0 var(--accent-dark);
   }
   .toast.show { opacity: 1; transform: translate(-50%, 0); }
-  .pop { position: fixed; pointer-events: none; font-family: var(--display); color: var(--gold); text-shadow: 0 2px 0 var(--gold-dark); animation: pop 800ms ease-out forwards; z-index: 5; }
+  .pop { position: fixed; pointer-events: none; font-family: var(--display); font-weight: var(--display-weight); color: var(--accent); text-shadow: 0 2px 0 var(--accent-dark); animation: pop 800ms ease-out forwards; z-index: 5; }
   @keyframes pop { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-40px); } }
   @media (prefers-reduced-motion: reduce) {
     .pop { animation: none; opacity: 0; }
@@ -215,9 +237,9 @@
     </div>
     <div class="stats">
       <span>Income <b id="ips">$0/s</b></span>
-      <span class="beer">Beer <b id="beer">0</b></span>
-      <span>Eggs <b id="eggs">0</b></span>
-      <span>Crystals <b id="crystals">0</b></span>
+      <span class="stat"><span id="beerLabel">Beer</span> <b id="beer">0</b></span>
+      <span><span id="eggsLabel">Eggs</span> <b id="eggs">0</b></span>
+      <span><span id="crystalsLabel">Crystals</span> <b id="crystals">0</b></span>
       <span>Permanent bonus <b id="perm">x1</b></span>
     </div>
   </header>
@@ -241,7 +263,7 @@
       <div class="signs" id="signs"></div>
       <section id="cardsView" hidden aria-label="Cards and chests">
         <div class="chests" id="chests"></div>
-        <div class="pull" id="pull" aria-live="polite">Open a chest to draw cards. Duplicates level a card up.</div>
+        <div class="pull" id="pull" aria-live="polite"></div>
         <div class="cardgrid" id="cardgrid"></div>
       </section>
     </main>
@@ -258,6 +280,7 @@
         <button class="btn alt" id="finBtn" disabled>Locked</button>
       </section>
       <section class="panel">
+        <label class="skin-pick">Setting <select id="skinSel"></select></label>
         <p id="offlineNote">Your shops keep earning while the tab is closed.</p>
         <button class="small-btn" id="resetBtn">Wipe save</button>
       </section>
@@ -275,148 +298,291 @@
 (() => {
   "use strict";
 
-  // ---------- Content (all placeholder, tune freely) ----------
-  // The numbers behind the six shop slots. Names, icons and story per episode live in EPISODES below.
+  // ---------- Mechanics (numbers only; everything players read lives in SKINS below) ----------
+  // The numbers behind the six shop slots. Names, icons and colors per shop come from the skin's episodes.
   const SCHEMES = [
-    { hue: 35,  base: 4,       growth: 1.07, payout: 1,      time: 1,  auto: 500 },
-    { hue: 275, base: 60,      growth: 1.15, payout: 60,     time: 3,  auto: 5e3 },
-    { hue: 320, base: 1000,    growth: 1.14, payout: 540,    time: 6,  auto: 5e4 },
-    { hue: 190, base: 20000,   growth: 1.13, payout: 4320,   time: 12, auto: 5e5 },
-    { hue: 210, base: 300000,  growth: 1.12, payout: 51840,  time: 24, auto: 5e6 },
-    { hue: 10,  base: 4000000, growth: 1.11, payout: 622080, time: 96, auto: 5e7 },
+    { base: 4,       growth: 1.07, payout: 1,      time: 1,  auto: 500 },
+    { base: 60,      growth: 1.15, payout: 60,     time: 3,  auto: 5e3 },
+    { base: 1000,    growth: 1.14, payout: 540,    time: 6,  auto: 5e4 },
+    { base: 20000,   growth: 1.13, payout: 4320,   time: 12, auto: 5e5 },
+    { base: 300000,  growth: 1.12, payout: 51840,  time: 24, auto: 5e6 },
+    { base: 4000000, growth: 1.11, payout: 622080, time: 96, auto: 5e7 },
   ];
-  const MILESTONES = [10, 25, 50, 100, 150];   // each doubles that scheme's income and gives 1 beer
-  const PERM_PER_EPISODE = 0.5;                 // +50% per finished episode (Bramble boosts this)
+  const MILESTONES = [10, 25, 50, 100, 150];   // each doubles that scheme's income and gives 1 of the milestone currency
+  const PERM_PER_EPISODE = 0.5;                 // +50% per finished episode (the finale card boosts this)
   const EPISODE_COST_GROWTH = 2.5;              // costs x2.5 per finished episode (x2.5, x6.25, x15.6...): customers, automation, cash goals
   const OFFLINE_CAP_S = 8 * 3600;               // shops earn for at most this long while the tab is closed
 
   // Cards: permanent, survive episode resets. Copies needed for levels 1..5 (cumulative).
-  // Each card is one multiplier; per is its strength per level (see the Math section for how each one applies).
+  // Each card is one multiplier, keyed by what it does; per is its strength per level (see the Math section).
+  // Who is on each card (name, role, icon, color) comes from the skin.
   const LEVEL_AT = [1, 3, 6, 11, 19];
   const MAX_LEVEL = LEVEL_AT.length;
   const CARDS = [
-    { id: "grizzle", name: "Grizzle", role: "Scrappy owner",       icon: "👺", hue: 100, weight: 30, per: 0.1,
-      perk: l => `All income x${(1 + 0.1 * l).toFixed(1)}` },
-    { id: "mort",    name: "Mort",    role: "Night-shift ghoul",   icon: "🧟", hue: 160, weight: 25, per: 0.1,
-      perk: l => `Shops run x${(1 + 0.1 * l).toFixed(1)} faster` },
-    { id: "vex",     name: "Countess Vex", role: "Vampire bookkeeper", icon: "🧛", hue: 340, weight: 20, per: 0.04,
-      perk: l => `Customers and automation ${Math.round(4 * l)}% cheaper` },
-    { id: "bramble", name: "Bramble", role: "Bouncer and collector", icon: "🧌", hue: 30, weight: 15, per: 0.2,
-      perk: l => `Finale bonus +${Math.round(PERM_PER_EPISODE * (1 + 0.2 * l) * 100)}%` },
-    { id: "witch",   name: "Old Bog Witch", role: "Rival across the street", icon: "🧙", hue: 285, weight: 10, per: 0.05,
-      perk: l => `Milestones multiply income x${(2 + 0.05 * l).toFixed(2)}` },
+    { id: "money",     weight: 30, per: 0.1,  perk: l => `All income x${(1 + 0.1 * l).toFixed(1)}` },
+    { id: "speed",     weight: 25, per: 0.1,  perk: l => `Shops run x${(1 + 0.1 * l).toFixed(1)} faster` },
+    { id: "discount",  weight: 20, per: 0.04, perk: l => `${cap(SK.words.customers)} and automation ${Math.round(4 * l)}% cheaper` },
+    { id: "finale",    weight: 15, per: 0.2,  perk: l => `Finale bonus +${Math.round(PERM_PER_EPISODE * (1 + 0.2 * l) * 100)}%` },
+    { id: "milestone", weight: 10, per: 0.05, perk: l => `Milestones multiply income x${(2 + 0.05 * l).toFixed(2)}` },
   ];
+  // cur is the state key the chest is paid from; the skin names each currency and chest.
+  // beer = milestone currency, eggs = goal and finale currency, crystals = from duplicates of maxed cards.
   const CHESTS = [
-    { id: "egg",    name: "Egg chest",     cur: "eggs",     cost: 2,  pulls: 3, blurb: "Eggs come from clearing goals and finishing episodes." },
-    { id: "beer",   name: "Beer chest",    cur: "beer",     cost: 5,  pulls: 2, blurb: "Beer comes from shop milestones." },
-    { id: "barrel", name: "Crystal barrel", cur: "crystals", cost: 12, pulls: 4, blurb: "Crystals come from duplicates of maxed cards." },
+    { id: "egg",    cur: "eggs",     cost: 2,  pulls: 3 },
+    { id: "beer",   cur: "beer",     cost: 5,  pulls: 2 },
+    { id: "barrel", cur: "crystals", cost: 12, pulls: 4 },
   ];
   const EGGS_PER_GOAL = 1, EGGS_PER_FINALE = 3;
-  // Episodes repeat after the last one (shown as "Haunted Mall 2" and so on), with the permanent bonus carrying over.
-  // shops[i] fills SCHEMES[i]: noun is used in goal text ("Own 25 pretzel customers"), lease is the last shop's name in short.
-  const EPISODES = [
+
+  // ---------- Skins ----------
+  // A skin is everything a player reads or sees: setting, cast, currencies, episodes and colors. Mechanics above are shared,
+  // so saves work in any skin. To add one, copy a skin and change it; the Setting picker lists them all. ?skin=<id> forces one.
+  // episodes repeat after the last one (shown as "Haunted Mall 2" and so on). shops[i] fills SCHEMES[i]:
+  // noun is used in goal text ("Own 25 pretzel customers"), hue colors its icon tile, lease is the last shop's name in short.
+  // theme sets the CSS variables at the top of the stylesheet; fonts is a Google Fonts URL.
+  const SKINS = [
     {
+      id: "mall",
       name: "Haunted Mall",
-      lease: "dragon lease",
-      shops: [
-        { name: "Pretzel kiosk of mystery",   icon: "🥨", noun: "pretzel" },
-        { name: "Cursed phone-case cart",     icon: "📱", noun: "phone-case" },
-        { name: "Love-potion perfume counter", icon: "🧪", noun: "perfume" },
-        { name: "Haunted arcade",             icon: "🕹️", noun: "arcade" },
-        { name: "Elevator-to-nowhere toll",   icon: "🛗", noun: "elevator" },
-        { name: "Dragon anchor-store lease",  icon: "🐉", noun: "dragon" },
+      owner: "Grizzle",
+      words: { customer: "customer", customers: "customers" },
+      currency: { beer: ["beer", "beer"], eggs: ["egg", "eggs"], crystals: ["crystal", "crystals"] },
+      chests: {
+        egg:    { name: "Egg chest",      blurb: "Eggs come from clearing goals and finishing episodes." },
+        beer:   { name: "Beer chest",     blurb: "Beer comes from shop milestones." },
+        barrel: { name: "Crystal barrel", blurb: "Crystals come from duplicates of maxed cards." },
+      },
+      cards: {
+        money:     { name: "Grizzle",       role: "Scrappy owner",           icon: "👺", hue: 140 },
+        speed:     { name: "Mort",          role: "Night-shift ghoul",       icon: "🧟", hue: 170 },
+        discount:  { name: "Countess Vex",  role: "Vampire bookkeeper",      icon: "🧛", hue: 340 },
+        finale:    { name: "Bramble",       role: "Bouncer and collector",   icon: "🧌", hue: 30 },
+        milestone: { name: "Old Bog Witch", role: "Rival across the street", icon: "🧙", hue: 265 },
+      },
+      hues: [205, 225, 190, 250, 175, 265],
+      theme: {
+        fonts: "https://fonts.googleapis.com/css2?family=Alegreya:wght@700&family=Alegreya+Sans:wght@400;500;700&display=swap",
+        display: '"Alegreya", Georgia, serif', "display-weight": "700", body: '"Alegreya Sans", system-ui, sans-serif',
+        bg: "#141a26", "bg-glow": "#243049", deep: "#0e131c", panel: "#1d2536", edge: "#3a4763", chain: "#3a4763",
+        accent: "#cfe3ff", "accent-dark": "#7f9cc7", "on-accent": "#14223a",
+        alt: "#6fd1e0", "alt-dark": "#2f8fa0", "on-alt": "#062228",
+        ink: "#e6ecf5", "ink-dim": "#9aa6bd", stat: "#e6c07b",
+        off: "#2a3346", "off-ink": "#7f8aa3", "off-dark": "#1a2130",
+        "alt-off": "#23393f", "alt-off-ink": "#7d9aa0", "alt-off-dark": "#16262a", "badge-off": "#5a9aa5", "badge-off-dark": "#2a5a62",
+        backdrop: "rgba(6, 9, 16, 0.78)", "tile-s": "32%", "tile-l": "46%", "bar-s": "55%", "bar-l": "62%",
+      },
+      episodes: [
+        {
+          name: "Haunted Mall",
+          lease: "dragon lease",
+          shops: [
+            { name: "Pretzel kiosk of mystery",    icon: "🥨", noun: "pretzel" },
+            { name: "Cursed phone-case cart",      icon: "📱", noun: "phone-case" },
+            { name: "Love-potion perfume counter", icon: "🧪", noun: "perfume" },
+            { name: "Haunted arcade",              icon: "🕹️", noun: "arcade" },
+            { name: "Elevator-to-nowhere toll",    icon: "🛗", noun: "elevator" },
+            { name: "Dragon anchor-store lease",   icon: "🐉", noun: "dragon" },
+          ],
+          intro: [
+            "The mall closed in 1994. Nobody told the ghosts, the goblins, or Grizzle.",
+            "Grizzle has a pretzel kiosk, a dream, and a lease that says AS-IS in very large letters. Mort has the night shift and no complaints. Countess Vex is doing the books, in a manner of speaking.",
+            "Sell something. Anything.",
+          ],
+          finale: {
+            title: "The big switch",
+            text: [
+              "Every shop is humming. The Old Bog Witch has been outbid, and a dragon has signed a lease on the whole east wing, food court included.",
+              "That leaves the mall's main breaker. Bramble is standing next to it. \"Boss,\" says Bramble, \"this is a bad idea.\" \"That's why it'll work,\" says Grizzle.",
+              "The lights go out. The profits do not.",
+            ],
+            ready: "Bramble is standing by the big switch.",
+            button: "Cut the mall's power",
+          },
+        },
+        {
+          name: "Swamp Market",
+          lease: "ferry monopoly",
+          shops: [
+            { name: "Mushroom stall of mystery", icon: "🍄", noun: "mushroom" },
+            { name: "Bog-water bottler",         icon: "🫙", noun: "bottled-water" },
+            { name: "Newt-eye lucky charms",     icon: "🧿", noun: "charm" },
+            { name: "Fog boat tours",            icon: "🛶", noun: "boat tour" },
+            { name: "Stilt-house timeshare",     icon: "🏚️", noun: "timeshare" },
+            { name: "Kraken ferry monopoly",     icon: "🦑", noun: "ferry" },
+          ],
+          intro: [
+            "The Swamp Market opens at dusk and never closes, because nobody remembers where the doors are.",
+            "Grizzle arrives with a crate of unsold pretzels and a reputation. The Old Bog Witch runs the stall across the way and has been expecting him. \"You again,\" she says.",
+            "Countess Vex has already found the ledger. Mort has already found the swamp.",
+          ],
+          finale: {
+            title: "Anchors aweigh",
+            text: [
+              "The Witch offers a truce and a very small pie. Grizzle declines the pie. She takes this personally.",
+              "So Bramble unhooks the market from its moorings, on purpose, with the kraken's blessing. The whole thing floats, and drifts downriver toward the next district.",
+              "It smells like old stone and expensive candles.",
+            ],
+            ready: "The market is straining at its moorings.",
+            button: "Cut the moorings",
+          },
+        },
+        {
+          name: "Crypt Quarter",
+          lease: "mausoleum condo",
+          shops: [
+            { name: "Grave-flower cart",     icon: "🥀", noun: "flower" },
+            { name: "Coffin showroom",       icon: "⚰️", noun: "coffin" },
+            { name: "Seance parlor",         icon: "🔮", noun: "seance" },
+            { name: "Ghost-tour desk",       icon: "👻", noun: "ghost tour" },
+            { name: "Bone-china antiques",   icon: "🦴", noun: "antique" },
+            { name: "Mausoleum condo sales", icon: "🏛️", noun: "condo" },
+          ],
+          intro: [
+            "The Crypt Quarter is the oldest, quietest, most overpriced district in town. Nobody here pays in cash. Everyone pays in favors, and Countess Vex knows all of them.",
+            "Grizzle opens a flower cart outside a family mausoleum. Nobody complains. Somehow that is the most worrying part.",
+          ],
+          finale: {
+            title: "Fine print",
+            text: [
+              "By dawn every mausoleum is a condo and every ghost has a timeshare. Then the Old Bog Witch turns up with an offer to buy the whole street.",
+              "Grizzle laughs. She shows him the paperwork. Bramble reads it twice. \"Boss,\" says Bramble, \"we have a bigger problem.\"",
+              "Somewhere in the distance, a mall reopens.",
+            ],
+            ready: "The Witch's paperwork is on your desk.",
+            button: "Burn the paperwork",
+          },
+        },
       ],
-      intro: {
-        text: [
-          "The mall closed in 1994. Nobody told the ghosts, the goblins, or Grizzle.",
-          "Grizzle has a pretzel kiosk, a dream, and a lease that says AS-IS in very large letters. Mort has the night shift and no complaints. Countess Vex is doing the books, in a manner of speaking.",
-          "Sell something. Anything.",
-        ],
-      },
-      finale: {
-        title: "The big switch",
-        text: [
-          "Every shop is humming. The Old Bog Witch has been outbid, and a dragon has signed a lease on the whole east wing, food court included.",
-          "That leaves the mall's main breaker. Bramble is standing next to it. \"Boss,\" says Bramble, \"this is a bad idea.\" \"That's why it'll work,\" says Grizzle.",
-          "The lights go out. The profits do not.",
-        ],
-        ready: "Bramble is standing by the big switch.",
-        button: "Cut the mall's power",
-      },
     },
     {
-      name: "Swamp Market",
-      lease: "ferry monopoly",
-      shops: [
-        { name: "Mushroom stall of mystery",   icon: "🍄", noun: "mushroom" },
-        { name: "Bog-water bottler",           icon: "🫙", noun: "bottled-water" },
-        { name: "Newt-eye lucky charms",       icon: "🧿", noun: "charm" },
-        { name: "Fog boat tours",              icon: "🛶", noun: "boat tour" },
-        { name: "Stilt-house timeshare",       icon: "🏚️", noun: "timeshare" },
-        { name: "Kraken ferry monopoly",       icon: "🦑", noun: "ferry" },
+      id: "starport",
+      name: "Starport Nine",
+      owner: "Juno",
+      words: { customer: "customer", customers: "customers" },
+      currency: { beer: ["scrap", "scrap"], eggs: ["keycard", "keycards"], crystals: ["stardust", "stardust"] },
+      chests: {
+        egg:    { name: "Keycard locker", blurb: "Keycards come from clearing goals and finishing episodes." },
+        beer:   { name: "Scrap crate",    blurb: "Scrap comes from shop milestones." },
+        barrel: { name: "Stardust vault", blurb: "Stardust comes from duplicates of maxed cards." },
+      },
+      cards: {
+        money:     { name: "Juno Vance",      role: "Ex-smuggler, current owner", icon: "🧑‍🚀", hue: 35 },
+        speed:     { name: "Sprocket",        role: "Maintenance droid",          icon: "🤖", hue: 190 },
+        discount:  { name: "Madame Ossa",     role: "Alien accountant",           icon: "👽", hue: 130 },
+        finale:    { name: "Brick",           role: "Bouncer from a heavy planet", icon: "🦾", hue: 15 },
+        milestone: { name: "Commodore Glint", role: "Rival across the ring",      icon: "🎖️", hue: 280 },
+      },
+      hues: [30, 185, 270, 150, 330, 205],
+      theme: {
+        fonts: "https://fonts.googleapis.com/css2?family=Russo+One&family=Space+Grotesk:wght@400;500;700&display=swap",
+        display: '"Russo One", "Trebuchet MS", sans-serif', "display-weight": "400", body: '"Space Grotesk", system-ui, sans-serif',
+        bg: "#0b1020", "bg-glow": "#1d2a52", deep: "#070b16", panel: "#141c33", edge: "#2e3d6b", chain: "transparent",
+        accent: "#ffb347", "accent-dark": "#b86e12", "on-accent": "#2b1600",
+        alt: "#36e0c2", "alt-dark": "#138c78", "on-alt": "#04241f",
+        ink: "#e8eeff", "ink-dim": "#9aa6c8", stat: "#ff8a5c",
+        off: "#2e3654", "off-ink": "#8590b3", "off-dark": "#1c2238",
+        "alt-off": "#1f3d45", "alt-off-ink": "#7fa3a6", "alt-off-dark": "#142a2f", "badge-off": "#5fae9f", "badge-off-dark": "#2a5f55",
+        backdrop: "rgba(4, 7, 16, 0.8)", "tile-s": "70%", "tile-l": "52%", "bar-s": "80%", "bar-l": "58%",
+      },
+      episodes: [
+        {
+          name: "Docking Ring",
+          lease: "wormhole taxi license",
+          shops: [
+            { name: "Noodle cart of questionable origin", icon: "🍜", noun: "noodle" },
+            { name: "Pre-owned spacesuit rack",           icon: "🥽", noun: "spacesuit" },
+            { name: "Zero-g karaoke booth",               icon: "🎤", noun: "karaoke" },
+            { name: "Asteroid mini-golf",                 icon: "⛳", noun: "mini-golf" },
+            { name: "Cryo-nap pods",                      icon: "🛌", noun: "nap-pod" },
+            { name: "Wormhole taxi rank",                 icon: "🌀", noun: "wormhole" },
+          ],
+          intro: [
+            "Starport Nine was decommissioned in 2291. The memo never made it past the airlock, so the station is still open for business.",
+            "Juno Vance docks with a noodle cart, three unpaid parking fines, and a maintenance droid named Sprocket who keeps saying this is fine. Madame Ossa has already opened a tab in Juno's name.",
+            "Rent is due every orbit. Sell something.",
+          ],
+          finale: {
+            title: "Hard undock",
+            text: [
+              "Every stall on the ring is humming, and the wormhole taxis are booked three light-years out. Commodore Glint, who owns the rest of the station, is not amused.",
+              "Brick has a hand on the emergency release. \"Boss,\" says Brick, \"that lever detaches the entire ring.\" \"I know,\" says Juno. \"That's the business plan.\"",
+              "The ring drifts free and bumps gently into the hydroponics deck. Nobody files a report.",
+            ],
+            ready: "Brick has a hand on the emergency release.",
+            button: "Pull the release",
+          },
+        },
+        {
+          name: "Hydroponics Deck",
+          lease: "terraforming futures desk",
+          shops: [
+            { name: "Space-lettuce stand",       icon: "🥬", noun: "lettuce" },
+            { name: "Recycled-water bar",        icon: "💧", noun: "water" },
+            { name: "Moon-mushroom tea house",   icon: "🍵", noun: "tea" },
+            { name: "Greenhouse escape room",    icon: "🪴", noun: "escape-room" },
+            { name: "Oxygen-garden tours",       icon: "🌿", noun: "garden-tour" },
+            { name: "Terraforming futures desk", icon: "🌍", noun: "terraforming" },
+          ],
+          intro: [
+            "The Hydroponics Deck grows everything the station eats, breathes and occasionally argues with.",
+            "Commodore Glint runs the salad bar across the aisle and has put up a sign about Juno specifically. Sprocket has been assigned to water the plants. The plants have been assigned to watch Sprocket.",
+          ],
+          finale: {
+            title: "Greenhouse effect",
+            text: [
+              "Juno now owns the lettuce, the water, and a surprising share of the air. Glint offers to buy the deck back at twice the price.",
+              "Juno counters by selling Glint's own salad bar back to Glint, at three times the price. Madame Ossa files the receipt with a smile that has too many teeth.",
+              "Then someone opens the vents on purpose, and the whole deck coasts downhill toward the reactor.",
+            ],
+            ready: "The vent controls are unlocked. Someone left them that way.",
+            button: "Open the vents",
+          },
+        },
+        {
+          name: "Reactor Row",
+          lease: "reactor naming deal",
+          shops: [
+            { name: "Glow-stick vendor",        icon: "🔦", noun: "glow-stick" },
+            { name: "Radiation-suit tailor",    icon: "🦺", noun: "suit" },
+            { name: "Fusion hot springs",       icon: "♨️", noun: "hot-spring" },
+            { name: "Low-orbit casino",         icon: "🎰", noun: "casino" },
+            { name: "Black-hole souvenir shop", icon: "🕳️", noun: "souvenir" },
+            { name: "Reactor naming rights",    icon: "⚛️", noun: "reactor" },
+          ],
+          intro: [
+            "Reactor Row is loud, hot, and glows in colors that don't have names yet. Everyone here wears two pairs of sunglasses.",
+            "Juno opens a glow-stick stand in the shadow of the main reactor. Sprocket calculates the odds of this going well and quietly stops talking.",
+          ],
+          finale: {
+            title: "Critical mass",
+            text: [
+              "The reactor is now officially called The Juno. Glint arrives with a lawyer, a second lawyer, and the station's original deed.",
+              "Brick reads it twice. \"Boss,\" says Brick, \"it says the whole station is scheduled for scrap. Tomorrow.\"",
+              "Somewhere below, the docking ring powers back up.",
+            ],
+            ready: "The deed is on the counter, face down.",
+            button: "Flip the deed",
+          },
+        },
       ],
-      intro: {
-        text: [
-          "The Swamp Market opens at dusk and never closes, because nobody remembers where the doors are.",
-          "Grizzle arrives with a crate of unsold pretzels and a reputation. The Old Bog Witch runs the stall across the way and has been expecting him. \"You again,\" she says.",
-          "Countess Vex has already found the ledger. Mort has already found the swamp.",
-        ],
-      },
-      finale: {
-        title: "Anchors aweigh",
-        text: [
-          "The Witch offers a truce and a very small pie. Grizzle declines the pie. She takes this personally.",
-          "So Bramble unhooks the market from its moorings, on purpose, with the kraken's blessing. The whole thing floats, and drifts downriver toward the next district.",
-          "It smells like old stone and expensive candles.",
-        ],
-        ready: "The market is straining at its moorings.",
-        button: "Cut the moorings",
-      },
-    },
-    {
-      name: "Crypt Quarter",
-      lease: "mausoleum condo",
-      shops: [
-        { name: "Grave-flower cart",           icon: "🥀", noun: "flower" },
-        { name: "Coffin showroom",             icon: "⚰️", noun: "coffin" },
-        { name: "Seance parlor",               icon: "🔮", noun: "seance" },
-        { name: "Ghost-tour desk",             icon: "👻", noun: "ghost tour" },
-        { name: "Bone-china antiques",         icon: "🦴", noun: "antique" },
-        { name: "Mausoleum condo sales",       icon: "🏛️", noun: "condo" },
-      ],
-      intro: {
-        text: [
-          "The Crypt Quarter is the oldest, quietest, most overpriced district in town. Nobody here pays in cash. Everyone pays in favors, and Countess Vex knows all of them.",
-          "Grizzle opens a flower cart outside a family mausoleum. Nobody complains. Somehow that is the most worrying part.",
-        ],
-      },
-      finale: {
-        title: "Fine print",
-        text: [
-          "By dawn every mausoleum is a condo and every ghost has a timeshare. Then the Old Bog Witch turns up with an offer to buy the whole street.",
-          "Grizzle laughs. She shows him the paperwork. Bramble reads it twice. \"Boss,\" says Bramble, \"we have a bigger problem.\"",
-          "Somewhere in the distance, a mall reopens.",
-        ],
-        ready: "The Witch's paperwork is on your desk.",
-        button: "Burn the paperwork",
-      },
     },
   ];
+  // The save key predates skins; it stays the same so existing saves keep loading.
   const SAVE_KEY = "grizzle-haunted-mall-v1";
   const SPEED = Math.max(1, Number(new URLSearchParams(location.search).get("speed")) || 1); // ?speed=10 for testing
 
   // Listed roughly in the order a player reaches them; the first three uncleared ones are shown.
-  // {n} in the text is filled with that shop's noun for the current episode, {$} with the target as money.
+  // {n} in the text is filled with that shop's noun for the current episode, {c} with the skin's word for customers, {$} with the target as money.
   // scaled goals grow with episode costs (see costMult). The finale also needs the last shop (see finaleReady).
   const GOALS = [
-    { id: "h1", text: "Own 25 {0} customers",       cur: s => s.schemes[0].n, target: 25 },
-    { id: "h2", text: "Own 10 {2} customers",       cur: s => s.schemes[2].n, target: 10 },
+    { id: "h1", text: "Own 25 {0} {c}",       cur: s => s.schemes[0].n, target: 25 },
+    { id: "h2", text: "Own 10 {2} {c}",       cur: s => s.schemes[2].n, target: 10 },
     { id: "h3", text: "Automate 3 shops",               cur: s => s.schemes.filter((x, i) => isAuto(i)).length, target: 3 },
-    { id: "h4", text: "Own 25 {3} customers",        cur: s => s.schemes[3].n, target: 25 },
-    { id: "h5", text: "Own 10 {4} customers",      cur: s => s.schemes[4].n, target: 10 },
+    { id: "h4", text: "Own 25 {3} {c}",        cur: s => s.schemes[3].n, target: 25 },
+    { id: "h5", text: "Own 10 {4} {c}",      cur: s => s.schemes[4].n, target: 10 },
     { id: "h6", text: "Hold {$} at once",               cur: s => s.cash, target: 3e6, scaled: true },
-    { id: "h7", text: "Own 50 {3} customers",        cur: s => s.schemes[3].n, target: 50 },
-    { id: "h8", text: "Own 25 {4} customers",      cur: s => s.schemes[4].n, target: 25 },
+    { id: "h7", text: "Own 50 {3} {c}",        cur: s => s.schemes[3].n, target: 50 },
+    { id: "h8", text: "Own 25 {4} {c}",      cur: s => s.schemes[4].n, target: 25 },
     { id: "h9", text: "Automate 5 shops",               cur: s => s.schemes.filter((x, i) => isAuto(i)).length, target: 5 },
   ];
   const GOALS_NEEDED = 5;
@@ -447,6 +613,9 @@
         s.schemes.forEach((sc, i) => { if (i < mort && sc.n > 0) sc.auto = true; });
         s.cardsV2 = true;
       }
+      // saves from before skins keyed cards by the Haunted Mall cast; cards are now keyed by what they do
+      const OLD_CARD_IDS = { grizzle: "money", mort: "speed", vex: "discount", bramble: "finale", witch: "milestone" };
+      for (const [old, id] of Object.entries(OLD_CARD_IDS)) if (old in s.cards) { s.cards[id] = (s.cards[id] || 0) + s.cards[old]; delete s.cards[old]; }
       return s;
     } catch { return null; }
   }
@@ -454,22 +623,31 @@
     try { S.seen = Date.now(); localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch {}
   }
 
+  // ---------- Skin ----------
+  const SKIN_KEY = "grizzle-haunted-mall-skin";
+  const skinById = id => SKINS.find(k => k.id === id);
+  let SK = skinById(new URLSearchParams(location.search).get("skin")) || skinById((() => { try { return localStorage.getItem(SKIN_KEY); } catch { return null; } })()) || SKINS[0];
+  const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
+  const cur = (key, n) => SK.currency[key][n === 1 ? 0 : 1];            // "egg" or "eggs" in this skin
+  const customers = n => n === 1 ? SK.words.customer : SK.words.customers;
+  const cast = c => ({ ...c, ...SK.cards[c.id] });                        // a card's mechanics plus who is on it in this skin
+
   // ---------- Episode content ----------
-  const EP = () => EPISODES[S.episode % EPISODES.length];
+  const EP = () => SK.episodes[S.episode % SK.episodes.length];
   const shop = i => EP().shops[i];
-  const goalText = g => g.text.replace(/\{(\d)\}/g, (m, i) => shop(i).noun).replace("{$}", () => money(goalTarget(g)));
+  const goalText = g => g.text.replace(/\{(\d)\}/g, (m, i) => shop(i).noun).replace("{c}", SK.words.customers).replace("{$}", () => money(goalTarget(g)));
 
   // ---------- Math ----------
   const copies = id => S.cards[id] || 0;
   const cardLevel = id => LEVEL_AT.filter(c => copies(id) >= c).length;
   const cardBonus = id => CARDS.find(c => c.id === id).per * cardLevel(id);   // e.g. 0.3 at level 3 of a 0.1 card
-  const milestoneMult = n => Math.pow(2 + cardBonus("witch"), MILESTONES.filter(m => n >= m).length);
-  const globalMult = () => S.perm * (1 + cardBonus("grizzle"));
-  const runTime = i => SCHEMES[i].time / (1 + cardBonus("mort"));
-  const discount = () => 1 - cardBonus("vex");
+  const milestoneMult = n => Math.pow(2 + cardBonus("milestone"), MILESTONES.filter(m => n >= m).length);
+  const globalMult = () => S.perm * (1 + cardBonus("money"));
+  const runTime = i => SCHEMES[i].time / (1 + cardBonus("speed"));
+  const discount = () => 1 - cardBonus("discount");
   const isAuto = i => S.schemes[i].auto;
   const offlineCap = () => OFFLINE_CAP_S;
-  const finaleGain = () => PERM_PER_EPISODE * (1 + cardBonus("bramble"));
+  const finaleGain = () => PERM_PER_EPISODE * (1 + cardBonus("finale"));
   const incomeAt = (i, n) => n * SCHEMES[i].payout * milestoneMult(n) * globalMult();   // one run with n customers
   const runIncome = i => incomeAt(i, S.schemes[i].n);
   const perSecond = i => S.schemes[i].n ? runIncome(i) / runTime(i) : 0;
@@ -517,7 +695,7 @@
     const crossed = MILESTONES.filter(m => before < m && S.schemes[i].n >= m).length;
     if (crossed) {
       S.beer += crossed;
-      toast(shop(i).name + ": income x" + Math.pow(2, crossed) + " and +" + crossed + " beer");
+      toast(shop(i).name + ": income x" + +Math.pow(2 + cardBonus("milestone"), crossed).toFixed(2) + " and +" + crossed + " " + cur("beer", crossed));
     }
     render();
   }
@@ -550,13 +728,13 @@
     for (let k = 0; k < ch.pulls; k++) {
       const c = pickCard();
       const before = cardLevel(c.id);
-      if (copies(c.id) >= LEVEL_AT[MAX_LEVEL - 1]) { S.crystals += 1; got.push({ c, tag: "+1 crystal" }); continue; }
+      if (copies(c.id) >= LEVEL_AT[MAX_LEVEL - 1]) { S.crystals += 1; got.push({ c, tag: "+1 " + cur("crystals", 1) }); continue; }
       S.cards[c.id] = copies(c.id) + 1;
       const after = cardLevel(c.id);
       got.push({ c, tag: before === 0 ? "new" : after > before ? "level " + after : "" });
     }
     S.schemes.forEach((sc, i) => { if (isAuto(i) && sc.n > 0) sc.running = true; });
-    $("pull").innerHTML = "<ul>" + got.map(g => `<li>${g.c.icon} ${g.c.name}${g.tag ? `<em>${g.tag}</em>` : ""}</li>`).join("") + "</ul>";
+    $("pull").innerHTML = "<ul>" + got.map(g => `<li>${cast(g.c).icon} ${cast(g.c).name}${g.tag ? `<em>${g.tag}</em>` : ""}</li>`).join("") + "</ul>";
     renderCards();
     render();
   }
@@ -580,7 +758,7 @@
     build();
     maybeShowIntro();
   }
-  const nameOf = ep => EPISODES[ep % EPISODES.length].name + (ep >= EPISODES.length ? " " + (Math.floor(ep / EPISODES.length) + 1) : "");
+  const nameOf = ep => { const E = SK.episodes; return E[ep % E.length].name + (ep >= E.length ? " " + (Math.floor(ep / E.length) + 1) : ""); };
   const episodeName = () => nameOf(S.episode);
 
   // ---------- Story ----------
@@ -605,7 +783,7 @@
     save();
     showStory({
       title: "Episode " + (S.episode + 1) + ": " + episodeName(),
-      text: EP().intro.text,
+      text: EP().intro,
       actions: [{ label: "Open for business" }],
     });
   }
@@ -614,7 +792,7 @@
     const f = EP().finale;
     showStory({
       title: f.title,
-      text: f.text.concat(["<b>Reward:</b> +" + Math.round(finaleGain() * 100) + "% permanent income and " + EGGS_PER_FINALE + " eggs. Next stop: " + nameOf(S.episode + 1) + "."]),
+      text: f.text.concat(["<b>Reward:</b> +" + Math.round(finaleGain() * 100) + "% permanent income and " + EGGS_PER_FINALE + " " + cur("eggs", EGGS_PER_FINALE) + ". Next stop: " + nameOf(S.episode + 1) + "."]),
       actions: [{ label: "Start " + nameOf(S.episode + 1), run: finish }, { label: "Not yet" }],
     });
   }
@@ -647,7 +825,7 @@
       if (!S.goalsDone.includes(g.id) && g.cur(S) >= goalTarget(g)) {
         S.goalsDone.push(g.id);
         S.eggs += EGGS_PER_GOAL;
-        toast("Goal cleared: " + goalText(g) + " (+" + EGGS_PER_GOAL + " egg)");
+        toast("Goal cleared: " + goalText(g) + " (+" + EGGS_PER_GOAL + " " + cur("eggs", EGGS_PER_GOAL) + ")");
         renderGoals();
       }
     }
@@ -671,7 +849,7 @@
   let rows = [];
 
   function build() {
-    $("episodeName").textContent = document.title = "Grizzle's " + episodeName();
+    $("episodeName").textContent = document.title = SK.owner + "'s " + episodeName();
     $("epNum").textContent = "Episode " + (S.episode + 1);
     // later episodes cost more (see costMult); say so, so the higher prices have a visible reason
     const cm = costMult();
@@ -681,7 +859,7 @@
     rows = SCHEMES.map((sc, i) => {
       const el = document.createElement("article");
       el.className = "sign";
-      el.style.setProperty("--hue", sc.hue);
+      el.style.setProperty("--hue", SK.hues[i]);
       el.innerHTML = `
         <button class="icon" aria-label="Run ${shop(i).name}"></button>
         <h3><span class="nm"></span><span class="n"></span></h3>
@@ -719,9 +897,9 @@
   function buildChests() {
     $("chests").innerHTML = CHESTS.map(c => `
       <div class="chest">
-        <h3>${c.name}</h3>
-        <p>${c.blurb} Draws ${c.pulls} cards.</p>
-        <button class="btn alt" data-chest="${c.id}">Open<span class="sub">${c.cost} ${c.cur}</span></button>
+        <h3>${SK.chests[c.id].name}</h3>
+        <p>${SK.chests[c.id].blurb} Draws ${c.pulls} cards.</p>
+        <button class="btn alt" data-chest="${c.id}">Open<span class="sub">${c.cost} ${cur(c.cur, c.cost)}</span></button>
       </div>`).join("");
     $("chests").querySelectorAll("[data-chest]").forEach(b => b.addEventListener("click", () => openChest(b.dataset.chest)));
   }
@@ -737,7 +915,7 @@
     $("cardDot").hidden = !any;
   }
   function renderCards() {
-    $("cardgrid").innerHTML = CARDS.map(c => {
+    $("cardgrid").innerHTML = CARDS.map(cast).map(c => {
       const n = copies(c.id), lv = cardLevel(c.id), max = lv >= MAX_LEVEL;
       const lo = lv ? LEVEL_AT[lv - 1] : 0, hi = max ? lo : LEVEL_AT[lv];
       const pct = max ? 100 : ((n - lo) / (hi - lo)) * 100;
@@ -772,8 +950,8 @@
       r.icon.disabled = !open || isAuto(i);
       r.meta.hidden = r.bar.hidden = !open;
       r.locked.hidden = open;
-      r.locked.textContent = open ? "" : "Open one " + shop(i - 1).name.toLowerCase() + " customer to unlock.";
-      r.n.textContent = open ? sc.n + " customers" : "";
+      r.locked.textContent = open ? "" : "Open one " + shop(i - 1).name.toLowerCase() + " " + customers(1) + " to unlock.";
+      r.n.textContent = open ? sc.n + " " + customers(sc.n) : "";
     });
     update(true);
   }
@@ -788,7 +966,7 @@
     $("offlineNote").textContent = "Your shops keep earning while the tab is closed (up to " + offlineCap() / 3600 + " hours).";
     updateChests();
     const s0 = S.schemes[0];
-    $("hint").textContent = "Tap the " + shop(0).name.toLowerCase() + " (the icon or its bar) to earn your first dollars. Every $1 gets you closer to a second customer.";
+    $("hint").textContent = "Tap the " + shop(0).name.toLowerCase() + " (the icon or its bar) to earn your first dollars. Every $1 gets you closer to a second " + customers(1) + ".";
     $("hint").hidden = !(s0.n === 1 && !isAuto(0) && S.cash < nextCost(0) && S.episode === 0);
     let total = 0;
     S.schemes.forEach((sc, i) => {
@@ -799,7 +977,7 @@
       const fast = auto && runTime(i) / SPEED < 0.25;
       r.fill.style.width = ((fast ? 1 : sc.progress) * 100) + "%";
       const income = runIncome(i);
-      r.label.textContent = sc.n < 1 ? "Buy a customer to open" : auto ? money(perSecond(i)) + "/s" : (sc.running ? money(income) : "Tap to run: " + money(income));
+      r.label.textContent = sc.n < 1 ? "Buy a " + customers(1) + " to open" : auto ? money(perSecond(i)) + "/s" : (sc.running ? money(income) : "Tap to run: " + money(income));
       const k = buyCount(i), cost = bulkCost(i, k);
       const nextM = MILESTONES.find(m => m > sc.n);
       const prevM = MILESTONES.filter(m => m <= sc.n).pop() || 0;
@@ -810,12 +988,12 @@
       const added = incomeAt(i, sc.n + k) - income;
       const crossed = MILESTONES.filter(m => sc.n < m && sc.n + k >= m).length;
       const gain = "+" + (auto ? money(added / runTime(i)) + "/s" : money(added) + "/run");
-      const badge = crossed ? `<span class="badge">x${+Math.pow(2 + cardBonus("witch"), crossed).toFixed(2)}</span>` : "";
+      const badge = crossed ? `<span class="badge">x${+Math.pow(2 + cardBonus("milestone"), crossed).toFixed(2)}</span>` : "";
       setHTML(r.buy, `Buy x${k}<span class="sub">${money(cost)}</span><span class="gain">${gain}</span>${badge}`);
       r.buy.disabled = S.cash < cost;
       if (auto) r.auto.hidden = true;
       else { r.auto.hidden = false; setHTML(r.auto, `Automate<span class="sub">${money(autoCost(i))}</span>`); r.auto.disabled = S.cash < autoCost(i) || sc.n < 1; }
-      r.n.textContent = sc.n + " customers" + (auto ? " · auto" : "");
+      r.n.textContent = sc.n + " " + customers(sc.n) + (auto ? " · auto" : "");
     });
     $("ips").textContent = money(total) + "/s";
     // finale
@@ -825,7 +1003,7 @@
     const nextEp = nameOf(S.episode + 1);
     btn.textContent = ready ? EP().finale.button : "Locked";
     $("finText").innerHTML = ready
-      ? `${EP().finale.ready} This resets your cash and shops, keeps your beer and cards, adds <b>+${Math.round(finaleGain() * 100)}%</b> permanent income and <b>${EGGS_PER_FINALE} eggs</b>, and moves you to the <b>${nextEp}</b>.`
+      ? `${EP().finale.ready} This resets your cash and shops, keeps your ${cur("beer", 2)} and cards, adds <b>+${Math.round(finaleGain() * 100)}%</b> permanent income and <b>${EGGS_PER_FINALE} ${cur("eggs", EGGS_PER_FINALE)}</b>, and moves you to the <b>${nextEp}</b>.`
       : "Still needed: " + [
           clearedCount() < GOALS_NEEDED ? `${GOALS_NEEDED - clearedCount()} more goal${GOALS_NEEDED - clearedCount() > 1 ? "s" : ""}` : "",
           S.schemes[SCHEMES.length - 1].n < 1 ? "a " + EP().lease : "",
@@ -844,7 +1022,23 @@
     toastTimer = setTimeout(() => el.classList.remove("show"), 3500);
   }
 
+  function applySkin() {
+    const root = document.documentElement.style;
+    for (const [k, v] of Object.entries(SK.theme)) if (k !== "fonts") root.setProperty("--" + k, v);
+    $("skinFonts").href = SK.theme.fonts;
+    for (const key of ["beer", "eggs", "crystals"]) $(key + "Label").textContent = cap(cur(key, 2));
+    $("pull").textContent = "Open one to draw cards. Duplicates level a card up.";
+    $("skinSel").value = SK.id;
+  }
+  function setSkin(id) {
+    SK = skinById(id) || SKINS[0];
+    try { localStorage.setItem(SKIN_KEY, SK.id); } catch {}
+    applySkin(); build(); buildChests();
+  }
+
   // ---------- Wiring ----------
+  $("skinSel").innerHTML = SKINS.map(k => `<option value="${k.id}">${k.name}</option>`).join("");
+  $("skinSel").addEventListener("change", e => setSkin(e.target.value));
   const showBuyMode = () => document.querySelectorAll("#buyBar .seg button").forEach(x => x.setAttribute("aria-pressed", x.dataset.mode === buyMode));
   document.querySelectorAll("#buyBar .seg button").forEach(b => b.addEventListener("click", () => {
     buyMode = b.dataset.mode;
@@ -884,6 +1078,7 @@
   });
   setInterval(save, 5000);
 
+  applySkin();
   offline();
   // resume any automated shops
   S.schemes.forEach((sc, i) => { if (isAuto(i) && sc.n > 0) sc.running = true; });
@@ -891,7 +1086,7 @@
   buildChests();
   maybeShowIntro();
   // ?debug exposes the state for testing in the console
-  if (new URLSearchParams(location.search).has("debug")) window.__game = { get S() { return S; }, openChest, renderCards, update, offline, tap, maybeShowIntro, openFinale, finish };
+  if (new URLSearchParams(location.search).has("debug")) window.__game = { get S() { return S; }, get SK() { return SK; }, setSkin, openChest, renderCards, update, offline, tap, maybeShowIntro, openFinale, finish };
   requestAnimationFrame(frame);
 })();
 </script>

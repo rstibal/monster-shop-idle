@@ -15,7 +15,9 @@ const block = name => new Function(grab(new RegExp(`const ${name} = \\[[\\s\\S]*
 const num = name => Number(grab(new RegExp(`const ${name} = [\\d.e]+`)).split("= ")[1]);
 const SCHEMES = block("SCHEMES")();
 const MILESTONES = new Function(grab(/const MILESTONES = \[[^\]]*\]/).replace("const MILESTONES =", "return"))();
-const EPISODES = block("EPISODES")();
+// shop names and goal wording come from the first skin (the numbers are the same in every skin)
+const SKIN = block("SKINS")()[0];
+const EPISODES = SKIN.episodes;
 const CARDS = block("CARDS")();
 const CHESTS = block("CHESTS")();
 const LEVEL_AT = new Function(grab(/const LEVEL_AT = \[[^\]]*\]/).replace("const LEVEL_AT =", "return"))();
@@ -35,7 +37,7 @@ const shopName = (ep, i) => EP(ep).shops[i].name;
 const costMult = ep => Math.pow(EPISODE_COST_GROWTH, ep);
 const goalTarget = (g, ep) => g.target * (g.scaled ? costMult(ep) : 1);
 const fmtMoney = v => v >= 1e6 ? "$" + +(v / 1e6).toFixed(1) + "M" : "$" + v;
-const goalText = (g, ep) => g.text.replace(/\{(\d)\}/g, (m, i) => EP(ep).shops[i].noun).replace("{$}", fmtMoney(goalTarget(g, ep)));
+const goalText = (g, ep) => g.text.replace(/\{(\d)\}/g, (m, i) => EP(ep).shops[i].noun).replace("{c}", SKIN.words.customers).replace("{$}", fmtMoney(goalTarget(g, ep)));
 
 const level = (meta, id) => LEVEL_AT.filter(c => (meta.cards[id] || 0) >= c).length;
 const bonus = (meta, id) => CARDS.find(c => c.id === id).per * level(meta, id);
@@ -73,10 +75,10 @@ const PROFILES = {
 function play(ep, meta, { tick = 0.25, limit = 30 * 86400, session = Infinity, gap = 0, autoFirst = false } = {}) {
   const cm = costMult(ep);
   // same formulas as the Math section of index.html
-  const global = meta.perm * (1 + bonus(meta, "grizzle"));
-  const speed = 1 + bonus(meta, "mort");
-  const disc = 1 - bonus(meta, "vex");
-  const mult = n => Math.pow(2 + bonus(meta, "witch"), MILESTONES.filter(m => n >= m).length);
+  const global = meta.perm * (1 + bonus(meta, "money"));
+  const speed = 1 + bonus(meta, "speed");
+  const disc = 1 - bonus(meta, "discount");
+  const mult = n => Math.pow(2 + bonus(meta, "milestone"), MILESTONES.filter(m => n >= m).length);
   const rate = (i, n) => n ? n * SCHEMES[i].payout * mult(n) * global * speed / SCHEMES[i].time : 0;
   const cost = (i, n) => SCHEMES[i].base * cm * disc * Math.pow(SCHEMES[i].growth, n);
   const autoCost = i => SCHEMES[i].auto * cm * disc;
@@ -147,7 +149,7 @@ function play(ep, meta, { tick = 0.25, limit = 30 * 86400, session = Infinity, g
 
 const fmtT = s => { s = Math.round(s); return `${Math.floor(s / 60)}m${String(s % 60).padStart(2, "0")}s`; };
 const newMeta = () => ({ perm: 1, beer: 0, eggs: 0, crystals: 0, cards: {} });
-const finale = meta => { meta.perm += PERM_PER_EPISODE * (1 + bonus(meta, "bramble")); meta.eggs += EGGS_PER_FINALE; };
+const finale = meta => { meta.perm += PERM_PER_EPISODE * (1 + bonus(meta, "finale")); meta.eggs += EGGS_PER_FINALE; };
 
 // Episode 1 in detail
 const r = play(0, newMeta());
