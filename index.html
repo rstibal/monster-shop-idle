@@ -121,10 +121,8 @@
   .btn.alt { background: var(--slime); box-shadow: 0 3px 0 #5f9a30; color: #12250a; }
   .btn.alt:disabled { background: #4c5a4f; color: #9aa89d; box-shadow: 0 3px 0 #38443a; }
   .btn .sub { display: block; font-size: 0.75rem; font-weight: 600; opacity: 0.8; }
-  /* what a purchase adds, as a dark pill; green when it crosses a milestone so the big buys stand out */
-  .btn .gain { display: block; font-size: 0.72rem; font-weight: 700; white-space: nowrap; margin-top: 2px; background: #2a1c00; color: var(--gold); border-radius: 6px; padding: 0 6px; }
-  .btn .gain.hot { background: var(--slime); color: #12250a; }
-  .btn:disabled .gain.hot { background: #8fb86d; }
+  /* what a purchase adds; the corner badge marks purchases that cross a milestone */
+  .btn .gain { display: block; font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
   .btn .badge {
     position: absolute; top: -9px; right: -7px; background: var(--slime); color: #12250a; border-radius: 999px;
     padding: 0 6px; font-size: 0.72rem; font-weight: 700; line-height: 1.5; box-shadow: 0 2px 0 #5f9a30;
@@ -796,7 +794,7 @@
       const crossed = MILESTONES.filter(m => sc.n < m && sc.n + k >= m).length;
       const gain = "+" + (auto ? money(added / runTime(i)) + "/s" : money(added) + "/run");
       const badge = crossed ? `<span class="badge">x${+Math.pow(2 + cardBonus("witch"), crossed).toFixed(2)}</span>` : "";
-      setHTML(r.buy, `Buy x${k}<span class="sub">${money(cost)}</span><span class="gain${crossed ? " hot" : ""}">${gain}</span>${badge}`);
+      setHTML(r.buy, `Buy x${k}<span class="sub">${money(cost)}</span><span class="gain">${gain}</span>${badge}`);
       r.buy.disabled = S.cash < cost;
       if (auto) r.auto.hidden = true;
       else { r.auto.hidden = false; setHTML(r.auto, `Automate<span class="sub">${money(autoCost(i))}</span>`); r.auto.disabled = S.cash < autoCost(i) || sc.n < 1; }

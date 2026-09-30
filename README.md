@@ -16,7 +16,7 @@ To host it, enable GitHub Pages on the `main` branch (root folder).
 
 - Six shops unlock in order. Each episode has its own six (episode 1 runs from the pretzel kiosk of mystery to the dragon anchor-store lease).
 - Buy customers (x1, x10 or Max) to raise a shop's income. Cost grows geometrically.
-- Each Buy button shows what it adds: $/s for automated shops, $ per run for tapped ones. When the purchase crosses a milestone, that line turns green and a badge shows the multiplier (x2).
+- Each Buy button shows what it adds: $/s for automated shops, $ per run for tapped ones. A green badge (x2) means the purchase crosses a milestone.
 - Tap a shop to run it once, or pay to automate it.
 - Owning 10, 25, 50, 100 and 150 customers of a shop doubles its income and gives 1 beer.
 - Clear 5 of the 9 goals and sign a dragon lease to unlock the episode finale. It resets cash and shops, keeps beer, eggs, crystals and cards, and adds a permanent 50% income bonus plus 3 eggs.
