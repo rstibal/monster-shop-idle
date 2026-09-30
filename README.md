@@ -86,29 +86,31 @@ Each card is one multiplier that grows with its level.
 
 Daily chest: once a day, from your second day on, the egg chest opens free.
 
+Albums: every card you draw goes in the album of the setting you're playing (the cards themselves are shared by all settings). Draw all six in a setting to finish its album: each finished album adds +10% to all income for good, up to +50% with all five. The Cards view lists every setting's album, and the header's permanent bonus includes it.
+
 ## Tuning
 
-Everything lives at the top of the script in `index.html`. The numbers: `SCHEMES` (costs, payouts, run times), `MILESTONES`, `UPGRADES` (price as a multiple of the shop's automation cost, and strength), `GOALS`, `CARDS` (weights and strength per level), `CHESTS`, `LEVEL_AT`, `PERM_PER_EPISODE`, `EPISODE_COST_GROWTH` (how much costs multiply per episode), `OFFLINE_CAP_S` and `FREE_AUTO_SHOPS` (shops that start automated from episode 2 on). Everything players read or see is in `SKINS`: to add a setting, copy a skin, change its words, episodes and `theme` colors, and it shows up in the Setting picker.
+Everything lives at the top of the script in `index.html`. The numbers: `SCHEMES` (costs, payouts, run times), `MILESTONES`, `UPGRADES` (price as a multiple of the shop's automation cost, and strength), `GOALS`, `CARDS` (weights and strength per level), `CHESTS`, `ALBUM_BONUS`, `LEVEL_AT`, `PERM_PER_EPISODE`, `EPISODE_COST_GROWTH` (how much costs multiply per episode), `OFFLINE_CAP_S` and `FREE_AUTO_SHOPS` (shops that start automated from episode 2 on). Everything players read or see is in `SKINS`: to add a setting, copy a skin, change its words, episodes and `theme` colors, and it shows up in the Setting picker.
 
 Balance check: `node tools/sim.mjs` reads the numbers from `index.html`, plays a greedy player who taps every shop the moment it's idle, and prints when each shop opens and when the finale unlocks. Episode 1 currently takes about 23 minutes that way (it buys 3 upgrades along the way), with the fifth goal landing a few minutes before the lease. It also prints when each goal clears. Real players are less efficient, so expect 30 to 40.
 
-It then plays several episodes in a row (carrying over the bonus, beer, eggs and cards, opening chests as soon as it can, plus the free daily chest for every 24 hours played; `DAILY=0` turns that off) and prints the median time per episode. `node tools/sim.mjs 9 50` plays 9 episodes over 50 runs, and `GROWTH=3 node tools/sim.mjs` tries a different per-episode cost growth without editing the game (`UPGRADES=0`, `UPCOST=2` or `UPSPEC='[{"cost":100,"mult":2}]'` try other upgrade setups).
+It then plays several episodes in a row (carrying over the bonus, beer, eggs and cards, opening chests as soon as it can, plus the free daily chest for every 24 hours played, and finishing one album since it stays in one setting; `DAILY=0` and `ALBUMS=0` turn those off) and prints the median time per episode. `node tools/sim.mjs 9 50` plays 9 episodes over 50 runs, and `GROWTH=3 node tools/sim.mjs` tries a different per-episode cost growth without editing the game (`UPGRADES=0`, `UPCOST=2` or `UPSPEC='[{"cost":100,"mult":2}]'` try other upgrade setups).
 
 The same table is printed for a casual player (10 minutes every 2 hours) and an idle one (3 minutes, 3 times a day), who only earn from automated shops while away and, while playing, leave a finished shop idle for a few seconds before tapping it again (3 seconds casual, 5 idle). Current real time to unlock each finale:
 
 | Episode | Engaged (nonstop) | Casual | Idle |
 | --- | --- | --- | --- |
 | 1 | 23 minutes | 2 hours | 16 hours |
-| 2 | 24 minutes | 2 hours | 8 hours |
-| 3 | 28 minutes | 2 hours | 8 hours |
-| 4 | 34 minutes | 2 hours | 8 hours |
-| 5 | 42 minutes | 2 hours | 8 hours |
-| 6 | 52 minutes | 2 hours | 16 hours |
-| 7 | 1.1 hours | 2 hours | 16 hours |
-| 8 | 1.4 hours | 2 hours | 16 hours |
-| 9 | 1.8 hours | 4 hours | 16 hours |
-| 10 | 2.1 hours | 4 hours | 16 hours |
-| 12 | 3.3 hours | 4 hours | 1 day |
+| 2 | 23 minutes | 2 hours | 8 hours |
+| 3 | 26 minutes | 2 hours | 8 hours |
+| 4 | 31 minutes | 2 hours | 8 hours |
+| 5 | 38 minutes | 2 hours | 8 hours |
+| 6 | 47 minutes | 2 hours | 16 hours |
+| 7 | 59 minutes | 2 hours | 16 hours |
+| 8 | 1.3 hours | 2 hours | 16 hours |
+| 9 | 1.6 hours | 4 hours | 16 hours |
+| 10 | 1.9 hours | 4 hours | 16 hours |
+| 12 | 3 hours | 4 hours | 16 hours |
 
 Early on, one break's offline earnings cover the rest of an episode, so session players finish on their second visit. The growing costs are what slow them down later. `OFFRATE=0.25` and `OFFCAP=4` try a lower offline rate or cap (a lower rate barely changes this).
 
