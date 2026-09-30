@@ -26,6 +26,8 @@ An idle clicker: a goblin shopkeeper runs dodgy shops in monster districts. Hobb
 
 Episode 1 should take about 30 minutes; the simulator (greedy, always-tapping player) currently gives about 26 minutes, with the fifth goal clearing about 4 minutes before the dragon lease. Later episodes should stay about as long: with the cost step at 2, episodes 2 to 6 take about 31, 27, 24, 21 and 19 minutes (slowly faster as cards level up). Real players are slower. If you change costs or goals, rerun the simulator and update the README numbers.
 
+The simulator also plays casual (10 min every 2 h) and idle (3 min, 3x a day) profiles. Finding (2026-09-29): both unlock the finale at the start of their second session, whatever the per-episode cost step, because income grows exponentially and one break's offline earnings cover the rest of an episode. Lowering the offline rate barely helps (even 1% still finishes in 2-3 sessions); only 0% slows them down. How long an episode should last for idle players is an open design question for Rob.
+
 ## Testing notes
 
 - The in-app browser pane can't run page tools on `file://` URLs. Serve the folder instead (`python -m http.server 8770`, then open `http://localhost:8770/index.html?debug`) and stop the server afterwards. The pane caches the page, so after editing add a throwaway query (`&v=2`) when reloading, or you'll test the old code.

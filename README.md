@@ -62,6 +62,8 @@ Balance check: `node tools/sim.mjs` reads the numbers from `index.html`, plays a
 
 It then plays several episodes in a row (carrying over the bonus, beer, eggs and cards, opening chests as soon as it can) and prints the median time per episode: currently about 31, 27, 24, 21 and 19 minutes for episodes 2 to 6. `node tools/sim.mjs 9 50` plays 9 episodes over 50 runs, and `STEP=1.5 node tools/sim.mjs` tries a different cost step without editing the game.
 
+The same table is printed for a casual player (10 minutes every 2 hours) and an idle one (3 minutes, 3 times a day), who only earn from automated shops while away. Both currently unlock the finale at the start of their second session: one break's offline earnings cover the rest of an episode. `OFFRATE=0.25` and `OFFCAP=4` try a lower offline rate or cap.
+
 ## Roadmap
 
 - [x] Cards and chests (permanent, survive episode resets)
