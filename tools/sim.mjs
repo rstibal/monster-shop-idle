@@ -137,7 +137,7 @@ function play(ep, meta, { tick = 0.25, limit = 30 * 86400, session = Infinity, g
       n[best.i]++;
       if (before === 0) mark("opened " + shopName(ep, best.i));
       const crossed = MILESTONES.filter(m => before < m && n[best.i] >= m);
-      if (crossed.length) { meta.beer += crossed.length; mark(`${shopName(ep, best.i)} hit ${crossed[0]}`); }
+      if (crossed.length) { meta.beer += crossed.length * (1 + bonus(meta, "beer")); mark(`${shopName(ep, best.i)} hit ${crossed[0]}`); }
     }
 
     check({ cash, schemes: n.map(x => ({ n: x })) });

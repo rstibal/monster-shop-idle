@@ -72,6 +72,7 @@ Each card is one multiplier that grows with its level.
 | Discount | Countess Vex | Madame Ossa | Customers and automation 4% cheaper | 20% off |
 | Finale | Bramble | Brick | Finale bonus +20% | +100% instead of +50% |
 | Milestone | Old Bog Witch | Commodore Glint | Each milestone multiplies income by 0.05 more | x2.25 per milestone instead of x2 |
+| Beer | Fang | Scav | Milestones give 20% more beer (scrap on Starport Nine) | 2 per milestone instead of 1 |
 
 | Chest (Haunted Mall / Starport Nine) | Cost | Cards | Where the currency comes from |
 | --- | --- | --- | --- |

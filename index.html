@@ -192,7 +192,8 @@
   .views { margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   .views .seg button { padding: 6px 18px; }
   .views .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-left: 6px; vertical-align: middle; }
-  .chests { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 14px; }
+  .chests { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 14px; }
+  @media (min-width: 560px) { .chests { grid-template-columns: repeat(3, 1fr); } }
   .chest { background: var(--panel); border: 3px solid var(--edge); border-radius: var(--radius); padding: 12px; display: flex; flex-direction: column; gap: 6px; }
   .chest h3 { margin: 0; font-family: var(--display); font-weight: var(--display-weight); font-size: 1.05rem; }
   .chest p { margin: 0; font-size: 0.85rem; color: var(--ink-dim); flex: 1; }
@@ -200,7 +201,7 @@
   .pull ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
   .pull li { background: var(--deep); border-radius: 999px; padding: 4px 12px; color: var(--ink); font-weight: 600; }
   .pull li em { font-style: normal; color: var(--accent); margin-left: 6px; }
-  .cardgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+  .cardgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }   /* six cards: rows of 1, 2 or 3 all come out even */
   .card { --hue: 100; background: var(--panel); border: 3px solid var(--edge); border-radius: var(--radius); padding: 12px; display: grid; grid-template-columns: 56px 1fr; gap: 4px 12px; align-content: start; }
   .card.none { opacity: 0.6; }
   .card.max { border-color: var(--accent); }
@@ -337,6 +338,7 @@
     { id: "discount",  weight: 20, per: 0.04, perk: l => `${cap(SK.words.customers)} and automation ${Math.round(4 * l)}% cheaper` },
     { id: "finale",    weight: 15, per: 0.2,  perk: l => `Finale bonus +${Math.round(PERM_PER_EPISODE * (1 + 0.2 * l) * 100)}%` },
     { id: "milestone", weight: 10, per: 0.05, perk: l => `Milestones multiply income x${(2 + 0.05 * l).toFixed(2)}` },
+    { id: "beer",      weight: 15, per: 0.2,  perk: l => `${cap(cur("beer", 2))} per milestone x${(1 + 0.2 * l).toFixed(1)}` },
   ];
   // cur is the state key the chest is paid from; the skin names each currency and chest.
   // beer = milestone currency, eggs = goal and finale currency, crystals = from duplicates of maxed cards.
@@ -372,6 +374,7 @@
         discount:  { name: "Countess Vex",  role: "Vampire bookkeeper",      icon: "🧛", hue: 340 },
         finale:    { name: "Bramble",       role: "Bouncer and collector",   icon: "🧌", hue: 30 },
         milestone: { name: "Old Bog Witch", role: "Rival across the street", icon: "🧙", hue: 265 },
+        beer:      { name: "Fang",          role: "Werewolf barkeep",        icon: "🐺", hue: 205 },
       },
       hues: [205, 225, 190, 250, 175, 265],
       sound: { wave: "triangle", root: 220, scale: [0, 3, 5, 7, 10], vibrato: 0.012, vol: 1.4 },   // soft and a little eerie: minor pentatonic with a wobble
@@ -538,6 +541,7 @@
         discount:  { name: "Madame Ossa",     role: "Alien accountant",           icon: "👽", hue: 130 },
         finale:    { name: "Brick",           role: "Bouncer from a heavy planet", icon: "🦾", hue: 15 },
         milestone: { name: "Commodore Glint", role: "Rival across the ring",      icon: "🎖️", hue: 280 },
+        beer:      { name: "Scav",            role: "Scrap-hauling raccoon",      icon: "🦝", hue: 330 },
       },
       hues: [30, 185, 270, 150, 330, 205],
       sound: { wave: "square", root: 262, scale: [0, 2, 4, 7, 9], vibrato: 0, vol: 0.6 },       // arcade blips: bright major pentatonic
@@ -877,8 +881,10 @@
     const crossed = MILESTONES.filter(m => before < m && S.schemes[i].n >= m).length;
     sfx(crossed ? "milestone" : "buy");
     if (crossed) {
-      S.beer += crossed;
-      toast(shop(i).name + ": income x" + +Math.pow(2 + cardBonus("milestone"), crossed).toFixed(2) + " and +" + crossed + " " + cur("beer", crossed));
+      const had = Math.floor(S.beer);
+      S.beer = Math.round((S.beer + crossed * (1 + cardBonus("beer"))) * 100) / 100;   // the beer card adds fractions; they add up
+      const got = Math.floor(S.beer) - had;
+      toast(shop(i).name + ": income x" + +Math.pow(2 + cardBonus("milestone"), crossed).toFixed(2) + (got ? " and +" + got + " " + cur("beer", got) : ""));
     }
     render();
   }
@@ -1149,7 +1155,7 @@
   // cheap per-frame update: bars, cash, button states
   function update(force) {
     $("cash").textContent = money(S.cash);
-    $("beer").textContent = S.beer;
+    $("beer").textContent = Math.floor(S.beer);
     $("eggs").textContent = S.eggs;
     $("crystals").textContent = S.crystals;
     $("perm").textContent = "x" + S.perm.toFixed(1);
