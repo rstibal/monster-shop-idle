@@ -1,6 +1,6 @@
 # Monster Shop Idle
 
-A small idle clicker about running dodgy shops, in two settings: a goblin shopkeeper in a haunted mall, or an ex-smuggler on a decommissioned space station. Plain HTML, CSS and JavaScript in one file, with no build step and no dependencies.
+A small idle clicker about running dodgy shops, in five settings: a goblin in a haunted mall, an ex-smuggler on a space station, a pirate captain on a ship that sails from port to port, a street vendor in a cyberpunk night market, or a repair bot on a planet of robots. Plain HTML, CSS and JavaScript in one file, with no build step and no dependencies.
 
 Status: early prototype. All numbers are placeholders.
 
@@ -8,7 +8,7 @@ Status: early prototype. All numbers are placeholders.
 
 Open `index.html` in a browser. Progress saves to the browser's local storage.
 
-Add `?speed=10` to the URL to run the game 10 times faster while tuning. Add `?debug` to expose the game state as `window.__game` in the console. Add `?skin=starport` (or `?skin=mall`) to force a setting.
+Add `?speed=10` to the URL to run the game 10 times faster while tuning. Add `?debug` to expose the game state as `window.__game` in the console. Add `?skin=starport` (or `mall`, `ship`, `neon`, `robot`) to force a setting.
 
 To host it, enable GitHub Pages on the `main` branch (root folder).
 
@@ -31,6 +31,9 @@ The side panel has a Setting picker. Each setting has its own cast, shops, story
 | --- | --- | --- | --- | --- |
 | Haunted Mall | Grizzle, a goblin | Haunted Mall, Swamp Market, Crypt Quarter, Midnight Carnival, Sunken Casino | Beer, eggs, crystals | Moonlit graveyard: silver and blue, Alegreya |
 | Starport Nine | Juno Vance, an ex-smuggler | Docking Ring, Hydroponics Deck, Reactor Row, Zero-G Stadium, Pirate Moon | Scrap, keycards, stardust | Deep space navy with amber and teal, Russo One |
+| The Salty Gull | Captain Nell, a pirate | Barnacle Harbor, Smuggler's Cove, Skull Island, Floating Fair, Treasure Reef | Grog, doubloons, pearls | Night sea with gold and red, rope instead of chains, Pirata One |
+| Neon Night Market | Kix, a street vendor | Gutter Street, Rain Bazaar, Chrome Row, Overdrive Circuit, Skyline Tower | Batteries, tokens, shards | Black-violet with magenta and cyan, Audiowide |
+| Planet Cog | Rivet, a repair bot | Scrapyard Flats, Toaster Works, Server City, Spark Festival, Old Spaceport | Oil, bolts, cores | Gunmetal with lime and hazard orange, Tilt Warp |
 
 ## How it plays
 
