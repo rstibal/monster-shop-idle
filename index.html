@@ -121,6 +121,14 @@
   .btn.alt { background: var(--slime); box-shadow: 0 3px 0 #5f9a30; color: #12250a; }
   .btn.alt:disabled { background: #4c5a4f; color: #9aa89d; box-shadow: 0 3px 0 #38443a; }
   .btn .sub { display: block; font-size: 0.75rem; font-weight: 600; opacity: 0.8; }
+  /* what a purchase adds; a dark chip when it crosses a milestone so the big buys stand out */
+  .btn .gain { display: block; font-size: 0.72rem; font-weight: 700; white-space: nowrap; margin-top: 2px; }
+  .btn .gain.hot { background: #2a1c00; color: var(--gold); border-radius: 6px; padding: 0 6px; }
+  .btn .badge {
+    position: absolute; top: -9px; right: -7px; background: var(--slime); color: #12250a; border-radius: 999px;
+    padding: 0 6px; font-size: 0.72rem; font-weight: 700; line-height: 1.5; box-shadow: 0 2px 0 #5f9a30;
+  }
+  .btn:disabled .badge { background: #8fb86d; box-shadow: 0 2px 0 #4c6e38; }
   .auto-tag { color: var(--slime); font-weight: 700; font-size: 0.9rem; }
   .locked-msg { grid-column: 2; color: var(--ink-dim); margin: 0; }
 
@@ -454,7 +462,8 @@
   const isAuto = i => S.schemes[i].auto;
   const offlineCap = () => OFFLINE_CAP_S;
   const finaleGain = () => PERM_PER_EPISODE * (1 + cardBonus("bramble"));
-  const runIncome = i => S.schemes[i].n * SCHEMES[i].payout * milestoneMult(S.schemes[i].n) * globalMult();
+  const incomeAt = (i, n) => n * SCHEMES[i].payout * milestoneMult(n) * globalMult();   // one run with n customers
+  const runIncome = i => incomeAt(i, S.schemes[i].n);
   const perSecond = i => S.schemes[i].n ? runIncome(i) / runTime(i) : 0;
   const costMult = () => 1 + EPISODE_COST_STEP * S.episode;
   const goalTarget = g => g.target * (g.scaled ? costMult() : 1);
@@ -781,7 +790,12 @@
       const k = buyCount(i), cost = bulkCost(i, k);
       const nextM = MILESTONES.find(m => m > sc.n);
       setHTML(r.info, `Runs every <b>${fmtTime(runTime(i))}</b>` + (nextM ? ` · next bonus at <b>${nextM}</b>` : " · all bonuses earned"));
-      setHTML(r.buy, `Buy x${k}<span class="sub">${money(cost)}</span>`);
+      // what this purchase adds: $/s once automated, per run while tapped by hand
+      const added = incomeAt(i, sc.n + k) - income;
+      const crossed = MILESTONES.filter(m => sc.n < m && sc.n + k >= m).length;
+      const gain = "+" + (auto ? money(added / runTime(i)) + "/s" : money(added) + "/run");
+      const badge = crossed ? `<span class="badge">x${+Math.pow(2 + cardBonus("witch"), crossed).toFixed(2)}</span>` : "";
+      setHTML(r.buy, `Buy x${k}<span class="sub">${money(cost)}</span><span class="gain${crossed ? " hot" : ""}">${gain}</span>${badge}`);
       r.buy.disabled = S.cash < cost;
       if (auto) r.auto.hidden = true;
       else { r.auto.hidden = false; setHTML(r.auto, `Automate<span class="sub">${money(autoCost(i))}</span>`); r.auto.disabled = S.cash < autoCost(i) || sc.n < 1; }
