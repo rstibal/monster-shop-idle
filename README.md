@@ -44,6 +44,7 @@ The rules below use the Haunted Mall's names.
 - Each Buy button shows what it adds: $/s for automated shops, $ per run for tapped ones. A green badge (x2) means the purchase crosses a milestone.
 - Tap a shop to run it once, or pay to automate it.
 - Owning 10, 25, 50, 100 and 150 customers of a shop doubles its income and gives 1 beer.
+- Each shop has 3 upgrades, bought in order, each doubling its income (x8 with all three). They cost 150, 1,500 and 15,000 times the shop's automation price, and reset with the episode.
 - Clear 5 of the 9 goals and sign a dragon lease to unlock the episode finale. It resets cash and shops, keeps beer, eggs, crystals and cards, and gives 3 eggs plus a permanent income bonus: each finale multiplies it by 1.5 (x1.5, x2.25, x3.4 and so on), so it keeps pace with the rising costs. From episode 2 on, the first shop starts automated.
 - Automated shops keep earning while you're away, up to 8 hours. After a break of 5 minutes or more, a welcome-back popup shows what they earned and any chests ready to open.
 - Sound effects for tapping, payouts, buying, milestones, automating, goals, chests and the finale, synthesized in the browser (no audio files). Each setting has its own voice: eerie in the Haunted Mall, arcade blips on Starport Nine. Each setting also has a quiet background loop, synthesized too: a humming, drafty mall, a station's engine drone and computer chirps, waves and creaking timbers on the ship, rain and a synth pad in the night market, and clanking machines on Planet Cog. The side panel has Effects and Ambience volume sliders; a Sound on/off switch above them mutes everything.
@@ -87,27 +88,27 @@ Daily chest: once a day, from your second day on, the egg chest opens free.
 
 ## Tuning
 
-Everything lives at the top of the script in `index.html`. The numbers: `SCHEMES` (costs, payouts, run times), `MILESTONES`, `GOALS`, `CARDS` (weights and strength per level), `CHESTS`, `LEVEL_AT`, `PERM_PER_EPISODE`, `EPISODE_COST_GROWTH` (how much costs multiply per episode), `OFFLINE_CAP_S` and `FREE_AUTO_SHOPS` (shops that start automated from episode 2 on). Everything players read or see is in `SKINS`: to add a setting, copy a skin, change its words, episodes and `theme` colors, and it shows up in the Setting picker.
+Everything lives at the top of the script in `index.html`. The numbers: `SCHEMES` (costs, payouts, run times), `MILESTONES`, `UPGRADES` (price as a multiple of the shop's automation cost, and strength), `GOALS`, `CARDS` (weights and strength per level), `CHESTS`, `LEVEL_AT`, `PERM_PER_EPISODE`, `EPISODE_COST_GROWTH` (how much costs multiply per episode), `OFFLINE_CAP_S` and `FREE_AUTO_SHOPS` (shops that start automated from episode 2 on). Everything players read or see is in `SKINS`: to add a setting, copy a skin, change its words, episodes and `theme` colors, and it shows up in the Setting picker.
 
-Balance check: `node tools/sim.mjs` reads the numbers from `index.html`, plays a greedy player who taps every shop the moment it's idle, and prints when each shop opens and when the finale unlocks. Episode 1 currently takes about 26 minutes that way, with the fifth goal landing a few minutes before the lease. It also prints when each goal clears. Real players are less efficient, so expect 30 to 40.
+Balance check: `node tools/sim.mjs` reads the numbers from `index.html`, plays a greedy player who taps every shop the moment it's idle, and prints when each shop opens and when the finale unlocks. Episode 1 currently takes about 23 minutes that way (it buys 3 upgrades along the way), with the fifth goal landing a few minutes before the lease. It also prints when each goal clears. Real players are less efficient, so expect 30 to 40.
 
-It then plays several episodes in a row (carrying over the bonus, beer, eggs and cards, opening chests as soon as it can, plus the free daily chest for every 24 hours played; `DAILY=0` turns that off) and prints the median time per episode. `node tools/sim.mjs 9 50` plays 9 episodes over 50 runs, and `GROWTH=3 node tools/sim.mjs` tries a different per-episode cost growth without editing the game.
+It then plays several episodes in a row (carrying over the bonus, beer, eggs and cards, opening chests as soon as it can, plus the free daily chest for every 24 hours played; `DAILY=0` turns that off) and prints the median time per episode. `node tools/sim.mjs 9 50` plays 9 episodes over 50 runs, and `GROWTH=3 node tools/sim.mjs` tries a different per-episode cost growth without editing the game (`UPGRADES=0`, `UPCOST=2` or `UPSPEC='[{"cost":100,"mult":2}]'` try other upgrade setups).
 
 The same table is printed for a casual player (10 minutes every 2 hours) and an idle one (3 minutes, 3 times a day), who only earn from automated shops while away and, while playing, leave a finished shop idle for a few seconds before tapping it again (3 seconds casual, 5 idle). Current real time to unlock each finale:
 
 | Episode | Engaged (nonstop) | Casual | Idle |
 | --- | --- | --- | --- |
-| 1 | 26 minutes | 2 hours | 16 hours |
-| 2 | 27 minutes | 2 hours | 8 hours |
-| 3 | 31 minutes | 2 hours | 8 hours |
-| 4 | 38 minutes | 2 hours | 8 hours |
-| 5 | 47 minutes | 2 hours | 8 hours |
-| 6 | 58 minutes | 2 hours | 16 hours |
-| 7 | 1.2 hours | 2 hours | 16 hours |
-| 8 | 1.6 hours | 2 hours | 16 hours |
-| 9 | 2 hours | 4 hours | 16 hours |
-| 10 | 2.4 hours | 4 hours | 16 hours |
-| 12 | 3.7 hours | 4 hours | 1 day |
+| 1 | 23 minutes | 2 hours | 16 hours |
+| 2 | 24 minutes | 2 hours | 8 hours |
+| 3 | 28 minutes | 2 hours | 8 hours |
+| 4 | 34 minutes | 2 hours | 8 hours |
+| 5 | 42 minutes | 2 hours | 8 hours |
+| 6 | 52 minutes | 2 hours | 16 hours |
+| 7 | 1.1 hours | 2 hours | 16 hours |
+| 8 | 1.4 hours | 2 hours | 16 hours |
+| 9 | 1.8 hours | 4 hours | 16 hours |
+| 10 | 2.1 hours | 4 hours | 16 hours |
+| 12 | 3.3 hours | 4 hours | 1 day |
 
 Early on, one break's offline earnings cover the rest of an episode, so session players finish on their second visit. The growing costs are what slow them down later. `OFFRATE=0.25` and `OFFCAP=4` try a lower offline rate or cap (a lower rate barely changes this).
 

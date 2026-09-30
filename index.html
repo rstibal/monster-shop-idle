@@ -356,6 +356,14 @@
     { base: 4000000, growth: 1.11, payout: 622080, time: 96, auto: 5e7 },
   ];
   const MILESTONES = [10, 25, 50, 100, 150];   // each doubles that scheme's income and gives 1 of the milestone currency
+  // Upgrades: one-off cash buys per shop, bought in order, each multiplying that shop's income. cost is a multiple of the
+  // shop's automation cost (so it scales with the episode and the discount card). Reset each episode like customers.
+  // Tuned so they speed engaged players up by about 6-10% (the simulator's greedy player buys 3 in episode 1).
+  const UPGRADES = [
+    { cost: 150,   mult: 2 },
+    { cost: 1500,  mult: 2 },
+    { cost: 15000, mult: 2 },
+  ];
   const PERM_PER_EPISODE = 0.5;                 // each finale multiplies the permanent bonus by 1.5 (the finale card boosts this); multiplying keeps pace with the growing costs
   const EPISODE_COST_GROWTH = 2.5;              // costs x2.5 per finished episode (x2.5, x6.25, x15.6...): customers, automation, cash goals
   const OFFLINE_CAP_S = 8 * 3600;               // shops earn for at most this long while the tab is closed
@@ -1255,7 +1263,7 @@
   // ---------- State ----------
   const fresh = () => ({
     cash: 0, beer: 0, eggs: 0, crystals: 0, cards: {}, cardsV2: true, episode: 0, storySeen: -1, perm: 1, goalsDone: [], dailyDay: today(),
-    schemes: SCHEMES.map((_, i) => ({ n: i === 0 ? 1 : 0, auto: false, running: false, progress: 0 })),
+    schemes: SCHEMES.map((_, i) => ({ n: i === 0 ? 1 : 0, auto: false, up: 0, running: false, progress: 0 })),
     seen: Date.now(),
   });
   let S = load() || fresh();
@@ -1270,6 +1278,8 @@
       if (!s || !Array.isArray(s.schemes) || s.schemes.length !== SCHEMES.length) return null;
       // saves from before cards existed
       s.eggs = s.eggs || 0; s.crystals = s.crystals || 0; s.cards = s.cards || {};
+      // saves from before upgrades
+      s.schemes.forEach(sc => { sc.up = sc.up || 0; });
       // saves from before the story existed count as having read the current intro
       if (typeof s.storySeen !== "number") s.storySeen = s.episode || 0;
       // saves from when Mort ran the first shops for free keep those shops automated
@@ -1498,7 +1508,9 @@
   const isAuto = i => S.schemes[i].auto;
   const offlineCap = () => OFFLINE_CAP_S;
   const finaleGain = () => PERM_PER_EPISODE * (1 + cardBonus("finale"));
-  const incomeAt = (i, n) => n * SCHEMES[i].payout * milestoneMult(n) * globalMult();   // one run with n customers
+  const upgradeMult = i => UPGRADES.slice(0, S.schemes[i].up).reduce((a, u) => a * u.mult, 1);
+  const upgradeCost = i => SCHEMES[i].auto * costMult() * discount() * UPGRADES[S.schemes[i].up].cost;   // for the next one; check up < UPGRADES.length first
+  const incomeAt = (i, n) => n * SCHEMES[i].payout * milestoneMult(n) * upgradeMult(i) * globalMult();   // one run with n customers
   const runIncome = i => incomeAt(i, S.schemes[i].n);
   const perSecond = i => S.schemes[i].n ? runIncome(i) / runTime(i) : 0;
   const costMult = () => Math.pow(EPISODE_COST_GROWTH, S.episode);
@@ -1559,6 +1571,15 @@
     sc.auto = true;
     sfx("automate");
     if (!sc.running) sc.running = true;
+    render();
+  }
+  function upgrade(i) {
+    const sc = S.schemes[i];
+    if (sc.n < 1 || sc.up >= UPGRADES.length || S.cash < upgradeCost(i)) return;
+    S.cash -= upgradeCost(i);
+    sc.up++;
+    sfx("milestone");
+    toast(shop(i).name + ": income x" + UPGRADES[sc.up - 1].mult);
     render();
   }
   function tap(i, ev) {
@@ -2217,6 +2238,7 @@
           <div class="buys">
             <button class="btn buy"></button>
             <button class="btn alt auto"></button>
+            <button class="btn alt up"></button>
           </div>
         </div>
         <p class="locked-msg" hidden></p>`;
@@ -2224,7 +2246,7 @@
       const r = {
         el, icon: el.querySelector(".icon"), nm: el.querySelector(".nm"), n: el.querySelector(".n"),
         fill: el.querySelector(".bar i"), label: el.querySelector(".bar span"), info: el.querySelector(".info"),
-        buy: el.querySelector(".buy"), auto: el.querySelector(".auto"), locked: el.querySelector(".locked-msg"),
+        buy: el.querySelector(".buy"), auto: el.querySelector(".auto"), up: el.querySelector(".up"), locked: el.querySelector(".locked-msg"),
         meta: el.querySelector(".meta"), bar: el.querySelector(".bar"),
       };
       r.icon.addEventListener("click", ev => tap(i, ev));
@@ -2234,6 +2256,7 @@
       r.bar.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); tap(i, ev); } });
       r.buy.addEventListener("click", () => buy(i));
       r.auto.addEventListener("click", () => automate(i));
+      r.up.addEventListener("click", () => upgrade(i));
       return r;
     });
     renderGoals();
@@ -2350,7 +2373,16 @@
       r.buy.disabled = S.cash < cost;
       if (auto) r.auto.hidden = true;
       else { r.auto.hidden = false; setHTML(r.auto, `Automate<span class="sub">${money(autoCost(i))}</span>`); r.auto.disabled = S.cash < autoCost(i) || sc.n < 1; }
-      r.n.textContent = sc.n + " " + customers(sc.n) + (auto ? " · auto" : "");
+      // upgrades: shown once the shop has a customer, gone when all are bought
+      const nextUp = UPGRADES[sc.up];
+      r.up.hidden = !nextUp || sc.n < 1;
+      if (!r.up.hidden) {
+        const upCost = upgradeCost(i);
+        setHTML(r.up, `Upgrade ${sc.up + 1}/${UPGRADES.length}<span class="sub">${money(upCost)}</span><span class="gain">income x${nextUp.mult}</span>`);
+        r.up.disabled = S.cash < upCost;
+      }
+      const um = upgradeMult(i);
+      r.n.textContent = sc.n + " " + customers(sc.n) + (auto ? " · auto" : "") + (um > 1 ? " · x" + um : "");
     });
     $("ips").textContent = money(total) + "/s";
     // finale

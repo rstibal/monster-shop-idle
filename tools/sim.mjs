@@ -1,5 +1,5 @@
 // Balance simulator: reads the game's numbers from index.html and plays a
-// greedy player (taps every idle shop immediately, spends on the best payback).
+// greedy player (taps every idle shop immediately, spends on the best payback: customers or upgrades).
 // Episode 1 is printed in detail for an always-engaged player, then several
 // episodes are played in a row for each profile in PROFILES (engaged, casual,
 // idle), carrying over the permanent bonus, beer, eggs, crystals and cards
@@ -19,6 +19,8 @@ const MILESTONES = new Function(grab(/const MILESTONES = \[[^\]]*\]/).replace("c
 const SKIN = block("SKINS")()[0];
 const EPISODES = SKIN.episodes;
 const CARDS = block("CARDS")();
+// UPCOST=2 doubles every upgrade price, UPGRADES=0 plays without them
+const UPGRADES = process.env.UPGRADES === "0" ? [] : (process.env.UPSPEC ? JSON.parse(process.env.UPSPEC) : block("UPGRADES")()).map(u => ({ ...u, cost: u.cost * Number(process.env.UPCOST || 1) }));
 const CHESTS = block("CHESTS")();
 const LEVEL_AT = new Function(grab(/const LEVEL_AT = \[[^\]]*\]/).replace("const LEVEL_AT =", "return"))();
 const GOALS_NEEDED = num("GOALS_NEEDED");
@@ -87,9 +89,12 @@ function play(ep, meta, { tick = 0.25, limit = 30 * 86400, session = Infinity, g
   const speed = 1 + bonus(meta, "speed");
   const disc = 1 - bonus(meta, "discount");
   const mult = n => Math.pow(2 + bonus(meta, "milestone"), MILESTONES.filter(m => n >= m).length);
-  const rate = (i, n) => n ? n * SCHEMES[i].payout * mult(n) * global * speed / SCHEMES[i].time : 0;
+  const up = SCHEMES.map(() => 0);
+  const upMult = (i, u = up[i]) => UPGRADES.slice(0, u).reduce((a, x) => a * x.mult, 1);
+  const rate = (i, n, u) => n ? n * SCHEMES[i].payout * mult(n) * upMult(i, u) * global * speed / SCHEMES[i].time : 0;
   const cost = (i, n) => SCHEMES[i].base * cm * disc * Math.pow(SCHEMES[i].growth, n);
   const autoCost = i => SCHEMES[i].auto * cm * disc;
+  const upCost = i => SCHEMES[i].auto * cm * disc * UPGRADES[up[i]].cost;
   let t = 0, cash = 0, active = 0, sessions = 1;
   const n = SCHEMES.map((_, i) => (i === 0 ? 1 : 0));
   const auto = SCHEMES.map((_, i) => ep > 0 && i < FREE_AUTO_SHOPS);
@@ -133,6 +138,10 @@ function play(ep, meta, { tick = 0.25, limit = 30 * 86400, session = Infinity, g
         const isUnlock = n[i] === 0;
         const score = isUnlock ? -Infinity : c / gain; // lower is better
         if (cash >= c && (!best || score < best.score)) best = { i, c, score, kind: "buy" };
+        if (n[i] >= 1 && up[i] < UPGRADES.length) {
+          const uc = upCost(i), us = uc / (rate(i, n[i], up[i] + 1) - rate(i, n[i]));
+          if (cash >= uc && (!best || us < best.score)) best = { i, c: uc, score: us, kind: "up" };
+        }
         if (!auto[i] && n[i] >= 1 && cash >= autoCost(i)) {
           // automation matters for goals and offline only; buy when cheap relative to cash
           if (!best || autoFirst || autoCost(i) < cash * 0.25) best = { i, c: autoCost(i), score: -1e18, kind: "auto" };
@@ -141,6 +150,7 @@ function play(ep, meta, { tick = 0.25, limit = 30 * 86400, session = Infinity, g
       if (!best) break;
       cash -= best.c;
       if (best.kind === "auto") { auto[best.i] = true; continue; }
+      if (best.kind === "up") { up[best.i]++; mark(`${shopName(ep, best.i)} upgrade ${up[best.i]}`); continue; }
       const before = n[best.i];
       n[best.i]++;
       if (before === 0) mark("opened " + shopName(ep, best.i));
