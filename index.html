@@ -83,8 +83,9 @@
   .cash { font-family: var(--display); font-weight: var(--display-weight); font-size: clamp(2.6rem, 9vw, 4.6rem); line-height: 1; color: var(--accent); text-shadow: 0 3px 0 var(--accent-dark); margin: 4px 0 0; }
   .cash small { font-size: 0.45em; color: var(--accent-dark); text-shadow: none; margin-left: 6px; }
   .hint { margin: 8px 0 0; padding: 8px 12px; max-width: 34ch; background: var(--accent); color: var(--on-accent); font-weight: 600; border-radius: 12px; font-size: 0.95rem; }
-  /* a fixed grid (three across, two on phones) so growing numbers never push an item onto another line */
-  .stats { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: 6px 20px; color: var(--ink-dim); font-size: 0.95rem; white-space: nowrap; }
+  /* a fixed grid so growing numbers never push an item onto another line: currencies stacked in the first
+     column, income, bonus and the sound button in the second */
+  .stats { display: grid; grid-template-columns: auto auto; grid-template-rows: repeat(3, auto); grid-auto-flow: column; justify-content: start; align-items: center; gap: 6px 28px; color: var(--ink-dim); font-size: 0.95rem; white-space: nowrap; }
   .stats .sound-btn { justify-self: start; }
   @media (max-width: 559px) { .stats { grid-template-columns: 1fr 1fr; gap: 6px 16px; } }
   .stats b { color: var(--ink); font-weight: 700; }
@@ -263,10 +264,10 @@
       <p class="hint" id="hint" hidden></p>
     </div>
     <div class="stats">
-      <span>Income <b id="ips">$0/s</b></span>
       <span class="stat"><span id="beerLabel">Beer</span> <b id="beer">0</b></span>
       <span><span id="eggsLabel">Eggs</span> <b id="eggs">0</b></span>
       <span><span id="crystalsLabel">Crystals</span> <b id="crystals">0</b></span>
+      <span>Income <b id="ips">$0/s</b></span>
       <span>Permanent bonus <b id="perm">x1</b></span>
       <button class="small-btn sound-btn" id="soundBtn"></button>
     </div>
