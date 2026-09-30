@@ -364,7 +364,7 @@
         milestone: { name: "Old Bog Witch", role: "Rival across the street", icon: "🧙", hue: 265 },
       },
       hues: [205, 225, 190, 250, 175, 265],
-      sound: { wave: "triangle", root: 220, scale: [0, 3, 5, 7, 10], vibrato: 0.012, vol: 1 },   // soft and a little eerie: minor pentatonic with a wobble
+      sound: { wave: "triangle", root: 220, scale: [0, 3, 5, 7, 10], vibrato: 0.012, vol: 1.4 },   // soft and a little eerie: minor pentatonic with a wobble
       theme: {
         fonts: "https://fonts.googleapis.com/css2?family=Alegreya:wght@700&family=Alegreya+Sans:wght@400;500;700&display=swap",
         display: '"Alegreya", Georgia, serif', "display-weight": "700", body: '"Alegreya Sans", system-ui, sans-serif',
@@ -478,7 +478,7 @@
         milestone: { name: "Commodore Glint", role: "Rival across the ring",      icon: "🎖️", hue: 280 },
       },
       hues: [30, 185, 270, 150, 330, 205],
-      sound: { wave: "square", root: 262, scale: [0, 2, 4, 7, 9], vibrato: 0, vol: 0.45 },       // arcade blips: bright major pentatonic
+      sound: { wave: "square", root: 262, scale: [0, 2, 4, 7, 9], vibrato: 0, vol: 0.6 },       // arcade blips: bright major pentatonic
       theme: {
         fonts: "https://fonts.googleapis.com/css2?family=Russo+One&family=Space+Grotesk:wght@400;500;700&display=swap",
         display: '"Russo One", "Trebuchet MS", sans-serif', "display-weight": "400", body: '"Space Grotesk", system-ui, sans-serif',
@@ -649,7 +649,13 @@
     if (!soundOn) return;
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
-    if (!actx) { actx = new AC(); master = actx.createGain(); master.gain.value = 0.22; master.connect(actx.destination); }
+    if (!actx) {
+      // master volume, then a compressor so overlapping notes (milestone runs, the finale) get louder without distorting
+      actx = new AC(); master = actx.createGain(); master.gain.value = 0.9;
+      const comp = actx.createDynamicsCompressor();
+      comp.threshold.value = -14; comp.knee.value = 6; comp.ratio.value = 4; comp.attack.value = 0.003; comp.release.value = 0.15;
+      master.connect(comp).connect(actx.destination);
+    }
     if (actx.state === "suspended") actx.resume();
   }
   addEventListener("pointerdown", unlockAudio, true);
