@@ -222,6 +222,7 @@
   dialog#story h2 { font-family: var(--display); font-weight: var(--display-weight); font-size: 1.4rem; margin: 0 0 10px; color: var(--accent); }
   dialog#story p { margin: 0 0 10px; line-height: 1.55; }
   dialog#story b { color: var(--accent); }
+  dialog#story .big-cash { display: block; margin: 2px 0 6px; font-family: var(--display); font-weight: var(--display-weight); font-size: 2rem; color: var(--accent); line-height: 1.2; }
   .story-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
 
   .toast {
@@ -955,7 +956,11 @@
   const episodeName = () => nameOf(S.episode);
 
   // ---------- Story ----------
-  function showStory({ title, text, actions }) {
+  // the welcome-back popup and an episode intro can both want the dialog on load; later ones wait their turn
+  const storyQueue = [];   // drained by the dialog's close listener in Wiring
+  function showStory(story) {
+    if ($("story").open) { storyQueue.push(story); return; }
+    const { title, text, actions } = story;
     $("storyTitle").textContent = title;
     $("storyText").innerHTML = text.map(t => "<p>" + t + "</p>").join("");
     const box = $("storyActions");
@@ -1027,15 +1032,29 @@
   }
 
   // ---------- Offline ----------
+  const WELCOME_AFTER_S = 5 * 60;   // away this long gets the welcome-back popup; shorter breaks just get a toast
+  const fmtAway = s => s >= 3600 ? +(s / 3600).toFixed(1) + " hours" : Math.max(1, Math.round(s / 60)) + " minutes";
   function offline() {
-    const secs = Math.min((Date.now() - (S.seen || Date.now())) / 1000, offlineCap());
+    const away = (Date.now() - (S.seen || Date.now())) / 1000;
+    const secs = Math.min(away, offlineCap());
     if (secs < 30) return;
     let gain = 0;
     SCHEMES.forEach((_, i) => { if (isAuto(i)) gain += perSecond(i) * secs; });
-    if (gain > 0) {
-      S.cash += gain;
-      toast("Welcome back. Your shops earned " + money(gain) + " in " + (secs >= 3600 ? (secs / 3600).toFixed(1) + " hours" : Math.round(secs / 60) + " minutes"));
-    }
+    S.cash += gain;
+    if (away < WELCOME_AFTER_S) { if (gain > 0) toast("Welcome back. Your shops earned " + money(gain) + " in " + fmtAway(secs)); return; }
+    welcomeBack(away, gain);
+  }
+  function welcomeBack(away, gain) {
+    const text = gain > 0
+      ? ["You were away for " + fmtAway(away) + ". Your automated shops earned <span class=\"big-cash\">" + money(gain) + "</span>"]
+      : ["You were away for " + fmtAway(away) + ". Only automated shops earn while you're away, so automate one to come back to cash."];
+    if (gain > 0 && away > offlineCap()) text.push("Shops earn for up to " + offlineCap() / 3600 + " hours while you're away, so that's where they stopped.");
+    const ready = CHESTS.filter(c => S[c.cur] >= c.cost).map(c => "<b>" + SK.chests[c.id].name + "</b>");
+    if (ready.length) text.push("Ready to open: " + (ready.length > 1 ? ready.slice(0, -1).join(", ") + " and " : "") + ready[ready.length - 1] + ".");
+    if (finaleReady()) text.push("The <b>finale</b> is ready. " + EP().finale.ready);
+    const actions = [{ label: gain > 0 ? "Collect " + money(gain) : "Back to work", run: () => sfx(gain > 0 ? "milestone" : "buy") }];
+    if (ready.length) actions.push({ label: "Open chests", run: () => document.querySelector('[data-view="cards"]').click() });
+    showStory({ title: "Welcome back", text, actions });
   }
 
   // ---------- Rendering ----------
@@ -1258,6 +1277,7 @@
   }));
   try { setView(localStorage.getItem(VIEW_KEY)); } catch { setView("shops"); }
   $("finBtn").addEventListener("click", openFinale);
+  $("story").addEventListener("close", () => { if (storyQueue.length) setTimeout(() => showStory(storyQueue.shift()), 150); });
   const showSound = () => { $("soundBtn").textContent = soundOn ? "🔊 Sound on" : "🔇 Sound off"; $("soundBtn").setAttribute("aria-pressed", soundOn); };
   $("soundBtn").addEventListener("click", () => {
     soundOn = !soundOn;
@@ -1291,7 +1311,7 @@
   buildChests();
   maybeShowIntro();
   // ?debug exposes the state for testing in the console
-  if (new URLSearchParams(location.search).has("debug")) window.__game = { get S() { return S; }, get SK() { return SK; }, setSkin, sfx, get audio() { return actx && actx.state; }, openChest, renderCards, update, offline, tap, maybeShowIntro, openFinale, finish };
+  if (new URLSearchParams(location.search).has("debug")) window.__game = { get S() { return S; }, get SK() { return SK; }, setSkin, welcomeBack, sfx, get audio() { return actx && actx.state; }, openChest, renderCards, update, offline, tap, maybeShowIntro, openFinale, finish };
   requestAnimationFrame(frame);
   // offline support for the home-screen app (http(s) only; file:// can't register one)
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
