@@ -33,7 +33,7 @@ The side panel has a Setting picker. Each setting has its own cast, shops, story
 | Starport Nine | Juno Vance, an ex-smuggler | Docking Ring, Hydroponics Deck, Reactor Row, Zero-G Stadium, Pirate Moon | Scrap, keycards, stardust | Deep space navy with amber and teal, Russo One |
 | The Salty Gull | Captain Nell, a pirate | Barnacle Harbor, Smuggler's Cove, Skull Island, Floating Fair, Treasure Reef | Grog, doubloons, pearls | Jolly Roger: black, bone white and blood red, New Rocker |
 | Neon Night Market | Kix, a street vendor | Gutter Street, Rain Bazaar, Chrome Row, Overdrive Circuit, Skyline Tower | Batteries, tokens, shards | Black-violet with magenta and cyan, VT323 terminal pixels |
-| Planet Cog | Rivet, a repair bot | Scrapyard Flats, Toaster Works, Server City, Spark Festival, Old Spaceport | Oil, bolts, cores | Gunmetal with lime and hazard orange, Tilt Warp |
+| Planet Cog | Rivet, a repair bot | Scrapyard Flats, Toaster Works, Server City, Spark Festival, Old Spaceport | Oil, bolts, cores | Scrap heap: tin grey, copper and patina green, Black Ops One |
 
 ## How it plays
 
