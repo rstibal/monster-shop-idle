@@ -50,6 +50,7 @@
     --radius: 14px;
     --display: "Rubik Wet Paint", system-ui, sans-serif;
     --display-weight: 400;
+    --display-size: 1;        /* headings scale by this; a skin whose display font runs small sets a bigger one */
     --body: "Rubik", system-ui, sans-serif;
   }
   * { box-sizing: border-box; }
@@ -79,7 +80,7 @@
   .cash, .stats b { font-variant-numeric: tabular-nums; }
   .ep-line { margin: 0 0 2px; font-size: 0.85rem; color: var(--ink-dim); display: flex; gap: 10px; }
   .ep-line b { color: var(--accent); font-weight: 700; }
-  .brand h1 { font-family: var(--display); font-weight: var(--display-weight); font-size: 1.15rem; margin: 0; color: var(--ink-dim); letter-spacing: 0.02em; }
+  .brand h1 { font-family: var(--display); font-weight: var(--display-weight); font-size: calc(1.15rem * var(--display-size)); margin: 0; color: var(--ink-dim); letter-spacing: 0.02em; }
   .cash { font-family: var(--display); font-weight: var(--display-weight); font-size: clamp(2.6rem, 9vw, 4.6rem); line-height: 1; color: var(--accent); text-shadow: 0 3px 0 var(--accent-dark); margin: 4px 0 0; }
   .cash small { font-size: 0.45em; color: var(--accent-dark); text-shadow: none; margin-left: 6px; }
   .hint { margin: 8px 0 0; padding: 8px 12px; max-width: 34ch; background: var(--accent); color: var(--on-accent); font-weight: 600; border-radius: 12px; font-size: 0.95rem; }
@@ -138,8 +139,8 @@
   .icon:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 transparent, inset 0 2px 0 rgba(255, 255, 255, 0.3); }
   /* automated or locked: nothing to tap, so it looks flat and quiet */
   .icon:disabled { cursor: default; background: hsl(var(--hue) 25% 30%); box-shadow: inset 0 -4px 0 hsl(var(--hue) 25% 20%); filter: saturate(0.7); }
-  .sign h3 { margin: 0; font-family: var(--display); font-weight: var(--display-weight); font-size: 1.15rem; display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
-  .sign h3 .n { color: var(--accent); font-size: 1rem; white-space: nowrap; }
+  .sign h3 { margin: 0; font-family: var(--display); font-weight: var(--display-weight); font-size: calc(1.15rem * var(--display-size)); display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .sign h3 .n { color: var(--accent); font-size: calc(1rem * var(--display-size)); white-space: nowrap; }
   /* phones: shop name on its own line, customer count underneath */
   @media (max-width: 560px) { .sign h3 { flex-direction: column; align-items: flex-start; gap: 0; } }
   .bar { cursor: pointer; height: 18px; background: var(--deep); border-radius: 999px; overflow: hidden; position: relative; }
@@ -180,7 +181,7 @@
   /* Side panel */
   aside { display: flex; flex-direction: column; gap: 16px; }
   .panel { background: var(--panel); border: 3px solid var(--edge); border-radius: var(--radius); padding: 14px; }
-  .panel h2 { font-family: var(--display); font-weight: var(--display-weight); font-size: 1.15rem; margin: 0 0 8px; }
+  .panel h2 { font-family: var(--display); font-weight: var(--display-weight); font-size: calc(1.15rem * var(--display-size)); margin: 0 0 8px; }
   .goal { margin: 0 0 10px; }
   .goal .gbar { height: 8px; background: var(--deep); border-radius: 999px; margin-top: 4px; overflow: hidden; }
   .goal .gbar i { display: block; height: 100%; background: var(--alt); }
@@ -210,7 +211,7 @@
   .chests { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 14px; }
   @media (min-width: 560px) { .chests { grid-template-columns: repeat(3, 1fr); } }
   .chest { background: var(--panel); border: 3px solid var(--edge); border-radius: var(--radius); padding: 12px; display: flex; flex-direction: column; gap: 6px; }
-  .chest h3 { margin: 0; font-family: var(--display); font-weight: var(--display-weight); font-size: 1.05rem; }
+  .chest h3 { margin: 0; font-family: var(--display); font-weight: var(--display-weight); font-size: calc(1.05rem * var(--display-size)); }
   .chest p { margin: 0; font-size: 0.85rem; color: var(--ink-dim); flex: 1; }
   .pull { min-height: 64px; margin-bottom: 14px; padding: 10px 12px; border: 2px dashed var(--edge); border-radius: var(--radius); color: var(--ink-dim); font-size: 0.92rem; }
   .pull ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
@@ -221,8 +222,8 @@
   .card.none { opacity: 0.6; }
   .card.max { border-color: var(--accent); }
   .card .portrait { grid-row: span 2; width: 56px; height: 56px; border-radius: 12px; display: grid; place-items: center; font-size: 1.9rem; background: hsl(var(--hue) var(--tile-s) 26%); box-shadow: inset 0 -4px 0 hsl(var(--hue) var(--tile-s) 18%); }
-  .card h3 { margin: 0; font-family: var(--display); font-weight: var(--display-weight); font-size: 1.05rem; display: flex; justify-content: space-between; gap: 6px; align-items: baseline; }
-  .card h3 .lv { color: var(--accent); font-size: 0.95rem; white-space: nowrap; }
+  .card h3 { margin: 0; font-family: var(--display); font-weight: var(--display-weight); font-size: calc(1.05rem * var(--display-size)); display: flex; justify-content: space-between; gap: 6px; align-items: baseline; }
+  .card h3 .lv { color: var(--accent); font-size: calc(0.95rem * var(--display-size)); white-space: nowrap; }
   .card .role { font-size: 0.82rem; color: var(--ink-dim); }
   .card .copies { grid-column: 1 / -1; }
   .card .copies .gbar { height: 8px; background: var(--deep); border-radius: 999px; overflow: hidden; }
@@ -241,7 +242,7 @@
   #pull .mini svg { display: block; width: 100%; height: 100%; }
   .card .portrait.unknown svg { filter: brightness(0.12) saturate(0); }
   dialog#story::backdrop { background: var(--backdrop); }
-  dialog#story h2 { font-family: var(--display); font-weight: var(--display-weight); font-size: 1.4rem; margin: 0 0 10px; color: var(--accent); }
+  dialog#story h2 { font-family: var(--display); font-weight: var(--display-weight); font-size: calc(1.4rem * var(--display-size)); margin: 0 0 10px; color: var(--accent); }
   dialog#story p { margin: 0 0 10px; line-height: 1.55; }
   dialog#story b { color: var(--accent); }
   dialog#story .big-cash { display: block; margin: 2px 0 6px; font-family: var(--display); font-weight: var(--display-weight); font-size: 2rem; color: var(--accent); line-height: 1.2; }
@@ -907,8 +908,9 @@
       hues: [320, 185, 280, 50, 200, 340],
       sound: { wave: "sawtooth", root: 147, scale: [0, 2, 3, 5, 7, 8, 10], vibrato: 0, vol: 0.35, ambience: "neon" },   // buzzy synth, natural minor
       theme: {
-        fonts: "https://fonts.googleapis.com/css2?family=Audiowide&family=Chakra+Petch:wght@400;500;700&display=swap",
-        display: '"Audiowide", "Trebuchet MS", sans-serif', "display-weight": "400", body: '"Chakra Petch", system-ui, sans-serif',
+        // VT323 terminal pixels for headings (Rob's pick on 2026-09-30, replacing Audiowide); the colors stayed
+        fonts: "https://fonts.googleapis.com/css2?family=VT323&family=Chakra+Petch:wght@400;500;700&display=swap",
+        display: '"VT323", "Courier New", monospace', "display-weight": "400", "display-size": "1.4", body: '"Chakra Petch", system-ui, sans-serif',
         bg: "#0d0a14", "bg-glow": "#2a1440", deep: "#07050c", panel: "#17111f", edge: "#3b2a55", chain: "transparent",
         accent: "#ff4fd8", "accent-dark": "#a3198a", "on-accent": "#2a0024",
         alt: "#3ef0ff", "alt-dark": "#1492a0", "on-alt": "#012a30",
@@ -2215,6 +2217,7 @@
   function applySkin() {
     const root = document.documentElement.style;
     for (const [k, v] of Object.entries(SK.theme)) if (k !== "fonts") root.setProperty("--" + k, v);
+    root.setProperty("--display-size", SK.theme["display-size"] || "1");   // optional, so reset it for skins without one
     $("skinFonts").href = SK.theme.fonts;
     document.querySelector('meta[name="theme-color"]').content = SK.theme.bg;   // phone status bar and app title bar
     for (const key of ["beer", "eggs", "crystals"]) $(key + "Label").textContent = cap(cur(key, 2));
