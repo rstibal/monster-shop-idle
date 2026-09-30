@@ -90,7 +90,8 @@
   @media (max-width: 559px) { .stats { grid-template-columns: 1fr 1fr; gap: 6px 16px; } }
   .stats b { color: var(--ink); font-weight: 700; }
   .stats { align-items: center; }
-  .sound-btn { padding: 2px 10px; }
+  /* a compact toggle exactly one text line tall, so its row is no taller than the others */
+  .sound-btn { height: calc(0.95rem * 1.45); padding: 0 8px; font-size: 0.78rem; line-height: 1; border-width: 1.5px; border-radius: 8px; display: inline-flex; align-items: center; }
   /* fast taps on phones shouldn't zoom the page or flash a gray highlight */
   button, .bar { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
   .stats .stat b { color: var(--stat); }
