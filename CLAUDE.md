@@ -4,7 +4,7 @@ An idle clicker about running dodgy shops, named Monster Shop Idle (Rob's choice
 
 - Live game: https://rstibal.github.io/monster-shop-idle/ (GitHub Pages, `main` branch root)
 - Repo: https://github.com/rstibal/monster-shop-idle (public, MIT)
-- Design doc (Claude Doc, rewritten 2026-09-29; the older doc at ed3d4d4e-... belongs to Rob's other claude.ai account, so it can't be opened from this one): https://claude.ai/code/artifact/8873543b-fa27-461d-9383-63a426faa78e
+- Design doc (Claude Doc, rewritten 2026-09-29; the older doc at ed3d4d4e-... belongs to Rob's other claude.ai account, so it can't be opened from this one). As of 2026-09-29 Rob develops this game from the account that owns the new doc, on both computers.: https://claude.ai/code/artifact/8873543b-fa27-461d-9383-63a426faa78e
 
 ## Layout
 
