@@ -315,7 +315,7 @@
       </section>
       <section class="panel">
         <label class="skin-pick">Setting <select id="skinSel"></select></label>
-        <div class="vol"><span id="soundLbl">Sound</span><button class="switch" id="soundBtn" role="switch" aria-labelledby="soundLbl"><span class="track"><span class="knob"></span></span><span class="state"></span></button></div>
+        <div class="vol"><span id="soundLbl">Sound</span><button class="switch" id="soundBtn" role="switch" aria-labelledby="soundLbl"><span class="track"><span class="knob"></span></span></button></div>
         <label class="vol">Effects <input type="range" id="fxVol" min="0" max="100" step="5"></label>
         <label class="vol">Ambience <input type="range" id="ambVol" min="0" max="100" step="5"></label>
         <p id="offlineNote">Automated shops keep earning while you're away.</p>
@@ -2180,7 +2180,7 @@
   try { setView(localStorage.getItem(VIEW_KEY)); } catch { setView("shops"); }
   $("finBtn").addEventListener("click", openFinale);
   $("story").addEventListener("close", () => { if (storyQueue.length) setTimeout(() => showStory(storyQueue.shift()), 150); });
-  const showSound = () => { $("soundBtn").setAttribute("aria-checked", soundOn); $("soundBtn").querySelector(".state").textContent = soundOn ? "On" : "Off"; };
+  const showSound = () => $("soundBtn").setAttribute("aria-checked", soundOn);   // the switch's color and knob show on or off
   $("soundBtn").addEventListener("click", () => {
     soundOn = !soundOn;
     try { localStorage.setItem(SOUND_KEY, soundOn ? "on" : "off"); } catch {}
