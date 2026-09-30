@@ -24,8 +24,6 @@ const UPGRADES = process.env.UPGRADES === "0" ? [] : (process.env.UPSPEC ? JSON.
 const CHESTS = block("CHESTS")();
 const LEVEL_AT = new Function(grab(/const LEVEL_AT = \[[^\]]*\]/).replace("const LEVEL_AT =", "return"))();
 const GOALS_NEEDED = num("GOALS_NEEDED");
-// albums: the simulated player stays in one setting, so they can finish one album (all six cards drawn); ALBUMS=0 turns it off
-const ALBUM_BONUS = process.env.ALBUMS === "0" ? 0 : num("ALBUM_BONUS");
 const PERM_PER_EPISODE = num("PERM_PER_EPISODE");
 const FREE_AUTO_SHOPS = process.env.FREEAUTO ? Number(process.env.FREEAUTO) : num("FREE_AUTO_SHOPS");
 const EPISODE_COST_GROWTH = process.env.GROWTH ? Number(process.env.GROWTH) : num("EPISODE_COST_GROWTH");
@@ -64,7 +62,6 @@ function openChests(meta, rand) {
       for (let k = 0; k < ch.pulls; k++) {
         let roll = rand() * total, c = CARDS[0];
         for (const x of CARDS) { roll -= x.weight; if (roll < 0) { c = x; break; } }
-        meta.album.add(c.id);
         if ((meta.cards[c.id] || 0) >= LEVEL_AT[LEVEL_AT.length - 1]) meta.crystals++;
         else meta.cards[c.id] = (meta.cards[c.id] || 0) + 1;
       }
@@ -88,7 +85,7 @@ const PROFILES = {
 function play(ep, meta, { tick = 0.25, limit = 30 * 86400, session = Infinity, gap = 0, autoFirst = false, tapWait = 0 } = {}, sessionLeft = session) {
   const cm = costMult(ep);
   // same formulas as the Math section of index.html
-  const global = meta.perm * (meta.album.size >= CARDS.length ? 1 + ALBUM_BONUS : 1) * (1 + bonus(meta, "money"));
+  const global = meta.perm * (1 + bonus(meta, "money"));
   const speed = 1 + bonus(meta, "speed");
   const disc = 1 - bonus(meta, "discount");
   const mult = n => Math.pow(2 + bonus(meta, "milestone"), MILESTONES.filter(m => n >= m).length);
@@ -169,7 +166,7 @@ function play(ep, meta, { tick = 0.25, limit = 30 * 86400, session = Infinity, g
 }
 
 const fmtT = s => { s = Math.round(s); return `${Math.floor(s / 60)}m${String(s % 60).padStart(2, "0")}s`; };
-const newMeta = () => ({ perm: 1, beer: 0, eggs: 0, crystals: 0, cards: {}, album: new Set() });
+const newMeta = () => ({ perm: 1, beer: 0, eggs: 0, crystals: 0, cards: {} });
 const finale = meta => { meta.perm *= 1 + PERM_PER_EPISODE * (1 + bonus(meta, "finale")); meta.eggs += EGGS_PER_FINALE; };   // the bonus multiplies, like the game
 
 // Episode 1 in detail

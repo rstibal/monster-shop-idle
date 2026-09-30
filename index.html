@@ -247,25 +247,6 @@
   #pull .mini { display: inline-block; width: 22px; height: 22px; vertical-align: -6px; border-radius: 5px; overflow: hidden; }
   #pull .mini svg { display: block; width: 100%; height: 100%; }
   .card .portrait.unknown svg { filter: brightness(0.12) saturate(0); }
-  .pull .album-note { margin: 8px 0 0; font-size: 0.85rem; }
-  .albums { margin-top: 14px; background: var(--panel); border: 3px solid var(--edge); border-radius: var(--radius); padding: 12px; }
-  .albums h3 { margin: 0; font-family: var(--display); font-weight: var(--display-weight); font-size: calc(1.05rem * var(--display-size)); }
-  .albums > p { margin: 4px 0 10px; font-size: 0.85rem; color: var(--ink-dim); }
-  .albums > p b { color: var(--alt); }
-  .albums ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-  .albums li { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "nm cnt" "minis minis"; align-items: center; gap: 4px 10px; }
-  @media (min-width: 560px) { .albums li { grid-template-columns: 1fr auto 72px; grid-template-areas: "nm minis cnt"; } }
-  .albums .nm { grid-area: nm; font-weight: 600; }
-  .albums .minis { grid-area: minis; }
-  .albums .cnt { grid-area: cnt; }
-  .albums .nm small { color: var(--ink-dim); font-weight: 400; }
-  .albums .minis { display: flex; gap: 4px; }
-  .albums .mini { width: 28px; height: 28px; border-radius: 6px; overflow: hidden; background: var(--deep); display: grid; place-items: center; font-size: 0.95rem; }
-  .albums .mini svg { display: block; width: 100%; height: 100%; }
-  .albums .mini.missing svg { filter: brightness(0.12) saturate(0); }
-  .albums .mini.missing:not(:has(svg)) { opacity: 0.4; }
-  .albums .cnt { text-align: right; font-size: 0.85rem; color: var(--ink-dim); }
-  .albums li.done .cnt { color: var(--accent); font-weight: 700; }
   dialog#story::backdrop { background: var(--backdrop); }
   dialog#story h2 { font-family: var(--display); font-weight: var(--display-weight); font-size: calc(1.4rem * var(--display-size)); margin: 0 0 10px; color: var(--accent); }
   dialog#story p { margin: 0 0 10px; line-height: 1.55; }
@@ -326,7 +307,6 @@
         <div class="chests" id="chests"></div>
         <div class="pull" id="pull" aria-live="polite"></div>
         <div class="cardgrid" id="cardgrid"></div>
-        <section class="albums" id="albums" aria-label="Albums"></section>
       </section>
     </main>
 
@@ -410,9 +390,6 @@
     { id: "barrel", cur: "crystals", cost: 12, pulls: 4 },
   ];
   const EGGS_PER_GOAL = 1, EGGS_PER_FINALE = 3;
-  // Albums: each setting keeps a list of the cards drawn while playing in it (S.albums[skinId]); drawing all six
-  // finishes that album, and each finished album adds this much to all income, for good.
-  const ALBUM_BONUS = 0.1;
   // one chest a day opens free, from the second calendar day on (a new game starts with today used, so episode 1's
   // balance doesn't change); S.dailyDay is the last local day it was used. Saves from before this get one right away.
   const DAILY_CHEST = "egg";
@@ -1287,7 +1264,7 @@
 
   // ---------- State ----------
   const fresh = () => ({
-    cash: 0, beer: 0, eggs: 0, crystals: 0, cards: {}, cardsV2: true, episode: 0, storySeen: -1, perm: 1, goalsDone: [], dailyDay: today(), albums: {},
+    cash: 0, beer: 0, eggs: 0, crystals: 0, cards: {}, cardsV2: true, episode: 0, storySeen: -1, perm: 1, goalsDone: [], dailyDay: today(),
     schemes: SCHEMES.map((_, i) => ({ n: i === 0 ? 1 : 0, auto: false, up: 0, running: false, progress: 0 })),
     seen: Date.now(),
   });
@@ -1305,6 +1282,8 @@
       s.eggs = s.eggs || 0; s.crystals = s.crystals || 0; s.cards = s.cards || {};
       // saves from before upgrades
       s.schemes.forEach(sc => { sc.up = sc.up || 0; });
+      // albums were tried and removed on 2026-09-30; drop their data from saves that had them
+      delete s.albums;
       // saves from before the story existed count as having read the current intro
       if (typeof s.storySeen !== "number") s.storySeen = s.episode || 0;
       // saves from when Mort ran the first shops for free keep those shops automated
@@ -1332,8 +1311,6 @@
   const cur = (key, n) => SK.currency[key][n === 1 ? 0 : 1];            // "egg" or "eggs" in this skin
   const customers = n => n === 1 ? SK.words.customer : SK.words.customers;
   const cast = c => ({ ...c, ...SK.cards[c.id] });                        // a card's mechanics plus who is on it in this skin
-  // saves from before albums: the cards found so far count for the setting being played now
-  if (!S.albums) S.albums = Object.keys(S.cards).some(id => S.cards[id] > 0) ? { [SK.id]: CARDS.filter(c => S.cards[c.id] > 0).map(c => c.id) } : {};
 
   // ---------- Sound ----------
   // Every effect is a few synthesized notes (no audio files). Notes are steps in the skin's scale, so the same
@@ -1529,9 +1506,7 @@
   const cardLevel = id => LEVEL_AT.filter(c => copies(id) >= c).length;
   const cardBonus = id => CARDS.find(c => c.id === id).per * cardLevel(id);   // e.g. 0.3 at level 3 of a 0.1 card
   const milestoneMult = n => Math.pow(2 + cardBonus("milestone"), MILESTONES.filter(m => n >= m).length);
-  const albumDone = id => (S.albums[id] || []).length >= CARDS.length;
-  const albumMult = () => 1 + ALBUM_BONUS * SKINS.filter(k => albumDone(k.id)).length;
-  const globalMult = () => S.perm * albumMult() * (1 + cardBonus("money"));
+  const globalMult = () => S.perm * (1 + cardBonus("money"));
   const runTime = i => SCHEMES[i].time / (1 + cardBonus("speed"));
   const discount = () => 1 - cardBonus("discount");
   const isAuto = i => S.schemes[i].auto;
@@ -1641,14 +1616,8 @@
       got.push({ c, tag: before === 0 ? "new" : after > before ? "level " + after : "" });
     }
     S.schemes.forEach((sc, i) => { if (isAuto(i) && sc.n > 0) sc.running = true; });
-    // every card drawn goes in this setting's album, maxed ones too
-    const album = S.albums[SK.id] = S.albums[SK.id] || [], wasDone = albumDone(SK.id);
-    got.forEach(g => { if (!album.includes(g.c.id)) { album.push(g.c.id); if (!g.tag) g.tag = "new in album"; } });
-    const finished = !wasDone && albumDone(SK.id);
-    if (finished) toast(SK.name + " album finished: +" + Math.round(ALBUM_BONUS * 100) + "% all income, for good");
     sfx("chest", got);
-    $("pull").innerHTML = "<ul>" + got.map(g => `<li>${cardArt(g.c.id) ? `<span class="mini">${cardArt(g.c.id)}</span>` : cast(g.c).icon} ${cast(g.c).name}${g.tag ? `<em>${g.tag}</em>` : ""}</li>`).join("") + "</ul>"
-      + `<p class="album-note">${SK.name} album: ${finished ? "finished!" : albumDone(SK.id) ? "finished" : album.length + " of " + CARDS.length}</p>`;
+    $("pull").innerHTML = "<ul>" + got.map(g => `<li>${cardArt(g.c.id) ? `<span class="mini">${cardArt(g.c.id)}</span>` : cast(g.c).icon} ${cast(g.c).name}${g.tag ? `<em>${g.tag}</em>` : ""}</li>`).join("") + "</ul>";
     renderCards();
     render();
   }
@@ -1668,7 +1637,6 @@
     next.crystals = S.crystals;
     next.cards = S.cards;
     next.dailyDay = S.dailyDay;
-    next.albums = S.albums;
     // without this, players who drop in a few times a day start each later episode earning nothing while away,
     // because the first automation costs as much as the episode's prices (see FREE_AUTO_SHOPS)
     next.schemes.slice(0, FREE_AUTO_SHOPS).forEach(sc => { sc.auto = true; sc.running = true; });
@@ -2342,22 +2310,6 @@
         <p class="perk"><b>${now}</b><small>${next}</small></p>
       </article>`;
     }).join("");
-    renderAlbums();
-  }
-  function renderAlbums() {
-    const pct = Math.round((albumMult() - 1) * 100);
-    $("albums").innerHTML = `<h3>Albums</h3>
-      <p>Every card you draw goes in the album of the setting you're playing. Draw all ${CARDS.length} in a setting to finish its album: +${Math.round(ALBUM_BONUS * 100)}% all income each, for good.${pct ? ` Now: <b>+${pct}%</b>.` : ""}</p>
-      <ul>${SKINS.map(k => {
-        const has = S.albums[k.id] || [], done = albumDone(k.id);
-        const minis = CARDS.map(c => {
-          // ids inside the art must stay unique on the page, so the album's copies get their own prefix
-          const art = ((ART[k.id] && ART[k.id].cards && ART[k.id].cards[c.id]) || "").replace(/(["#])art-/g, "$1alb-art-");
-          const got = has.includes(c.id);
-          return `<span class="mini${got ? "" : " missing"}" title="${got ? k.cards[c.id].name : "Not drawn here yet"}">${art || (got ? k.cards[c.id].icon : "❔")}</span>`;
-        }).join("");
-        return `<li class="${done ? "done" : ""}"><span class="nm">${k.name}${k.id === SK.id ? " <small>(playing)</small>" : ""}</span><span class="minis">${minis}</span><span class="cnt">${done ? "Finished" : has.length + " of " + CARDS.length}</span></li>`;
-      }).join("")}</ul>`;
   }
 
   function renderGoals() {
@@ -2395,8 +2347,7 @@
     $("beer").textContent = Math.floor(S.beer);
     $("eggs").textContent = S.eggs;
     $("crystals").textContent = S.crystals;
-    const perm = S.perm * albumMult();   // finales and finished albums
-    $("perm").textContent = "x" + (perm < 100 ? perm.toFixed(1) : fmt(perm));
+    $("perm").textContent = "x" + (S.perm < 100 ? S.perm.toFixed(1) : fmt(S.perm));
     $("offlineNote").textContent = "Automated shops keep earning while you're away (up to " + offlineCap() / 3600 + " hours).";
     updateChests();
     const s0 = S.schemes[0];
