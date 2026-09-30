@@ -149,7 +149,7 @@ function play(ep, meta, { tick = 0.25, limit = 30 * 86400, session = Infinity, g
 
 const fmtT = s => { s = Math.round(s); return `${Math.floor(s / 60)}m${String(s % 60).padStart(2, "0")}s`; };
 const newMeta = () => ({ perm: 1, beer: 0, eggs: 0, crystals: 0, cards: {} });
-const finale = meta => { meta.perm += PERM_PER_EPISODE * (1 + bonus(meta, "finale")); meta.eggs += EGGS_PER_FINALE; };
+const finale = meta => { meta.perm *= 1 + PERM_PER_EPISODE * (1 + bonus(meta, "finale")); meta.eggs += EGGS_PER_FINALE; };   // the bonus multiplies, like the game
 
 // Episode 1 in detail
 const r = play(0, newMeta());

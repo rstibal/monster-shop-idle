@@ -324,7 +324,7 @@
     { base: 4000000, growth: 1.11, payout: 622080, time: 96, auto: 5e7 },
   ];
   const MILESTONES = [10, 25, 50, 100, 150];   // each doubles that scheme's income and gives 1 of the milestone currency
-  const PERM_PER_EPISODE = 0.5;                 // +50% per finished episode (the finale card boosts this)
+  const PERM_PER_EPISODE = 0.5;                 // each finale multiplies the permanent bonus by 1.5 (the finale card boosts this); multiplying keeps pace with the growing costs
   const EPISODE_COST_GROWTH = 2.5;              // costs x2.5 per finished episode (x2.5, x6.25, x15.6...): customers, automation, cash goals
   const OFFLINE_CAP_S = 8 * 3600;               // shops earn for at most this long while the tab is closed
 
@@ -941,7 +941,7 @@
     if (!finaleReady()) return;
     const next = fresh();
     next.episode = S.episode + 1;
-    next.perm = S.perm + finaleGain();
+    next.perm = S.perm * (1 + finaleGain());
     next.beer = S.beer;
     next.eggs = S.eggs + EGGS_PER_FINALE;
     next.crystals = S.crystals;
@@ -1177,7 +1177,7 @@
     $("beer").textContent = Math.floor(S.beer);
     $("eggs").textContent = S.eggs;
     $("crystals").textContent = S.crystals;
-    $("perm").textContent = "x" + S.perm.toFixed(1);
+    $("perm").textContent = "x" + (S.perm < 100 ? S.perm.toFixed(1) : fmt(S.perm));
     $("offlineNote").textContent = "Automated shops keep earning while you're away (up to " + offlineCap() / 3600 + " hours).";
     updateChests();
     const s0 = S.schemes[0];

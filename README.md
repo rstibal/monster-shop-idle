@@ -41,7 +41,7 @@ The rules below use the Haunted Mall's names.
 - Each Buy button shows what it adds: $/s for automated shops, $ per run for tapped ones. A green badge (x2) means the purchase crosses a milestone.
 - Tap a shop to run it once, or pay to automate it.
 - Owning 10, 25, 50, 100 and 150 customers of a shop doubles its income and gives 1 beer.
-- Clear 5 of the 9 goals and sign a dragon lease to unlock the episode finale. It resets cash and shops, keeps beer, eggs, crystals and cards, and adds a permanent 50% income bonus plus 3 eggs.
+- Clear 5 of the 9 goals and sign a dragon lease to unlock the episode finale. It resets cash and shops, keeps beer, eggs, crystals and cards, and gives 3 eggs plus a permanent income bonus: each finale multiplies it by 1.5 (x1.5, x2.25, x3.4 and so on), so it keeps pace with the rising costs.
 - Automated shops keep earning while you're away, up to 8 hours. After a break of 5 minutes or more, a welcome-back popup shows what they earned and any chests ready to open.
 - Sound effects for tapping, payouts, buying, milestones, automating, goals, chests and the finale, synthesized in the browser (no audio files). Each setting has its own voice: eerie in the Haunted Mall, arcade blips on Starport Nine. The Sound button in the header mutes it.
 
@@ -57,7 +57,7 @@ Each episode has its own district, shops, goal wording and a short story scene a
 | 4 | Midnight Carnival | Cobweb candy floss, ring toss for souls, tarot booth, haunted carousel, house of mirrors, big top lease |
 | 5 | Sunken Casino | Barnacle snack bar, soggy slots, mermaid card tables, shipwreck pawn shop, pearl-diving tours, drowned casino deed |
 
-After episode 5 the list repeats (the story loops back too) (shown as "Haunted Mall 2" and so on), and the permanent bonus keeps carrying over. All episodes share the same six shop slots, but costs grow each episode: customers, automation and the cash goal cost 2.5x more each episode (x2.5 in episode 2, x6.25 in episode 3, x15.6 in episode 4 and so on). Early episodes stay quick, and later ones take longer and longer: a long tail for players who keep coming back.
+After episode 5 the list repeats (the story loops back too) (shown as "Haunted Mall 2" and so on), and the permanent bonus keeps carrying over. All episodes share the same six shop slots, but costs grow each episode: customers, automation and the cash goal cost 2.5x more each episode (x2.5 in episode 2, x6.25 in episode 3, x15.6 in episode 4 and so on). The permanent bonus grows by x1.5 per finale (up to x2 with the Finale card maxed), a little slower than costs, so each episode takes a bit longer than the last: a gentle long tail rather than a wall.
 
 ### Cards and chests
 
@@ -70,7 +70,7 @@ Each card is one multiplier that grows with its level.
 | Money | Grizzle | Juno Vance | All income +10% | x1.5 income |
 | Speed | Mort | Sprocket | Shops run 10% faster | x1.5 speed |
 | Discount | Countess Vex | Madame Ossa | Customers and automation 4% cheaper | 20% off |
-| Finale | Bramble | Brick | Finale bonus +20% | +100% instead of +50% |
+| Finale | Bramble | Brick | Finale bonus +20% | x2 per finale instead of x1.5 |
 | Milestone | Old Bog Witch | Commodore Glint | Each milestone multiplies income by 0.05 more | x2.25 per milestone instead of x2 |
 | Beer | Fang | Scav | Milestones give 20% more beer (scrap on Starport Nine) | 2 per milestone instead of 1 |
 
@@ -93,12 +93,14 @@ The same table is printed for a casual player (10 minutes every 2 hours) and an 
 | Episode | Engaged (nonstop) | Casual | Idle |
 | --- | --- | --- | --- |
 | 1-2 | 26 minutes | 2 hours | 8 hours |
-| 3 | 35 minutes | 2 hours | 8 hours |
-| 4 | 56 minutes | 2 hours | 8 hours |
-| 5 | 1.6 hours | 2 hours | 16 hours |
-| 6 | 2.9 hours | 4 hours | 1 day |
-| 7 | 5.9 hours | 6 hours | 1.7 days |
-| 8 | 12 hours | 12 hours | 3.3 days |
+| 3 | 31 minutes | 2 hours | 8 hours |
+| 4 | 38 minutes | 2 hours | 8 hours |
+| 5 | 47 minutes | 2 hours | 8 hours |
+| 6 | 58 minutes | 2 hours | 16 hours |
+| 7 | 1.2 hours | 2 hours | 16 hours |
+| 8 | 1.6 hours | 2 hours | 16 hours |
+| 9 | 2 hours | 2 hours | 1 day |
+| 10 | 2.4 hours | 4 hours | 1 day |
 
 Early on, one break's offline earnings cover the rest of an episode, so session players finish on their second visit. The growing costs are what slow them down later. `OFFRATE=0.25` and `OFFCAP=4` try a lower offline rate or cap (a lower rate barely changes this).
 
