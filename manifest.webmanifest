@@ -1,0 +1,17 @@
+{
+  "name": "Monster Shop Idle",
+  "short_name": "Monster Shop",
+  "description": "An idle clicker about running dodgy shops in a haunted mall or on a space station.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#141a26",
+  "theme_color": "#141a26",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -11,6 +11,7 @@ An idle clicker about running dodgy shops, named Monster Shop Idle (Rob's choice
 - `index.html`: the whole game (HTML, CSS, JS in one file, no build step, no dependencies)
 - `tools/sim.mjs`: balance simulator, run with `node tools/sim.mjs`. It reads the numbers straight out of `index.html` (`SCHEMES`, `MILESTONES`, `SKINS` (for the first skin's shop names), `GOALS`, `GOALS_NEEDED`, `CARDS`, `CHESTS`, `LEVEL_AT`, `PERM_PER_EPISODE`, `EPISODE_COST_GROWTH`, `OFFLINE_CAP_S`, `EGGS_PER_GOAL`) with regexes, so keep those blocks in their current shape (`const X = [` ... `\n  ];`, and single-line number constants). It prints episode 1 in detail, then median times for several episodes in a row for engaged, casual and idle profiles (`node tools/sim.mjs [episodes] [runs]`; env vars `GROWTH`, `OFFRATE`, `OFFCAP` try what-ifs).
 - `README.md`: player-facing rules, card and chest tables, tuning pointers
+- `manifest.webmanifest`, `sw.js`, `icons/`: make it installable as a home-screen app. The service worker is network first (cache only as the offline fallback), so pushes show up without cache busting; bump `CACHE` in `sw.js` if its file list changes. Icons are drawn by `tools/make_icons.py` (Pillow). The in-app browser pane can't register service workers, so test offline behavior in real Chrome. `theme-color` follows the skin's `bg` in `applySkin`.
 
 ## How the game works (current state)
 

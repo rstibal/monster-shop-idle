@@ -12,6 +12,17 @@ Add `?speed=10` to the URL to run the game 10 times faster while tuning. Add `?d
 
 To host it, enable GitHub Pages on the `main` branch (root folder).
 
+### On your phone
+
+The game can be added to a phone's home screen, where it opens full screen like an app and works without a connection:
+
+- Android (Chrome): open the game, then the ⋮ menu, then Add to home screen (or Install app).
+- iPhone (Safari): open the game, tap Share, then Add to Home Screen.
+
+On iPhone the home-screen app keeps its own save, separate from Safari's, so progress in one doesn't show in the other. On Android they share one save.
+
+`manifest.webmanifest` and `sw.js` (network first, so updates show up as soon as you're online) make this work. The icons in `icons/` are drawn by `python tools/make_icons.py` (needs Pillow).
+
 ## Settings (skins)
 
 The side panel has a Setting picker. Each setting has its own cast, shops, story, currency names and colors; the numbers are the same, so one save works in both and you can switch at any time.
