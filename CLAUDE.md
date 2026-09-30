@@ -57,3 +57,9 @@ Idle tuning pass (2026-09-30): the simulator's session players used to tap every
 - More episodes (after 5 the loop reuses episode 1)
 - Art for new settings or episodes (every current setting is fully drawn)
 - Optional rewarded-ad boosts (the design doc has the plan; not needed for a hobby project)
+- From the first sketch doc (Rob picked these on 2026-09-30):
+  - Card collections: a bonus for completing a set, e.g. one per setting; gives maxed-out players something to chase
+  - Daily login chest
+  - Scheme upgrades: one-off cash purchases that multiply a shop's income, a second cash sink beside customers
+  - Old Bog Witch as the rival shopkeeper across the street and story antagonist (in the scenes and story, not just a card)
+- Rejected from that sketch (Rob, 2026-09-30): 8 to 10 shops per episode or a new shop each episode (six stays), limited-time events, notifications, IAP
