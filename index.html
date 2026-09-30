@@ -812,7 +812,7 @@
         },
         {
           name: "Floating Fair",
-          lease: "raft Ferris wheel",
+          lease: "Ferris-wheel license",
           shops: [
             { name: "Saltwater taffy stand",    icon: "🍭", noun: "taffy" },
             { name: "Hook-a-duck stall",        icon: "🦆", noun: "duck" },
@@ -829,7 +829,7 @@
             title: "Grand finale",
             text: [
               "Nell owns the slide, the barge and the Ferris wheel, and the fair has never been this crowded or this seaworthy.",
-              "Then Blackwake lights every firework at once and steals the Gull's treasure map in the smoke.",
+              "Nell lights the fuse, every firework goes up at once, and in the smoke Blackwake steals the Gull's treasure map.",
               "Luckily Ledger knows the map by heart. It leads to a reef that only surfaces once a year, and the Gull sails after Blackwake.",
             ],
             ready: "The fireworks barge is loaded and nobody is guarding it.",
@@ -838,7 +838,7 @@
         },
         {
           name: "Treasure Reef",
-          lease: "treasure itself",
+          lease: "treasure claim",
           shops: [
             { name: "Oyster-shucking bar",       icon: "🦪", noun: "oyster" },
             { name: "Diving-bell rentals",       icon: "🔔", noun: "diving-bell" },
@@ -994,7 +994,7 @@
           finale: {
             title: "Photo finish",
             text: [
-              "Kix owns the pits, the skyboxes and the whole racing league. Mr. Glass enters a car of his own, which looks suspiciously like a tank.",
+              "Kix owns the pits, the skyboxes and the whole racing league. Mr. Glass enters a car of his own, which looks suspiciously like an armored truck.",
               "Dot wins the final on a hover-scooter by half a pixel.",
               "Mr. Glass storms off to his tower at the top of the city and locks the door. Kix takes the stairs.",
             ],
@@ -1092,7 +1092,7 @@
         },
         {
           name: "Toaster Works",
-          lease: "assembly-line lease",
+          lease: "production-line lease",
           shops: [
             { name: "Toast bar",             icon: "🍞", noun: "toast" },
             { name: "Firmware-update kiosk", icon: "💾", noun: "update" },
@@ -1118,7 +1118,7 @@
         },
         {
           name: "Server City",
-          lease: "cloud itself",
+          lease: "cloud contract",
           shops: [
             { name: "Cooling-fan cafe",        icon: "❄️", noun: "fan" },
             { name: "Password-recovery stall", icon: "🔑", noun: "password" },
@@ -1144,12 +1144,12 @@
         },
         {
           name: "Spark Festival",
-          lease: "main stage",
+          lease: "main-stage booking",
           shops: [
             { name: "Static candy floss",   icon: "🍭", noun: "candy-floss" },
             { name: "Glow-paint face booth", icon: "🎭", noun: "face-paint" },
             { name: "Bumper-bot arena",     icon: "🚗", noun: "bumper-bot" },
-            { name: "Tesla-coil concerts",  icon: "🎸", noun: "concert" },
+            { name: "Lightning-coil concerts", icon: "🎸", noun: "concert" },
             { name: "Firework launch pad",  icon: "🎆", noun: "firework" },
             { name: "Main stage",           icon: "🎪", noun: "stage" },
           ],
@@ -1164,13 +1164,13 @@
               "Crusher holds the breaker shut with one arm and waves to the crowd with the other.",
               "In the flash, a signal comes back from the edge of the planet: the humans' old spaceport, still waiting for passengers.",
             ],
-            ready: "The main breaker is sparking.",
-            button: "Hit the switch",
+            ready: "Chairbot Prime is eyeing the main breaker.",
+            button: "Guard the breaker",
           },
         },
         {
           name: "Old Spaceport",
-          lease: "last rocket",
+          lease: "launch-pad lease",
           shops: [
             { name: "Vending-machine diner", icon: "🍔", noun: "diner" },
             { name: "Lost-luggage auction",  icon: "🧳", noun: "luggage" },
@@ -1188,7 +1188,7 @@
             text: [
               "Rivet owns the diner, the museum, the viewing deck and the last rocket on Planet Cog. Chairbot Prime asks, very quietly, for a job.",
               "Rivet makes Chairbot Prime head of customer complaints. Chairbot Prime has never been happier.",
-              "The rocket doesn't need to go anywhere; it makes a lovely sign. Rivet flies it back to the scrapyard, and the whole business starts over where it began.",
+              "Rivet never launches the rocket; it makes a lovely sign. Crusher carries it home to the scrapyard, and the whole business starts over where it began.",
             ],
             ready: "The last rocket is fueled.",
             button: "Light the engines",
@@ -1258,6 +1258,7 @@
   const skinById = id => SKINS.find(k => k.id === id);
   let SK = skinById(new URLSearchParams(location.search).get("skin")) || skinById((() => { try { return localStorage.getItem(SKIN_KEY); } catch { return null; } })()) || SKINS[0];
   const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
+  const uncap = t => t.charAt(0).toLowerCase() + t.slice(1);   // shop names mid-sentence; keeps "VR" and "Tesla" as they are
   const cur = (key, n) => SK.currency[key][n === 1 ? 0 : 1];            // "egg" or "eggs" in this skin
   const customers = n => n === 1 ? SK.words.customer : SK.words.customers;
   const cast = c => ({ ...c, ...SK.cards[c.id] });                        // a card's mechanics plus who is on it in this skin
@@ -1670,7 +1671,7 @@
       r.icon.disabled = !open || isAuto(i);
       r.meta.hidden = r.bar.hidden = !open;
       r.locked.hidden = open;
-      r.locked.textContent = open ? "" : "Get one " + shop(i - 1).name.toLowerCase() + " " + customers(1) + " to unlock.";
+      r.locked.textContent = open ? "" : "Get one " + uncap(shop(i - 1).name) + " " + customers(1) + " to unlock.";
       r.n.textContent = open ? sc.n + " " + customers(sc.n) : "";
     });
     update(true);
@@ -1686,7 +1687,7 @@
     $("offlineNote").textContent = "Automated shops keep earning while you're away (up to " + offlineCap() / 3600 + " hours).";
     updateChests();
     const s0 = S.schemes[0];
-    $("hint").textContent = "Tap the " + shop(0).name.toLowerCase() + " (the icon or its bar) to earn your first dollars. Every $1 gets you closer to a second " + customers(1) + ".";
+    $("hint").textContent = "Tap the " + uncap(shop(0).name) + " (the icon or its bar) to earn your first dollars. Every $1 gets you closer to a second " + customers(1) + ".";
     $("hint").hidden = !(s0.n === 1 && !isAuto(0) && S.cash < nextCost(0) && S.episode === 0);
     let total = 0;
     S.schemes.forEach((sc, i) => {
