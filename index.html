@@ -104,8 +104,11 @@
   .bar i { position: absolute; inset: 0 auto 0 0; width: 0; background: hsl(var(--hue) 65% 55%); border-radius: 999px; }
   .bar span { position: absolute; inset: 0; display: grid; place-items: center; font-size: 0.78rem; font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.7); }
   .meta { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; grid-column: 2; }
-  .meta .info { font-size: 0.85rem; color: var(--ink-dim); }
+  .meta .info { font-size: 0.85rem; color: var(--ink-dim); flex: 1 1 150px; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
   .meta .info b { color: var(--ink); }
+  /* progress toward the next milestone */
+  .mbar { height: 6px; max-width: 220px; margin-top: 5px; background: var(--moss-deep); border-radius: 999px; overflow: hidden; }
+  .mbar i { display: block; height: 100%; background: var(--gold); border-radius: 999px; }
   .buys { display: flex; gap: 8px; flex-wrap: wrap; }
   .btn {
     background: var(--gold); color: #2a1c00; border: 0; border-radius: 10px; padding: 7px 12px; font-weight: 700;
@@ -121,8 +124,9 @@
   .btn.alt { background: var(--slime); box-shadow: 0 3px 0 #5f9a30; color: #12250a; }
   .btn.alt:disabled { background: #4c5a4f; color: #9aa89d; box-shadow: 0 3px 0 #38443a; }
   .btn .sub { display: block; font-size: 0.75rem; font-weight: 600; opacity: 0.8; }
+  .btn.buy .sub { font-weight: 700; opacity: 1; }
   /* what a purchase adds; the corner badge marks purchases that cross a milestone */
-  .btn .gain { display: block; font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+  .btn .gain { display: block; font-size: 0.72rem; font-weight: 600; opacity: 0.8; white-space: nowrap; }
   .btn .badge {
     position: absolute; top: -9px; right: -7px; background: var(--slime); color: #12250a; border-radius: 999px;
     padding: 0 6px; font-size: 0.72rem; font-weight: 700; line-height: 1.5; box-shadow: 0 2px 0 #5f9a30;
@@ -788,7 +792,10 @@
       r.label.textContent = sc.n < 1 ? "Buy a customer to open" : auto ? money(perSecond(i)) + "/s" : (sc.running ? money(income) : "Tap to run: " + money(income));
       const k = buyCount(i), cost = bulkCost(i, k);
       const nextM = MILESTONES.find(m => m > sc.n);
-      setHTML(r.info, `Runs every <b>${fmtTime(runTime(i))}</b>` + (nextM ? ` · next bonus at <b>${nextM}</b>` : " · all bonuses earned"));
+      const prevM = MILESTONES.filter(m => m <= sc.n).pop() || 0;
+      setHTML(r.info, `<span>Runs every <b>${fmtTime(runTime(i))}</b></span>`
+        + (nextM ? `<span>Next bonus at <b>${nextM}</b> · ${nextM - sc.n} to go</span>` : "<span>All bonuses earned</span>")
+        + `<span class="mbar"><i style="width:${nextM ? ((sc.n - prevM) / (nextM - prevM)) * 100 : 100}%"></i></span>`);
       // what this purchase adds: $/s once automated, per run while tapped by hand
       const added = incomeAt(i, sc.n + k) - income;
       const crossed = MILESTONES.filter(m => sc.n < m && sc.n + k >= m).length;
