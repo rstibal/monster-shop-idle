@@ -284,7 +284,7 @@
   ];
   const MILESTONES = [10, 25, 50, 100, 150];   // each doubles that scheme's income and gives 1 beer
   const PERM_PER_EPISODE = 0.5;                 // +50% per finished episode (Bramble boosts this)
-  const EPISODE_COST_STEP = 2;                  // costs x(1 + 2 per finished episode): customers, automation, cash goals
+  const EPISODE_COST_GROWTH = 2.5;              // costs x2.5 per finished episode (x2.5, x6.25, x15.6...): customers, automation, cash goals
   const OFFLINE_CAP_S = 8 * 3600;               // shops earn for at most this long while the tab is closed
 
   // Cards: permanent, survive episode resets. Copies needed for levels 1..5 (cumulative).
@@ -470,7 +470,7 @@
   const incomeAt = (i, n) => n * SCHEMES[i].payout * milestoneMult(n) * globalMult();   // one run with n customers
   const runIncome = i => incomeAt(i, S.schemes[i].n);
   const perSecond = i => S.schemes[i].n ? runIncome(i) / runTime(i) : 0;
-  const costMult = () => 1 + EPISODE_COST_STEP * S.episode;
+  const costMult = () => Math.pow(EPISODE_COST_GROWTH, S.episode);
   const goalTarget = g => g.target * (g.scaled ? costMult() : 1);
   const autoCost = i => SCHEMES[i].auto * costMult() * discount();
   const nextCost = i => SCHEMES[i].base * costMult() * discount() * Math.pow(SCHEMES[i].growth, S.schemes[i].n);

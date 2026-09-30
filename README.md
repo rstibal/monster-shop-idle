@@ -32,7 +32,7 @@ Each episode has its own district, shops, goal wording and a short story scene a
 | 2 | Swamp Market | Mushroom stall, bog-water bottler, lucky charms, fog boat tours, stilt-house timeshare, kraken ferry monopoly |
 | 3 | Crypt Quarter | Grave-flower cart, coffin showroom, seance parlor, ghost tours, bone-china antiques, mausoleum condos |
 
-After episode 3 the list repeats (shown as "Haunted Mall 2" and so on), and the permanent bonus keeps carrying over. All episodes share the same six shop slots, but costs grow each episode: customers, automation and the cash goal cost 3x in episode 2, 5x in episode 3 and so on. That keeps episodes 2 to 4 about as long as the first, with later ones slowly getting faster as cards level up.
+After episode 3 the list repeats (shown as "Haunted Mall 2" and so on), and the permanent bonus keeps carrying over. All episodes share the same six shop slots, but costs grow each episode: customers, automation and the cash goal cost 2.5x more each episode (x2.5 in episode 2, x6.25 in episode 3, x15.6 in episode 4 and so on). Early episodes stay quick, and later ones take longer and longer: a long tail for players who keep coming back.
 
 ### Cards and chests
 
@@ -56,13 +56,25 @@ Each card is one multiplier that grows with its level.
 
 ## Tuning
 
-Everything lives at the top of the script in `index.html`: `SCHEMES` (costs, payouts, run times), `EPISODES` (shop names and story text), `MILESTONES`, `GOALS`, `CARDS`, `CHESTS`, `LEVEL_AT`, `PERM_PER_EPISODE`, `EPISODE_COST_STEP` (how much costs grow per episode) and `OFFLINE_CAP_S`.
+Everything lives at the top of the script in `index.html`: `SCHEMES` (costs, payouts, run times), `EPISODES` (shop names and story text), `MILESTONES`, `GOALS`, `CARDS`, `CHESTS`, `LEVEL_AT`, `PERM_PER_EPISODE`, `EPISODE_COST_GROWTH` (how much costs multiply per episode) and `OFFLINE_CAP_S`.
 
 Balance check: `node tools/sim.mjs` reads the numbers from `index.html`, plays a greedy player who taps every shop the moment it's idle, and prints when each shop opens and when the finale unlocks. Episode 1 currently takes about 26 minutes that way, with the fifth goal landing a few minutes before the lease. It also prints when each goal clears. Real players are less efficient, so expect 30 to 40.
 
-It then plays several episodes in a row (carrying over the bonus, beer, eggs and cards, opening chests as soon as it can) and prints the median time per episode: currently about 31, 27, 24, 21 and 19 minutes for episodes 2 to 6. `node tools/sim.mjs 9 50` plays 9 episodes over 50 runs, and `STEP=1.5 node tools/sim.mjs` tries a different cost step without editing the game.
+It then plays several episodes in a row (carrying over the bonus, beer, eggs and cards, opening chests as soon as it can) and prints the median time per episode. `node tools/sim.mjs 9 50` plays 9 episodes over 50 runs, and `GROWTH=3 node tools/sim.mjs` tries a different per-episode cost growth without editing the game.
 
-The same table is printed for a casual player (10 minutes every 2 hours) and an idle one (3 minutes, 3 times a day), who only earn from automated shops while away. Both currently unlock the finale at the start of their second session: one break's offline earnings cover the rest of an episode. `OFFRATE=0.25` and `OFFCAP=4` try a lower offline rate or cap.
+The same table is printed for a casual player (10 minutes every 2 hours) and an idle one (3 minutes, 3 times a day), who only earn from automated shops while away. Current real time to unlock each finale:
+
+| Episode | Engaged (nonstop) | Casual | Idle |
+| --- | --- | --- | --- |
+| 1-2 | 26 minutes | 2 hours | 8 hours |
+| 3 | 35 minutes | 2 hours | 8 hours |
+| 4 | 56 minutes | 2 hours | 8 hours |
+| 5 | 1.6 hours | 2 hours | 16 hours |
+| 6 | 2.9 hours | 4 hours | 1 day |
+| 7 | 5.9 hours | 6 hours | 1.7 days |
+| 8 | 12 hours | 12 hours | 3.3 days |
+
+Early on, one break's offline earnings cover the rest of an episode, so session players finish on their second visit. The growing costs are what slow them down later. `OFFRATE=0.25` and `OFFCAP=4` try a lower offline rate or cap (a lower rate barely changes this).
 
 ## Roadmap
 

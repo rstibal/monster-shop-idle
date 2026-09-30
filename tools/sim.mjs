@@ -4,7 +4,7 @@
 // episodes are played in a row for each profile in PROFILES (engaged, casual,
 // idle), carrying over the permanent bonus, beer, eggs, crystals and cards
 // (chests are opened as soon as affordable, with a seeded RNG, over several runs).
-// Usage: node tools/sim.mjs [episodes] [runs]   (STEP=1.2 node tools/sim.mjs tries another cost step)
+// Usage: node tools/sim.mjs [episodes] [runs]   (GROWTH=2.5 node tools/sim.mjs tries another per-episode cost growth)
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -21,7 +21,7 @@ const CHESTS = block("CHESTS")();
 const LEVEL_AT = new Function(grab(/const LEVEL_AT = \[[^\]]*\]/).replace("const LEVEL_AT =", "return"))();
 const GOALS_NEEDED = num("GOALS_NEEDED");
 const PERM_PER_EPISODE = num("PERM_PER_EPISODE");
-const EPISODE_COST_STEP = process.env.STEP ? Number(process.env.STEP) : num("EPISODE_COST_STEP"); // STEP=1.2 to try other values
+const EPISODE_COST_GROWTH = process.env.GROWTH ? Number(process.env.GROWTH) : num("EPISODE_COST_GROWTH");
 const OFFLINE_CAP_S = process.env.OFFCAP ? Number(process.env.OFFCAP) * 3600 : new Function("return " + grab(/const OFFLINE_CAP_S = [^;]+/).split("= ")[1])();
 // what-ifs: OFFCAP=4 tries a 4-hour offline cap, OFFRATE=0.25 pays 25% while away (the game pays 100%)
 const OFFLINE_RATE = process.env.OFFRATE ? Number(process.env.OFFRATE) : 1;
@@ -32,7 +32,7 @@ const GOALS_SIM = new Function("isAuto", grab(/const GOALS = \[[\s\S]*?\n  \];/)
 
 const EP = ep => EPISODES[ep % EPISODES.length];
 const shopName = (ep, i) => EP(ep).shops[i].name;
-const costMult = ep => 1 + EPISODE_COST_STEP * ep;
+const costMult = ep => Math.pow(EPISODE_COST_GROWTH, ep);
 const goalTarget = (g, ep) => g.target * (g.scaled ? costMult(ep) : 1);
 const fmtMoney = v => v >= 1e6 ? "$" + +(v / 1e6).toFixed(1) + "M" : "$" + v;
 const goalText = (g, ep) => g.text.replace(/\{(\d)\}/g, (m, i) => EP(ep).shops[i].noun).replace("{$}", fmtMoney(goalTarget(g, ep)));
@@ -162,7 +162,7 @@ const EPS = Number(process.argv[2]) || 6, RUNS = Number(process.argv[3]) || 20;
 const fmtH = s => s < 3600 ? fmtT(s) : s < 86400 ? (s / 3600).toFixed(1) + " hours" : (s / 86400).toFixed(1) + " days";
 const median = a => a.slice().sort((x, y) => x - y)[Math.floor(a.length / 2)];
 console.log(`
-Episodes in a row (cost step ${EPISODE_COST_STEP}, ${RUNS} runs, medians).`);
+Episodes in a row (costs x${EPISODE_COST_GROWTH} per episode, ${RUNS} runs, medians).`);
 console.log("Elapsed is real time until the finale unlocks; active is time spent playing.");
 for (const [id, prof] of Object.entries(PROFILES)) {
   const res = Array.from({ length: EPS }, () => []), perms = Array(EPS).fill(0), lvls = Array(EPS).fill(0);
@@ -182,6 +182,6 @@ ${prof.label}`);
   for (let ep = 0; ep < EPS; ep++) {
     const r = res[ep], done = r.every(x => !x.timedOut);
     const cols = done ? [fmtH(median(r.map(x => x.t))).padEnd(13), fmtT(median(r.map(x => x.active))).padStart(8), String(median(r.map(x => x.sessions))).padStart(9)].join("  ") : "did not finish";
-    console.log(`  ${String(ep + 1).padStart(2)}  x${costMult(ep).toFixed(1).padEnd(4)}  x${perms[ep].toFixed(2)}  ${lvls[ep].toFixed(1).padStart(9)}  ${cols}`);
+    console.log(`  ${String(ep + 1).padStart(2)}  x${String(+costMult(ep).toPrecision(3)).padEnd(5)}  x${perms[ep].toFixed(2)}  ${lvls[ep].toFixed(1).padStart(9)}  ${cols}`);
   }
 }
