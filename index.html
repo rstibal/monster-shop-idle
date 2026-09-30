@@ -226,6 +226,11 @@
   .card .perk small { display: block; color: var(--ink-dim); font-size: 0.8rem; }
 
   dialog#story { border: 3px solid var(--edge); border-radius: var(--radius); background: var(--panel); color: var(--ink); padding: 20px 22px; width: min(520px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow-x: hidden; overflow-y: auto; overflow-wrap: anywhere; box-shadow: 0 8px 0 var(--deep); }
+  dialog#story .scene { margin: -20px -22px 14px; line-height: 0; border-bottom: 3px solid var(--edge); }
+  dialog#story .scene svg { display: block; width: 100%; height: auto; }
+  .card .portrait.drawn { overflow: hidden; }
+  .card .portrait.drawn svg { display: block; width: 100%; height: 100%; }
+  .card .portrait.unknown svg { filter: brightness(0.12) saturate(0); }
   dialog#story::backdrop { background: var(--backdrop); }
   dialog#story h2 { font-family: var(--display); font-weight: var(--display-weight); font-size: 1.4rem; margin: 0 0 10px; color: var(--accent); }
   dialog#story p { margin: 0 0 10px; line-height: 1.55; }
@@ -313,6 +318,7 @@
   </div>
 </div>
 <dialog id="story" aria-labelledby="storyTitle">
+  <div class="scene" id="storyArt" hidden></div>
   <h2 id="storyTitle"></h2>
   <div id="storyText"></div>
   <div class="story-actions" id="storyActions"></div>
@@ -1588,12 +1594,134 @@
   const nameOf = ep => { const E = SK.episodes; return E[ep % E.length].name + (ep >= E.length ? " " + (Math.floor(ep / E.length) + 1) : ""); };
   const episodeName = () => nameOf(S.episode);
 
+  // ---------- Art ----------
+  // Hand-drawn SVG for skins that have it: card portraits (64x64, shown at card size) and one story scene per
+  // episode (480x180, the banner on its intro and finale). Skins without art keep their emoji. Colors are the
+  // art's own; ids inside an SVG must be unique on the page, so they carry the skin, card or episode.
+  const O = "#07100d";   // outline
+  const ART = {
+    mall: {
+      cards: {
+        // Grizzle: goblin owner in a bowler hat, scheming
+        money: `<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" fill="#10251c"/><circle cx="32" cy="31" r="25" fill="#1c3d2e"/>
+          <path d="M6 64C8 54 18 50 32 50S56 54 58 64Z" fill="#5e4a8a" stroke="${O}" stroke-width="1.4"/><path d="M26 50L32 60L38 50Z" fill="#e4f5ee" stroke="${O}" stroke-width="1.2"/>
+          <path d="M18 30L3 19Q6 31 17 37Z" fill="#8cc152" stroke="${O}" stroke-width="1.4"/><path d="M46 30L61 19Q58 31 47 37Z" fill="#8cc152" stroke="${O}" stroke-width="1.4"/>
+          <path d="M16 31L8 24Q10 30 16 34Z" fill="#5f8f33"/><path d="M48 31L56 24Q54 30 48 34Z" fill="#5f8f33"/>
+          <ellipse cx="32" cy="33" rx="15" ry="16" fill="#8cc152" stroke="${O}" stroke-width="1.4"/>
+          <path d="M21 27L29 29.5M43 27L35 29.5" stroke="${O}" stroke-width="2.4" stroke-linecap="round"/>
+          <ellipse cx="26" cy="32.5" rx="3.4" ry="2.6" fill="#e6f07a"/><ellipse cx="38" cy="32.5" rx="3.4" ry="2.6" fill="#e6f07a"/>
+          <circle cx="27" cy="32.6" r="1.4" fill="${O}"/><circle cx="39" cy="32.6" r="1.4" fill="${O}"/>
+          <path d="M30.5 31Q31 37 37.5 41Q32.5 43 29.6 40.5Q28.8 36 30.5 31Z" fill="#74a843" stroke="${O}" stroke-width="1"/>
+          <path d="M22.5 42Q32 50 41.5 42Q32 45.5 22.5 42Z" fill="${O}"/><path d="M27 43.6L28.6 45.8L30 44.1ZM34.4 44.1L35.8 45.8L37.3 43.6Z" fill="#e4f5ee"/>
+          <ellipse cx="32" cy="19.5" rx="13.5" ry="2.8" fill="#2a2438" stroke="${O}" stroke-width="1.4"/><path d="M23 19.5Q23 8 32 8T41 19.5Z" fill="#2a2438" stroke="${O}" stroke-width="1.4"/>
+          <path d="M23.3 15.5H40.7V18H23.3Z" fill="#c7a6ff"/></svg>`,
+        // Mort: night-shift ghoul in a security cap, very tired
+        speed: `<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" fill="#0f2322"/><circle cx="32" cy="30" r="25" fill="#1a3a38"/>
+          <path d="M6 64C8 54 18 50 32 50S56 54 58 64Z" fill="#2f4858" stroke="${O}" stroke-width="1.4"/><path d="M26 50L32 57L38 50" fill="none" stroke="${O}" stroke-width="1.4"/>
+          <circle cx="42" cy="57" r="2.4" fill="#e6f07a" stroke="${O}" stroke-width="0.8"/><path d="M27 43H37V52H27Z" fill="#94ad9f"/>
+          <ellipse cx="32" cy="31" rx="13" ry="16" fill="#a9c4b4" stroke="${O}" stroke-width="1.4"/>
+          <ellipse cx="26" cy="32" rx="4.2" ry="3.6" fill="#5b7468"/><ellipse cx="38" cy="32" rx="4.2" ry="3.6" fill="#5b7468"/>
+          <circle cx="26" cy="32.5" r="1.5" fill="#e4f5ee"/><circle cx="38" cy="32.5" r="1.5" fill="#e4f5ee"/>
+          <path d="M22 37Q26 39 30 37M34 37Q38 39 42 37" fill="none" stroke="#7f9a8c" stroke-width="1.2"/>
+          <path d="M30 38L31.5 34.5L33 38" fill="none" stroke="#7f9a8c" stroke-width="1.1"/>
+          <path d="M26 43.5Q32 41.8 38 44.4" fill="none" stroke="${O}" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M37 24L44 27M39 23.4L38.2 25.6M41.4 24.4L40.6 26.6" stroke="#5b7468" stroke-width="1.1" stroke-linecap="round"/>
+          <path d="M18 22Q18 10.5 32 10.5T46 22Z" fill="#2f4858" stroke="${O}" stroke-width="1.4"/>
+          <path d="M16 22Q32 27.5 48 22V24.2Q32 30 16 24.2Z" fill="#1d2e38" stroke="${O}" stroke-width="1.2"/><circle cx="32" cy="16" r="2.2" fill="#e6f07a"/></svg>`,
+        // Countess Vex: vampire bookkeeper, monocle, high collar
+        discount: `<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" fill="#24121c"/><circle cx="32" cy="30" r="25" fill="#3a1c2c"/>
+          <path d="M9 44L17 17L27 45Z" fill="#8e1f3a" stroke="${O}" stroke-width="1.4"/><path d="M55 44L47 17L37 45Z" fill="#8e1f3a" stroke="${O}" stroke-width="1.4"/>
+          <path d="M6 64C8 54 18 50 32 50S56 54 58 64Z" fill="#1a1016" stroke="${O}" stroke-width="1.4"/><path d="M28 43H36V52H28Z" fill="#d9cce2"/>
+          <ellipse cx="32" cy="32" rx="12" ry="15" fill="#e8dcef" stroke="${O}" stroke-width="1.4"/>
+          <path d="M19 33Q17 14 32 14T45 33Q43 22 36.5 21L32 27.5L27.5 21Q21 22 19 33Z" fill="#120a10" stroke="${O}" stroke-width="1"/>
+          <path d="M23.5 30.5L30 32M40.5 30.5L34 32" stroke="${O}" stroke-width="1.6" stroke-linecap="round"/>
+          <ellipse cx="27" cy="34" rx="3" ry="1.8" fill="#ff5c7a"/><ellipse cx="37" cy="34" rx="3" ry="1.8" fill="#ff5c7a"/>
+          <path d="M27 32.4V35.6M37 32.4V35.6" stroke="${O}" stroke-width="0.9"/>
+          <circle cx="37" cy="34" r="4.6" fill="none" stroke="#e6f07a" stroke-width="1.3"/><path d="M41.4 35.5Q45 42 43 50" fill="none" stroke="#e6f07a" stroke-width="0.9"/>
+          <path d="M28 42.5Q32 44.6 36 42.5Q32 43.6 28 42.5Z" fill="#7a1030" stroke="#7a1030" stroke-width="0.8"/>
+          <path d="M29.6 43L30.3 45.2L31 43.2ZM33 43.2L33.7 45.2L34.4 43Z" fill="#fff"/>
+          <circle cx="32" cy="56" r="2.6" fill="#c7a6ff" stroke="${O}" stroke-width="0.8"/></svg>`,
+        // Bramble: troll bouncer with tusks and an earpiece
+        finale: `<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" fill="#22180f"/><circle cx="32" cy="30" r="25" fill="#3a2a1a"/>
+          <path d="M0 64C2 48 14 45 32 45S62 48 64 64Z" fill="#1b1b20" stroke="${O}" stroke-width="1.4"/>
+          <ellipse cx="13.5" cy="31" rx="3" ry="4" fill="#8a7d6a" stroke="${O}" stroke-width="1.2"/><ellipse cx="50.5" cy="31" rx="3" ry="4" fill="#8a7d6a" stroke="${O}" stroke-width="1.2"/>
+          <rect x="14" y="13" width="36" height="35" rx="14" fill="#8a7d6a" stroke="${O}" stroke-width="1.4"/>
+          <circle cx="21" cy="19" r="1.6" fill="#6f6454"/><circle cx="44" cy="40" r="1.4" fill="#6f6454"/><circle cx="41" cy="17" r="1" fill="#6f6454"/>
+          <path d="M16.5 27Q32 20.5 47.5 27V30.5Q32 25 16.5 30.5Z" fill="#6f6454" stroke="${O}" stroke-width="1"/>
+          <circle cx="25.5" cy="32" r="2" fill="#e6f07a"/><circle cx="38.5" cy="32" r="2" fill="#e6f07a"/><circle cx="25.5" cy="32" r="0.9" fill="${O}"/><circle cx="38.5" cy="32" r="0.9" fill="${O}"/>
+          <ellipse cx="32" cy="37" rx="4.4" ry="3" fill="#756a58" stroke="${O}" stroke-width="1"/>
+          <path d="M22 43Q32 46 42 43" fill="none" stroke="${O}" stroke-width="2" stroke-linecap="round"/>
+          <path d="M24.2 43.2L25.6 37L27.8 43.8Z" fill="#efe6d0" stroke="${O}" stroke-width="0.9"/><path d="M39.8 43.2L38.4 37L36.2 43.8Z" fill="#efe6d0" stroke="${O}" stroke-width="0.9"/>
+          <path d="M52 33Q55.5 37 52.5 41T53 49" fill="none" stroke="#c7a6ff" stroke-width="1.2"/><circle cx="51.5" cy="32" r="1.6" fill="#c7a6ff"/></svg>`,
+        // Old Bog Witch: bent hat, glowing eyes, the nose
+        milestone: `<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" fill="#1a1426"/><circle cx="32" cy="31" r="25" fill="#2c2240"/>
+          <path d="M18 30Q14 44 16 54L22 52Q20 42 22 34ZM46 30Q50 44 48 54L42 52Q44 42 42 34Z" fill="#8f9a92" stroke="${O}" stroke-width="1"/>
+          <path d="M6 64C8 54 18 50 32 50S56 54 58 64Z" fill="#3b2d57" stroke="${O}" stroke-width="1.4"/><path d="M14 57L18 60L22 57L26 60L30 57L34 60L38 57L42 60L46 57L50 60" fill="none" stroke="#c7a6ff" stroke-width="1.1"/>
+          <ellipse cx="32" cy="36" rx="12" ry="13.5" fill="#9dbf8a" stroke="${O}" stroke-width="1.4"/>
+          <path d="M24 32L30 33.5M40 32L34 33.5" stroke="${O}" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="27" cy="35.5" r="2.3" fill="#7dffb2"/><circle cx="37" cy="35.5" r="2.3" fill="#7dffb2"/><circle cx="27.3" cy="35.6" r="0.9" fill="${O}"/><circle cx="37.3" cy="35.6" r="0.9" fill="${O}"/>
+          <path d="M31 35Q32.5 40.5 40 45.5Q34.5 47.5 31.5 43.5Q30.2 39.5 31 35Z" fill="#88aa74" stroke="${O}" stroke-width="1"/><circle cx="35" cy="43" r="1.2" fill="#6d8a5a"/>
+          <path d="M26 46.5Q30 49.5 36.5 47.6" fill="none" stroke="${O}" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M20 24.5Q26 13 29 3Q33 8 37 6.5Q39 15 44 24.5Z" fill="#241a38" stroke="${O}" stroke-width="1.4"/><path d="M22.5 20.5H41.8L43 23.5H21Z" fill="#7dffb2"/>
+          <ellipse cx="32" cy="25" rx="22" ry="4" fill="#241a38" stroke="${O}" stroke-width="1.4"/></svg>`,
+        // Fang: werewolf barkeep in a bow tie
+        beer: `<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" fill="#0f1a24"/><circle cx="32" cy="30" r="25" fill="#1c2d3d"/>
+          <path d="M6 64C8 54 18 50 32 50S56 54 58 64Z" fill="#1d2536" stroke="${O}" stroke-width="1.4"/><path d="M25 50L32 64L39 50Z" fill="#e4f5ee"/>
+          <path d="M32 54L26 51V57ZM32 54L38 51V57Z" fill="#c7a6ff" stroke="${O}" stroke-width="0.9"/><circle cx="32" cy="54" r="1.4" fill="#9a7ad8"/>
+          <path d="M18 24L20 5L29 18Z" fill="#7d6553" stroke="${O}" stroke-width="1.4"/><path d="M46 24L44 5L35 18Z" fill="#7d6553" stroke="${O}" stroke-width="1.4"/>
+          <path d="M21 19L21.5 10L26 17ZM43 19L42.5 10L38 17Z" fill="#4a3a30"/>
+          <path d="M16 30Q16 14 32 14T48 30L51.5 35.5L46.5 37.5L48.5 43L40.5 44L32 48.5L23.5 44L15.5 43L17.5 37.5L12.5 35.5Z" fill="#7d6553" stroke="${O}" stroke-width="1.4"/>
+          <ellipse cx="32" cy="38.5" rx="8.5" ry="6.5" fill="#c9b29a" stroke="${O}" stroke-width="1"/>
+          <path d="M28.6 33.5H35.4L32 37.2Z" fill="${O}"/>
+          <ellipse cx="25" cy="27.5" rx="2.8" ry="2.1" fill="#e6f07a"/><ellipse cx="39" cy="27.5" rx="2.8" ry="2.1" fill="#e6f07a"/><path d="M25 25.8V29.2M39 25.8V29.2" stroke="${O}" stroke-width="1.1"/>
+          <path d="M21 24L28 25.5M43 24L36 25.5" stroke="${O}" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M27 40.5Q32 44 37 40.5" fill="none" stroke="${O}" stroke-width="1.4" stroke-linecap="round"/><path d="M28.6 41.4L29.5 44.2L30.6 42.1Z" fill="#fff"/></svg>`,
+      },
+      scenes: [
+        // Haunted Mall: the atrium after dark, a ghost drifting past, Grizzle peeking over the pretzel kiosk
+        `<svg viewBox="0 0 480 180" aria-hidden="true"><defs><radialGradient id="art-mall-0-moon"><stop offset="0" stop-color="#7dffb2" stop-opacity="0.35"/><stop offset="1" stop-color="#7dffb2" stop-opacity="0"/></radialGradient></defs>
+          <rect width="480" height="180" fill="#0b1412"/>
+          <path d="M150 0H330V58Q240 40 150 58Z" fill="#12231f"/>
+          <path d="M176 6H304V50H176Z" fill="#163a30" stroke="#2d4a42" stroke-width="3"/><path d="M208 6V50M240 6V50M272 6V50M176 28H304" stroke="#2d4a42" stroke-width="2"/>
+          <circle cx="262" cy="26" r="30" fill="url(#art-mall-0-moon)"/><circle cx="262" cy="26" r="12" fill="#e4f5ee"/><circle cx="268" cy="22" r="11" fill="#163a30"/>
+          <path d="M0 62H480V74H0Z" fill="#1a2b27"/><path d="M0 62H480" stroke="#2d4a42" stroke-width="2"/>
+          <path d="M0 50H480" stroke="#2d4a42" stroke-width="1.5"/><path d="M12 50V62M40 50V62M68 50V62M96 50V62M124 50V62M356 50V62M384 50V62M412 50V62M440 50V62M468 50V62" stroke="#2d4a42" stroke-width="1.5"/>
+          <path d="M20 12H120V50H20Z" fill="#101c19" stroke="#2d4a42" stroke-width="2"/><path d="M34 22H106V50H34Z" fill="#0b1412"/>
+          <path d="M360 12H460V50H360Z" fill="#101c19" stroke="#2d4a42" stroke-width="2"/><path d="M374 22H446V50H374Z" fill="#2a2438"/><path d="M380 30H440" stroke="#c7a6ff" stroke-width="2" opacity="0.5"/>
+          <path d="M0 140H480V180H0Z" fill="#111d1a"/><path d="M0 140H480" stroke="#2d4a42" stroke-width="2"/>
+          <path d="M60 140L20 180M150 140L130 180M240 140V180M330 140L350 180M420 140L460 180" stroke="#1a2b27" stroke-width="2"/>
+          <path d="M14 80H130V140H14Z" fill="#15201d" stroke="#2d4a42" stroke-width="2"/><path d="M22 88H122V140H22Z" fill="#1a2b27"/>
+          <path d="M22 96H122M22 104H122M22 112H122M22 120H122M22 128H122M22 136H122" stroke="#243a35" stroke-width="2"/>
+          <path d="M370 150L440 72H466L396 150Z" fill="#1a2b27" stroke="#2d4a42" stroke-width="2"/>
+          <path d="M381 138L406 138M392 126L417 126M403 114L428 114M414 102L439 102M425 90L450 90M436 78L461 78" stroke="#2d4a42" stroke-width="2"/>
+          <path d="M366 150L436 72M400 150L470 72" stroke="#7dffb2" stroke-width="1.5" opacity="0.5"/>
+          <circle cx="240" cy="78" r="26" fill="url(#art-mall-0-moon)"/>
+          <path d="M227 84C215 70 238 60 240 76C242 60 265 70 253 84C247 91 233 91 227 84Z" fill="none" stroke="#e6f07a" stroke-width="3.5" stroke-linejoin="round"/><path d="M231 87L247 73M249 87L233 73" stroke="#e6f07a" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M184 90H296V102H184Z" fill="#7dffb2"/><path d="M198 90H212V102H198ZM226 90H240V102H226ZM254 90H268V102H254ZM282 90H296V102H282Z" fill="#c7a6ff"/>
+          <path d="M184 102Q191 108 198 102Q205 108 212 102Q219 108 226 102Q233 108 240 102Q247 108 254 102Q261 108 268 102Q275 108 282 102Q289 108 296 102Z" fill="#7dffb2"/><path d="M188 104V130M292 104V130" stroke="#2d4a42" stroke-width="3"/>
+          <path d="M229 117L214 108L230 122ZM251 117L266 108L250 122Z" fill="#8cc152" stroke="${O}" stroke-width="1.2"/>
+          <ellipse cx="240" cy="121" rx="12" ry="10" fill="#8cc152" stroke="${O}" stroke-width="1.2"/>
+          <ellipse cx="235" cy="118" rx="2.8" ry="2.2" fill="#e6f07a"/><ellipse cx="245" cy="118" rx="2.8" ry="2.2" fill="#e6f07a"/><circle cx="236" cy="118" r="1.1" fill="${O}"/><circle cx="246" cy="118" r="1.1" fill="${O}"/><path d="M229.5 114L238 115.5M250.5 114L242 115.5" stroke="${O}" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M192 132H288V152H192Z" fill="#15201d" stroke="#2d4a42" stroke-width="2"/><path d="M188 129H292V135H188Z" fill="#2d4a42"/><path d="M226 129Q231 125 235 129M245 129Q249 125 254 129" fill="#8cc152" stroke="${O}" stroke-width="1"/>
+          <ellipse cx="96" cy="152" rx="46" ry="6" fill="#7dffb2" opacity="0.18"/>
+          <path d="M80 72Q80 48 100 48T120 72V106L114 100L108 108L102 100L96 108L90 100L84 106L80 100Z" fill="#c9f5dc" opacity="0.88"/>
+          <ellipse cx="93" cy="68" rx="3.4" ry="5" fill="#0b1412"/><ellipse cx="107" cy="68" rx="3.4" ry="5" fill="#0b1412"/><ellipse cx="100" cy="82" rx="4" ry="5" fill="#0b1412"/>
+          <path d="M126 70Q134 66 140 72M128 82Q136 78 142 84" fill="none" stroke="#c9f5dc" stroke-width="2" opacity="0.5" stroke-linecap="round"/>
+          <circle cx="330" cy="100" r="2" fill="#7dffb2" opacity="0.7"/><circle cx="160" cy="92" r="1.6" fill="#c7a6ff" opacity="0.7"/><circle cx="310" cy="128" r="1.4" fill="#7dffb2" opacity="0.6"/></svg>`,
+      ],
+    },
+  };
+  const cardArt = id => (ART[SK.id] && ART[SK.id].cards && ART[SK.id].cards[id]) || "";
+  const sceneArt = () => (ART[SK.id] && ART[SK.id].scenes && ART[SK.id].scenes[S.episode % SK.episodes.length]) || "";
+
   // ---------- Story ----------
   // the welcome-back popup and an episode intro can both want the dialog on load; later ones wait their turn
   const storyQueue = [];   // drained by the dialog's close listener in Wiring
   function showStory(story) {
     if ($("story").open) { storyQueue.push(story); return; }
-    const { title, text, actions } = story;
+    const { title, text, actions, art } = story;
+    $("storyArt").innerHTML = art || "";
+    $("storyArt").hidden = !art;
     $("storyTitle").textContent = title;
     $("storyText").innerHTML = text.map(t => "<p>" + t + "</p>").join("");
     const box = $("storyActions");
@@ -1615,6 +1743,7 @@
     showStory({
       title: "Episode " + (S.episode + 1) + ": " + episodeName(),
       text: EP().intro,
+      art: sceneArt(),
       actions: [{ label: "Open for business" }],
     });
   }
@@ -1624,6 +1753,7 @@
     showStory({
       title: f.title,
       text: f.text.concat(["<b>Reward:</b> +" + Math.round(finaleGain() * 100) + "% permanent income and " + EGGS_PER_FINALE + " " + cur("eggs", EGGS_PER_FINALE) + ". Next stop: " + nameOf(S.episode + 1) + "."]),
+      art: sceneArt(),
       actions: [{ label: "Start " + nameOf(S.episode + 1), run: finish }, { label: "Not yet" }],
     });
   }
@@ -1666,7 +1796,10 @@
 
   // ---------- Offline ----------
   const WELCOME_AFTER_S = 5 * 60;   // away this long gets the welcome-back popup; shorter breaks just get a toast
-  const fmtAway = s => s >= 3600 ? +(s / 3600).toFixed(1) + " hours" : Math.max(1, Math.round(s / 60)) + " minutes";
+  const fmtAway = s => {
+    const [n, unit] = s >= 3600 ? [+(s / 3600).toFixed(1), "hour"] : [Math.max(1, Math.round(s / 60)), "minute"];
+    return n + " " + unit + (n === 1 ? "" : "s");
+  };
   function offline() {
     const away = (Date.now() - (S.seen || Date.now())) / 1000;
     const secs = Math.min(away, offlineCap());
@@ -1769,8 +1902,9 @@
       const pct = max ? 100 : ((n - lo) / (hi - lo)) * 100;
       const now = lv ? c.perk(lv) : "Not found yet";
       const next = max ? "Max level" : `Next: ${c.perk(lv + 1)}`;
+      const art = cardArt(c.id);   // drawn portrait if the skin has one; cards not found yet show it as a silhouette
       return `<article class="card${lv ? "" : " none"}${max ? " max" : ""}" style="--hue:${c.hue}">
-        <div class="portrait">${lv ? c.icon : "❔"}</div>
+        <div class="portrait${art ? " drawn" : ""}${lv ? "" : " unknown"}">${art || (lv ? c.icon : "❔")}</div>
         <h3><span>${c.name}</span><span class="lv">${lv ? "Level " + lv : ""}</span></h3>
         <div class="role">${c.role}</div>
         <div class="copies"><div class="gbar"><i style="width:${pct}%"></i></div><span>${max ? n + " copies" : `${n} of ${hi} copies`}</span></div>
