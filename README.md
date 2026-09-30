@@ -18,8 +18,8 @@ The side panel has a Setting picker. Each setting has its own cast, shops, story
 
 | Setting | Owner | Episodes | Currencies | Look |
 | --- | --- | --- | --- | --- |
-| Haunted Mall | Grizzle, a goblin | Haunted Mall, Swamp Market, Crypt Quarter | Beer, eggs, crystals | Moonlit graveyard: silver and blue, Alegreya |
-| Starport Nine | Juno Vance, an ex-smuggler | Docking Ring, Hydroponics Deck, Reactor Row | Scrap, keycards, stardust | Deep space navy with amber and teal, Russo One |
+| Haunted Mall | Grizzle, a goblin | Haunted Mall, Swamp Market, Crypt Quarter, Midnight Carnival, Sunken Casino | Beer, eggs, crystals | Moonlit graveyard: silver and blue, Alegreya |
+| Starport Nine | Juno Vance, an ex-smuggler | Docking Ring, Hydroponics Deck, Reactor Row, Zero-G Stadium, Pirate Moon | Scrap, keycards, stardust | Deep space navy with amber and teal, Russo One |
 
 ## How it plays
 
@@ -43,8 +43,10 @@ Each episode has its own district, shops, goal wording and a short story scene a
 | 1 | Haunted Mall | Pretzel kiosk, phone-case cart, perfume counter, arcade, elevator toll, dragon lease |
 | 2 | Swamp Market | Mushroom stall, bog-water bottler, lucky charms, fog boat tours, stilt-house timeshare, kraken ferry monopoly |
 | 3 | Crypt Quarter | Grave-flower cart, coffin showroom, seance parlor, ghost tours, bone-china antiques, mausoleum condos |
+| 4 | Midnight Carnival | Cobweb candy floss, ring toss for souls, tarot booth, haunted carousel, house of mirrors, big top lease |
+| 5 | Sunken Casino | Barnacle snack bar, soggy slots, mermaid card tables, shipwreck pawn shop, pearl-diving tours, drowned casino deed |
 
-After episode 3 the list repeats (shown as "Haunted Mall 2" and so on), and the permanent bonus keeps carrying over. All episodes share the same six shop slots, but costs grow each episode: customers, automation and the cash goal cost 2.5x more each episode (x2.5 in episode 2, x6.25 in episode 3, x15.6 in episode 4 and so on). Early episodes stay quick, and later ones take longer and longer: a long tail for players who keep coming back.
+After episode 5 the list repeats (the story loops back too) (shown as "Haunted Mall 2" and so on), and the permanent bonus keeps carrying over. All episodes share the same six shop slots, but costs grow each episode: customers, automation and the cash goal cost 2.5x more each episode (x2.5 in episode 2, x6.25 in episode 3, x15.6 in episode 4 and so on). Early episodes stay quick, and later ones take longer and longer: a long tail for players who keep coming back.
 
 ### Cards and chests
 
@@ -91,7 +93,7 @@ Early on, one break's offline earnings cover the rest of an episode, so session 
 ## Roadmap
 
 - [x] Cards and chests (permanent, survive episode resets)
-- [x] Episode-specific shops and story beats (3 episodes)
+- [x] Episode-specific shops and story beats (5 episodes per setting)
 - [x] Balance pass targeting about 30 minutes for episode 1
 - [x] Costs scale per episode so later episodes stay a challenge
 - [x] Sound effects (synthesized, per setting)
