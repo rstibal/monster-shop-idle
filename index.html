@@ -253,6 +253,9 @@
   dialog#story b { color: var(--accent); }
   dialog#story .big-cash { display: block; margin: 2px 0 6px; font-family: var(--display); font-weight: var(--display-weight); font-size: 2rem; color: var(--accent); line-height: 1.2; }
   .story-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
+  dialog#story textarea { display: block; width: 100%; box-sizing: border-box; height: 7.5em; resize: vertical; background: var(--deep); color: var(--ink); border: 2px solid var(--edge); border-radius: 10px; padding: 8px 10px; font: 0.8rem/1.4 ui-monospace, Consolas, monospace; word-break: break-all; }
+  .save-btns { display: flex; gap: 6px; }
+  .save-btns .small-btn { flex: 1; padding: 4px 6px; }
 
   .toast {
     position: fixed; z-index: 5; left: 50%; bottom: 20px; transform: translate(-50%, 30px); opacity: 0;
@@ -326,8 +329,12 @@
         <div class="vol"><span id="soundLbl">Sound</span><button class="switch" id="soundBtn" role="switch" aria-labelledby="soundLbl"><span class="track"><span class="knob"></span></span></button></div>
         <label class="vol">Effects <input type="range" id="fxVol" min="0" max="100" step="5"></label>
         <label class="vol">Ambience <input type="range" id="ambVol" min="0" max="100" step="5"></label>
+        <div class="vol"><span id="saveLbl">Save</span><div class="save-btns" role="group" aria-labelledby="saveLbl">
+          <button class="small-btn" id="copySaveBtn" aria-label="Copy save code">Copy</button>
+          <button class="small-btn" id="pasteSaveBtn" aria-label="Paste save code">Paste</button>
+          <button class="small-btn" id="resetBtn" aria-label="Wipe save">Wipe</button>
+        </div></div>
         <p id="offlineNote">Automated shops keep earning while you're away.</p>
-        <button class="small-btn" id="resetBtn">Wipe save</button>
       </section>
     </aside>
   </div>
@@ -1278,8 +1285,11 @@
   let buyMode = (() => { try { const m = localStorage.getItem(PREF_KEY); return ["1", "10", "max"].includes(m) ? m : "1"; } catch { return "1"; } })();
 
   function load() {
+    try { return parseSave(localStorage.getItem(SAVE_KEY)); } catch { return null; }
+  }
+  // a save as JSON (from localStorage or a pasted save code) to state, bringing older saves up to date; null if it isn't one
+  function parseSave(raw) {
     try {
-      const raw = localStorage.getItem(SAVE_KEY);
       if (!raw) return null;
       const s = JSON.parse(raw);
       if (!s || !Array.isArray(s.schemes) || s.schemes.length !== SCHEMES.length) return null;
@@ -1305,6 +1315,16 @@
   }
   function save() {
     try { S.seen = Date.now(); localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch {}
+  }
+  // Save codes carry a game between devices (saves live in each browser): the save as base64 JSON behind a short tag.
+  const SAVE_CODE_TAG = "MSI1.";
+  const saveCode = () => { save(); return SAVE_CODE_TAG + btoa(Array.from(new TextEncoder().encode(JSON.stringify(S)), b => String.fromCharCode(b)).join("")); };
+  function readSaveCode(code) {
+    try {
+      code = code.replace(/\s+/g, "");
+      if (!code.startsWith(SAVE_CODE_TAG)) return null;
+      return parseSave(new TextDecoder().decode(Uint8Array.from(atob(code.slice(SAVE_CODE_TAG.length)), c => c.charCodeAt(0))));
+    } catch { return null; }
   }
 
   // ---------- Skin ----------
@@ -2484,6 +2504,36 @@
       if (key === "amb" && !was !== !levels.amb) levels.amb ? startAmbience() : stopAmbience();
     });
     $(id).addEventListener("change", () => { if (key === "fx") sfx("buy"); });   // a sample at the new level
+  }
+  $("copySaveBtn").addEventListener("click", () => {
+    const code = saveCode();
+    // if the clipboard is blocked, show the code to copy by hand
+    const show = () => {
+      showStory({ title: "Your save code", text: ["Copy this code, then use <b>Paste</b> (next to Save) on your other device.", '<textarea id="saveCodeBox" readonly aria-label="Save code"></textarea>'], actions: [{ label: "Done" }] });
+      $("saveCodeBox").value = code;
+      $("saveCodeBox").select();
+    };
+    if (navigator.clipboard) navigator.clipboard.writeText(code).then(() => toast("Save code copied. Use Paste next to Save on your other device."), show);
+    else show();
+  });
+  $("pasteSaveBtn").addEventListener("click", () => {
+    showStory({
+      title: "Paste a save",
+      text: ["Paste a save code from <b>Copy</b> (next to Save) on another device. It replaces the game on this one.", '<textarea id="saveCodeBox" aria-label="Save code" placeholder="MSI1...."></textarea>'],
+      actions: [{ label: "Load save", run: () => loadSaveCode($("saveCodeBox").value) }, { label: "Cancel" }],
+    });
+    $("saveCodeBox").focus();
+  });
+  const cardLevels = s => CARDS.reduce((a, c) => a + LEVEL_AT.filter(n => (s.cards[c.id] || 0) >= n).length, 0);
+  function loadSaveCode(code) {
+    const s = readSaveCode(code);
+    if (!s) { toast("That isn't a save code. Copy it again with Copy next to Save."); return; }
+    const sum = x => "episode " + (x.episode + 1) + ", " + money(x.cash) + ", " + cardLevels(x) + " card levels";
+    if (!confirm("Load this save (" + sum(s) + ")? It replaces this device's game (" + sum(S) + ").")) return;
+    S = s;
+    offline();   // the time since the code was copied counts as time away
+    save(); build(); maybeShowIntro();
+    toast("Save loaded.");
   }
   $("resetBtn").addEventListener("click", () => {
     if (confirm("Wipe your save and start over?")) {
