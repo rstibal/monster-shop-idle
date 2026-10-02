@@ -358,11 +358,12 @@
   const MILESTONES = [10, 25, 50, 100, 150];   // each doubles that scheme's income and gives 1 of the milestone currency
   // Upgrades: one-off cash buys per shop, bought in order, each multiplying that shop's income. cost is a multiple of the
   // shop's automation cost (so it scales with the episode and the discount card). Reset each episode like customers.
-  // Tuned so they speed engaged players up by about 6-10% (the simulator's greedy player buys 3 in episode 1).
+  // Tuned so episode 1 stays near 25 minutes for the simulator's greedy player, who buys 3 (at about 8 and 21 minutes);
+  // later episodes run about 3-6% faster than without them. Priced 150/1500/15000 until 2026-10-01 (episode 1 took 23 minutes).
   const UPGRADES = [
-    { cost: 150,   mult: 2 },
-    { cost: 1500,  mult: 2 },
-    { cost: 15000, mult: 2 },
+    { cost: 600,   mult: 2 },
+    { cost: 6000,  mult: 2 },
+    { cost: 60000, mult: 2 },
   ];
   const PERM_PER_EPISODE = 0.5;                 // each finale multiplies the permanent bonus by 1.5 (the finale card boosts this); multiplying keeps pace with the growing costs
   const EPISODE_COST_GROWTH = 2.5;              // costs x2.5 per finished episode (x2.5, x6.25, x15.6...): customers, automation, cash goals
