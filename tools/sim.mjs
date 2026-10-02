@@ -37,6 +37,9 @@ const DAILY = process.env.DAILY === "0" ? null : CHESTS.find(c => c.id === grab(
 // GOALS reference isAuto, so they're built with the simulator's automation flags
 let autoFlags = [];
 const GOALS_SIM = new Function("isAuto", grab(/const GOALS = \[[\s\S]*?\n  \];/).replace("const GOALS =", "return"))(i => autoFlags[i]);
+// one story goal per episode joins them, picked by episode number like the game does (STORY=0 leaves them out)
+const STORY_GOALS = process.env.STORY === "0" ? [] : new Function("MILESTONES", grab(/const STORY_GOALS = \[[\s\S]*?\n  \];/).replace("const STORY_GOALS =", "return"))(MILESTONES);
+const goalsFor = ep => STORY_GOALS.length ? [STORY_GOALS[ep % STORY_GOALS.length], ...GOALS_SIM] : GOALS_SIM;
 
 const EP = ep => EPISODES[ep % EPISODES.length];
 const shopName = (ep, i) => EP(ep).shops[i].name;
@@ -100,11 +103,12 @@ function play(ep, meta, { tick = 0.25, limit = 30 * 86400, session = Infinity, g
   const n = SCHEMES.map((_, i) => (i === 0 ? 1 : 0));
   const auto = SCHEMES.map((_, i) => ep > 0 && i < FREE_AUTO_SHOPS);
   const log = [];
-  const goals = Object.fromEntries(GOALS_SIM.map(g => [g.id, null]));
+  const GOALS_EP = goalsFor(ep);
+  const goals = Object.fromEntries(GOALS_EP.map(g => [g.id, null]));
   autoFlags = auto;
   const mark = s => log.push([t, s]);
   const check = state => {
-    for (const g of GOALS_SIM) if (goals[g.id] === null && g.cur(state) >= goalTarget(g, ep)) { goals[g.id] = t; meta.eggs += EGGS_PER_GOAL; }
+    for (const g of GOALS_EP) if (goals[g.id] === null && g.cur(state) >= goalTarget(g, ep)) { goals[g.id] = t; meta.eggs += EGGS_PER_GOAL; }
   };
 
   while (t < limit) {
@@ -126,7 +130,7 @@ function play(ep, meta, { tick = 0.25, limit = 30 * 86400, session = Infinity, g
     t += tick;
 
     // cash goals are checked before spending: the player is saving up at that moment
-    check({ cash, schemes: n.map(x => ({ n: x })) });
+    check({ cash, schemes: n.map((x, i) => ({ n: x, up: up[i] })) });
 
     // spend: unlock next shop asap, then best payback among the rest
     for (let guard = 0; guard < 50; guard++) {
@@ -159,7 +163,7 @@ function play(ep, meta, { tick = 0.25, limit = 30 * 86400, session = Infinity, g
       if (crossed.length) { meta.beer += crossed.length * (1 + bonus(meta, "beer")); mark(`${shopName(ep, best.i)} hit ${crossed[0]}`); }
     }
 
-    check({ cash, schemes: n.map(x => ({ n: x })) });
+    check({ cash, schemes: n.map((x, i) => ({ n: x, up: up[i] })) });
     const done = Object.values(goals).filter(v => v !== null).length;
     if (done >= GOALS_NEEDED && n[n.length - 1] >= 1) { mark("FINALE READY"); return { t, active, sessions, sessionLeft, log, goals, n }; }
   }
@@ -174,7 +178,7 @@ const finale = meta => { meta.perm *= 1 + PERM_PER_EPISODE * (1 + bonus(meta, "f
 const r = play(0, newMeta());
 for (const [t, s] of r.log) if (!/hit (25|50|100|150)$/.test(s)) console.log(fmtT(t).padStart(7), s);
 console.log("\nGoals (need " + GOALS_NEEDED + " plus the " + EP(0).lease + "):");
-for (const g of GOALS_SIM) console.log("  " + (r.goals[g.id] == null ? "      -" : fmtT(r.goals[g.id]).padStart(7)), goalText(g, 0));
+for (const g of goalsFor(0)) console.log("  " + (r.goals[g.id] == null ? "      -" : fmtT(r.goals[g.id]).padStart(7)), goalText(g, 0));
 console.log("Customers:", r.n.join(", "));
 console.log(r.timedOut ? "DID NOT FINISH" : "Finale ready at " + fmtT(r.t));
 

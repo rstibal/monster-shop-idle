@@ -193,6 +193,9 @@
   .goal .gbar i { display: block; height: 100%; background: var(--alt); }
   .goal .label { font-size: 0.92rem; display: flex; justify-content: space-between; gap: 8px; }
   .goal .label span:last-child { color: var(--ink-dim); white-space: nowrap; }
+  .goal.story .label span:first-child { color: var(--accent); font-weight: 700; }
+  .panel .goal .why { margin: 2px 0 0; font-size: 0.8rem; font-style: italic; }
+  .goal.story .gbar i { background: var(--accent); }
   .panel p { margin: 0 0 10px; font-size: 0.92rem; color: var(--ink-dim); }
   .panel p b { color: var(--ink); }
   .finale .btn { width: 100%; padding: 10px; }
@@ -453,6 +456,7 @@
       episodes: [
         {
           name: "Haunted Mall",
+          goal: "Cursed phone cases outsell fortunes. Prove it to the Witch.",
           lease: "dragon lease",
           shops: [
             { name: "Pretzel kiosk of mystery",    icon: "🥨", noun: "pretzel" },
@@ -481,6 +485,7 @@
         },
         {
           name: "Swamp Market",
+          goal: "The Witch has been expecting you. Show up looking sharp.",
           lease: "ferry monopoly",
           shops: [
             { name: "Mushroom stall of mystery", icon: "🍄", noun: "mushroom" },
@@ -508,6 +513,7 @@
         },
         {
           name: "Crypt Quarter",
+          goal: "Everyone here pays in favors. Collect them all over town.",
           lease: "mausoleum condo",
           shops: [
             { name: "Grave-flower cart",     icon: "🥀", noun: "flower" },
@@ -534,6 +540,7 @@
         },
         {
           name: "Midnight Carnival",
+          goal: "Ring every bell on the strength tester.",
           lease: "big top lease",
           shops: [
             { name: "Cobweb candy-floss stand", icon: "🍭", noun: "candy-floss" },
@@ -560,6 +567,7 @@
         },
         {
           name: "Sunken Casino",
+          goal: "The house always wins. Feed the house.",
           lease: "casino deed",
           shops: [
             { name: "Barnacle snack bar",       icon: "🦪", noun: "snack" },
@@ -621,6 +629,7 @@
       episodes: [
         {
           name: "Docking Ring",
+          goal: "Rent is due every orbit. Suit up the whole ring.",
           lease: "wormhole taxi license",
           shops: [
             { name: "Noodle cart of questionable origin", icon: "🍜", noun: "noodle" },
@@ -648,6 +657,7 @@
         },
         {
           name: "Hydroponics Deck",
+          goal: "Glint put up a sign about you. Outgrow it.",
           lease: "terraforming futures desk",
           shops: [
             { name: "Space-lettuce stand",       icon: "🥬", noun: "lettuce" },
@@ -674,6 +684,7 @@
         },
         {
           name: "Reactor Row",
+          goal: "Keep four stalls glowing brighter than the reactor.",
           lease: "reactor naming deal",
           shops: [
             { name: "Glow-stick vendor",        icon: "🔦", noun: "glow-stick" },
@@ -700,6 +711,7 @@
         },
         {
           name: "Zero-G Stadium",
+          goal: "Score twelve before the final whistle.",
           lease: "broadcast rights deal",
           shops: [
             { name: "Floating hot-dog vendor",   icon: "🌭", noun: "hot-dog" },
@@ -726,6 +738,7 @@
         },
         {
           name: "Pirate Moon",
+          goal: "Be the only noodle-and-rum stand on the moon.",
           lease: "moon charter",
           shops: [
             { name: "Space-rum stand",       icon: "🍹", noun: "rum" },
@@ -788,6 +801,7 @@
       episodes: [
         {
           name: "Barnacle Harbor",
+          goal: "Mooring fees are due by sundown.",
           lease: "harbor charter",
           shops: [
             { name: "Hardtack cart",              icon: "🍪", noun: "hardtack" },
@@ -815,6 +829,7 @@
         },
         {
           name: "Smuggler's Cove",
+          goal: "Fix up the Gull before Blackwake notices.",
           lease: "lighthouse lease",
           shops: [
             { name: "Contraband candy stall",      icon: "🍬", noun: "candy" },
@@ -841,6 +856,7 @@
         },
         {
           name: "Skull Island",
+          goal: "Ledger's price list has four columns to fill.",
           lease: "volcano lease",
           shops: [
             { name: "Coconut-shell stand",        icon: "🥥", noun: "coconut" },
@@ -867,6 +883,7 @@
         },
         {
           name: "Floating Fair",
+          goal: "Set off a fireworks show the whole fair can see.",
           lease: "Ferris-wheel license",
           shops: [
             { name: "Saltwater taffy stand",    icon: "🍭", noun: "taffy" },
@@ -893,6 +910,7 @@
         },
         {
           name: "Treasure Reef",
+          goal: "Make the whole queue your customers.",
           lease: "treasure claim",
           shops: [
             { name: "Oyster-shucking bar",       icon: "🦪", noun: "oyster" },
@@ -955,6 +973,7 @@
       episodes: [
         {
           name: "Gutter Street",
+          goal: "The street tax is due at midnight.",
           lease: "billboard lease",
           shops: [
             { name: "Synth-dumpling cart",      icon: "🥟", noun: "dumpling" },
@@ -982,6 +1001,7 @@
         },
         {
           name: "Rain Bazaar",
+          goal: "Mr. Glass is pricing your weather. Get ready.",
           lease: "weather contract",
           shops: [
             { name: "Umbrella vending machine", icon: "☂️", noun: "umbrella" },
@@ -1009,6 +1029,7 @@
         },
         {
           name: "Chrome Row",
+          goal: "Get upgraded, polished and paid, four times over.",
           lease: "server-farm lease",
           shops: [
             { name: "Drone-delivered coffee", icon: "☕", noun: "coffee" },
@@ -1035,6 +1056,7 @@
         },
         {
           name: "Overdrive Circuit",
+          goal: "Twelve laps, no pit stops.",
           lease: "racing league",
           shops: [
             { name: "Energy-drink stand",  icon: "🥤", noun: "energy-drink" },
@@ -1061,6 +1083,7 @@
         },
         {
           name: "Skyline Tower",
+          goal: "Show Mr. Glass who let the street in.",
           lease: "tower deed",
           shops: [
             { name: "Cloud-level cocktail bar", icon: "🍸", noun: "cocktail" },
@@ -1122,6 +1145,7 @@
       episodes: [
         {
           name: "Scrapyard Flats",
+          goal: "Rent is due every cycle, interest included.",
           lease: "junk-mountain claim",
           shops: [
             { name: "Lukewarm oil-can stand", icon: "🥫", noun: "oil-can" },
@@ -1149,6 +1173,7 @@
         },
         {
           name: "Toaster Works",
+          goal: "Four hundred years without an upgrade. Fix that.",
           lease: "production-line lease",
           shops: [
             { name: "Toast bar",             icon: "🍞", noun: "toast" },
@@ -1175,6 +1200,7 @@
         },
         {
           name: "Server City",
+          goal: "Fill four racks before the reminders do.",
           lease: "cloud contract",
           shops: [
             { name: "Cooling-fan cafe",        icon: "❄️", noun: "fan" },
@@ -1201,6 +1227,7 @@
         },
         {
           name: "Spark Festival",
+          goal: "Let off a whole year of static.",
           lease: "main-stage booking",
           shops: [
             { name: "Static candy floss",   icon: "🍭", noun: "candy-floss" },
@@ -1227,6 +1254,7 @@
         },
         {
           name: "Old Spaceport",
+          goal: "Feed the robots food they can't eat.",
           lease: "launch-pad lease",
           shops: [
             { name: "Vending-machine diner", icon: "🍔", noun: "diner" },
@@ -1263,7 +1291,6 @@
   // scaled goals grow with episode costs (see costMult). The finale also needs the last shop (see finaleReady).
   const GOALS = [
     { id: "h1", text: "Get 25 {0} {c}",       cur: s => s.schemes[0].n, target: 25 },
-    { id: "h2", text: "Get 10 {2} {c}",       cur: s => s.schemes[2].n, target: 10 },
     { id: "h3", text: "Automate 3 shops",               cur: s => s.schemes.filter((x, i) => isAuto(i)).length, target: 3 },
     { id: "h4", text: "Get 25 {3} {c}",        cur: s => s.schemes[3].n, target: 25 },
     { id: "h5", text: "Get 10 {4} {c}",      cur: s => s.schemes[4].n, target: 10 },
@@ -1271,6 +1298,16 @@
     { id: "h7", text: "Get 50 {3} {c}",        cur: s => s.schemes[3].n, target: 50 },
     { id: "h8", text: "Get 25 {4} {c}",      cur: s => s.schemes[4].n, target: 25 },
     { id: "h9", text: "Automate 5 shops",               cur: s => s.schemes.filter((x, i) => isAuto(i)).length, target: 5 },
+  ];
+  // h2 (10 customers at the third shop) made way for the story goals on 2026-10-01, so each episode still pays the same eggs.
+  // One story goal per episode, picked by episode number (episode 1 gets the first, 6 the first again, ...). It's listed
+  // first and counts toward GOALS_NEEDED like the rest; each skin's episode has a goal line saying why it matters there.
+  const STORY_GOALS = [
+    { id: "s1", text: "Get 50 {1} {c}",           cur: s => s.schemes[1].n, target: 50 },
+    { id: "s2", text: "Buy 3 upgrades",           cur: s => s.schemes.reduce((a, x) => a + x.up, 0), target: 3 },
+    { id: "s3", text: "Get 25 {c} at 4 shops",    cur: s => s.schemes.filter(x => x.n >= 25).length, target: 4 },
+    { id: "s4", text: "Reach 12 bonuses across your shops", cur: s => s.schemes.reduce((a, x) => a + MILESTONES.filter(m => x.n >= m).length, 0), target: 12 },
+    { id: "s5", text: "Get 150 {0} {c}",          cur: s => s.schemes[0].n, target: 150 },
   ];
   const GOALS_NEEDED = 5;
 
@@ -1650,7 +1687,9 @@
   }
 
   // only count goals that still exist, so saves from older goal lists don't inflate it
-  const clearedCount = () => GOALS.filter(g => S.goalsDone.includes(g.id)).length;
+  const storyGoal = () => STORY_GOALS[S.episode % STORY_GOALS.length];
+  const goalsNow = () => [storyGoal(), ...GOALS];   // this episode's story goal first, then the shared ones
+  const clearedCount = () => goalsNow().filter(g => S.goalsDone.includes(g.id)).length;
   function finaleReady() {
     return clearedCount() >= GOALS_NEEDED && S.schemes[SCHEMES.length - 1].n >= 1;
   }
@@ -2202,12 +2241,12 @@
   }
 
   function checkGoals() {
-    for (const g of GOALS) {
+    for (const g of goalsNow()) {
       if (!S.goalsDone.includes(g.id) && g.cur(S) >= goalTarget(g)) {
         S.goalsDone.push(g.id);
         S.eggs += EGGS_PER_GOAL;
         sfx("goal");
-        toast("Goal cleared: " + goalText(g) + " (+" + EGGS_PER_GOAL + " " + cur("eggs", EGGS_PER_GOAL) + ")");
+        toast((g === storyGoal() ? "Story goal cleared: " : "Goal cleared: ") + goalText(g) + " (+" + EGGS_PER_GOAL + " " + cur("eggs", EGGS_PER_GOAL) + ")");
         renderGoals();
       }
     }
@@ -2340,10 +2379,11 @@
   }
 
   function renderGoals() {
-    const active = GOALS.filter(g => !S.goalsDone.includes(g.id)).slice(0, 3);
+    const active = goalsNow().filter(g => !S.goalsDone.includes(g.id)).slice(0, 3);
     $("goals").innerHTML = active.map(g => {
       const target = goalTarget(g), cur = Math.min(g.cur(S), target);
-      return `<div class="goal" data-id="${g.id}"><div class="label"><span>${goalText(g)}</span><span>${fmt(cur)} / ${fmt(target)}</span></div><div class="gbar"><i style="width:${(cur / target) * 100}%"></i></div></div>`;
+      const story = g === storyGoal() && EP().goal ? `<p class="why">${EP().goal}</p>` : "";
+      return `<div class="goal${story ? " story" : ""}" data-id="${g.id}"><div class="label"><span>${goalText(g)}</span><span>${fmt(cur)} / ${fmt(target)}</span></div>${story}<div class="gbar"><i style="width:${(cur / target) * 100}%"></i></div></div>`;
     }).join("") || "<p>All goals cleared.</p>";
     $("goalsNote").innerHTML = `Cleared <b>${clearedCount()}</b> of the <b>${GOALS_NEEDED}</b> needed to open the finale.`;
   }
