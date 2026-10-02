@@ -80,6 +80,7 @@
   .cash, .stats b { font-variant-numeric: tabular-nums; }
   .ep-line { margin: 0 0 2px; font-size: 0.85rem; color: var(--ink-dim); display: flex; gap: 10px; }
   .ep-line b { color: var(--accent); font-weight: 700; }
+  .ep-line .rush { color: var(--alt); font-weight: 700; font-variant-numeric: tabular-nums; }
   .brand h1 { font-family: var(--display); font-weight: var(--display-weight); font-size: calc(1.15rem * var(--display-size)); margin: 0; color: var(--ink-dim); letter-spacing: 0.02em; }
   .cash { font-family: var(--display); font-weight: var(--display-weight); font-size: clamp(2.6rem, 9vw, 4.6rem); line-height: 1; color: var(--accent); text-shadow: 0 3px 0 var(--accent-dark); margin: 4px 0 0; }
   .cash small { font-size: 0.45em; color: var(--accent-dark); text-shadow: none; margin-left: 6px; }
@@ -279,7 +280,7 @@
 <div class="wrap">
   <header class="top">
     <div class="brand">
-      <p class="ep-line"><b id="epNum">Episode 1</b><span id="epPrices" hidden></span></p>
+      <p class="ep-line"><b id="epNum">Episode 1</b><span id="epPrices" hidden></span><span id="rush" class="rush" hidden></span></p>
       <h1 id="episodeName">Grizzle's Haunted Mall</h1>
       <div class="cash" id="cash">$0</div>
     </div>
@@ -378,6 +379,11 @@
   const PERM_PER_EPISODE = 0.5;                 // each finale multiplies the permanent bonus by 1.5 (the finale card boosts this); multiplying keeps pace with the growing costs
   const EPISODE_COST_GROWTH = 2.5;              // costs x2.5 per finished episode (x2.5, x6.25, x15.6...): customers, automation, cash goals
   const OFFLINE_CAP_S = 8 * 3600;               // shops earn for at most this long while the tab is closed
+  // Welcome back after WELCOME_AFTER_S or more: bank the earnings with BANK_BONUS extra, or start a rush hour (all income
+  // x RUSH_MULT for RUSH_S seconds). Banking wins after long breaks, a rush when you're back to play for a few minutes.
+  const BANK_BONUS = 0.25;
+  const RUSH_MULT = 3;
+  const RUSH_S = 300;
   const FREE_AUTO_SHOPS = 1;                    // from episode 2 on, this many shops start automated, so a new episode earns while you're away from the start
 
   // Cards: permanent, survive episode resets. Copies needed for levels 1..10 (cumulative).
@@ -1570,7 +1576,9 @@
   const bonusAt = (id, l) => CARDS.find(c => c.id === id).per * levelStrength(l);
   const cardBonus = id => bonusAt(id, cardLevel(id));   // e.g. 0.3 at level 3 of a 0.1 card, 0.6 at level 7
   const milestoneMult = n => Math.pow(2 + cardBonus("milestone"), MILESTONES.filter(m => n >= m).length);
-  const globalMult = () => S.perm * (1 + cardBonus("money"));
+  const rushLeft = () => Math.max(0, ((S.rushUntil || 0) - Date.now()) / 1000);   // seconds of rush hour left (wall clock)
+  const rushMult = () => rushLeft() > 0 ? RUSH_MULT : 1;
+  const globalMult = () => S.perm * (1 + cardBonus("money")) * rushMult();
   const runTime = i => SCHEMES[i].time / (1 + cardBonus("speed"));
   const discount = () => 1 - cardBonus("discount");
   const isAuto = i => S.schemes[i].auto;
@@ -1702,6 +1710,7 @@
     next.eggs = S.eggs + EGGS_PER_FINALE;
     next.crystals = S.crystals;
     next.cards = S.cards;
+    next.rushUntil = S.rushUntil;   // a rush hour keeps running into the next episode
     next.dailyDay = S.dailyDay;
     // without this, players who drop in a few times a day start each later episode earning nothing while away,
     // because the first automation costs as much as the episode's prices (see FREE_AUTO_SHOPS)
@@ -2186,7 +2195,7 @@
     box.innerHTML = "";
     actions.forEach((a, k) => {
       const b = document.createElement("button");
-      b.className = k === 0 ? "btn alt" : "small-btn";
+      b.className = k === 0 ? "btn alt" : a.choice ? "btn" : "small-btn";   // choice: an equal alternative to the first action, not a way out
       b.textContent = a.label;
       b.addEventListener("click", () => { $("story").close(); if (a.run) a.run(); });
       box.appendChild(b);
@@ -2263,7 +2272,7 @@
     const secs = Math.min(away, offlineCap());
     if (secs < 30) return;
     let gain = 0;
-    SCHEMES.forEach((_, i) => { if (isAuto(i)) gain += perSecond(i) * secs; });
+    SCHEMES.forEach((_, i) => { if (isAuto(i)) gain += perSecond(i) / rushMult() * secs; });   // a rush hour only counts while you play
     S.cash += gain;
     if (away < WELCOME_AFTER_S) { if (gain > 0) toast("Welcome back. Your shops earned " + money(gain) + " in " + fmtAway(secs)); return; }
     welcomeBack(away, gain);
@@ -2277,8 +2286,13 @@
       .map(c => "<b>" + SK.chests[c.id].name + "</b>" + (c.id === DAILY_CHEST && dailyReady() ? " (free today)" : ""));
     if (ready.length) text.push("Ready to open: " + (ready.length > 1 ? ready.slice(0, -1).join(", ") + " and " : "") + ready[ready.length - 1] + ".");
     if (finaleReady()) text.push("The <b>finale</b> is ready. " + EP().finale.ready);
-    const actions = [{ label: gain > 0 ? "Collect " + money(gain) : "Back to work", run: () => sfx(gain > 0 ? "milestone" : "buy") }];
-    if (ready.length) actions.push({ label: "Open chests", run: () => document.querySelector('[data-view="cards"]').click() });
+    // the earnings are already in the till (closing the popup keeps them); the choice is the bonus on top
+    const actions = gain > 0
+      ? [{ label: "Bank " + money(gain * (1 + BANK_BONUS)), run: () => { S.cash += gain * BANK_BONUS; sfx("milestone"); toast("Banked, with " + Math.round(BANK_BONUS * 100) + "% on top."); } },
+         { label: "Rush hour", choice: true, run: () => { S.rushUntil = Date.now() + RUSH_S * 1000; sfx("finale"); toast("Rush hour! Everything earns x" + RUSH_MULT + " for " + RUSH_S / 60 + " minutes."); } }]
+      : [{ label: "Back to work", run: () => sfx("buy") }];
+    if (gain > 0) text.splice(1, 0, "<b>Bank it</b> for " + Math.round(BANK_BONUS * 100) + "% more, or call a <b>rush hour</b>: every shop earns x" + RUSH_MULT + " for the next " + RUSH_S / 60 + " minutes. A rush pays off if you're staying to play.");
+    if (ready.length && gain <= 0) actions.push({ label: "Open chests", run: () => document.querySelector('[data-view="cards"]').click() });
     showStory({ title: "Welcome back", text, actions });
   }
 
@@ -2415,6 +2429,11 @@
     $("eggs").textContent = S.eggs;
     $("crystals").textContent = S.crystals;
     $("perm").textContent = "x" + (S.perm < 100 ? S.perm.toFixed(1) : fmt(S.perm));
+    const rush = Math.ceil(rushLeft());
+    $("rush").hidden = !rush;
+    if (rush) $("rush").textContent = "Rush hour x" + RUSH_MULT + " · " + Math.floor(rush / 60) + ":" + String(rush % 60).padStart(2, "0");
+    if (update.rush && !rush) toast("Rush hour is over.");
+    update.rush = rush;
     $("offlineNote").textContent = "Automated shops keep earning while you're away (up to " + offlineCap() / 3600 + " hours).";
     updateChests();
     const s0 = S.schemes[0];

@@ -31,6 +31,9 @@ const OFFLINE_CAP_S = process.env.OFFCAP ? Number(process.env.OFFCAP) * 3600 : n
 // what-ifs: OFFCAP=4 tries a 4-hour offline cap, OFFRATE=0.25 pays 25% while away (the game pays 100%),
 // FREEAUTO=0 starts later episodes with no automated shops
 const OFFLINE_RATE = process.env.OFFRATE ? Number(process.env.OFFRATE) : 1;
+// session players come back to the welcome-back popup and bank their earnings (a 5-minute rush hour doesn't pay for
+// 3- or 10-minute visits after hours away); BANK=0 tries it without the bonus
+const BANK_BONUS = process.env.BANK ? Number(process.env.BANK) : num("BANK_BONUS");
 const [EGGS_PER_GOAL, EGGS_PER_FINALE] = grab(/const EGGS_PER_GOAL = \d+, EGGS_PER_FINALE = \d+/).match(/\d+/g).map(Number);
 // one chest a day is free; DAILY=0 turns it off
 const DAILY = process.env.DAILY === "0" ? null : CHESTS.find(c => c.id === grab(/const DAILY_CHEST = "\w+"/).split('"')[1]);
@@ -116,7 +119,7 @@ function play(ep, meta, { tick = 0.25, limit = 30 * 86400, session = Infinity, g
       // away: only automated shops earn, and only up to the offline cap
       let autoIps = 0;
       for (let i = 0; i < n.length; i++) if (auto[i]) autoIps += rate(i, n[i]);
-      cash += autoIps * Math.min(gap, OFFLINE_CAP_S) * OFFLINE_RATE;
+      cash += autoIps * Math.min(gap, OFFLINE_CAP_S) * OFFLINE_RATE * (1 + BANK_BONUS);
       t += gap;
       sessionLeft = session;
       sessions++;

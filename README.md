@@ -47,7 +47,7 @@ The rules below use the Haunted Mall's names.
 - Each shop has 3 upgrades, bought in order, each doubling its income (x8 with all three). They cost 600, 6,000 and 60,000 times the shop's automation price, and reset with the episode.
 - Each episode has a story goal (listed first, in the setting's accent color, with a line on why it matters there) and 8 shared goals. Clear any 5 and sign a dragon lease to unlock the episode finale. It resets cash and shops, keeps beer, eggs, crystals and cards, and gives 3 eggs plus a permanent income bonus: each finale multiplies it by 1.5 (x1.5, x2.25, x3.4 and so on), so it keeps pace with the rising costs. From episode 2 on, the first shop starts automated.
 - Saves stay in your browser. To move a game to another device, press **Copy** next to Save in the side panel, then **Paste** the code on the other device (it replaces the game there).
-- Automated shops keep earning while you're away, up to 8 hours. After a break of 5 minutes or more, a welcome-back popup shows what they earned and any chests ready to open.
+- Automated shops keep earning while you're away, up to 8 hours. After a break of 5 minutes or more, a welcome-back popup shows what they earned and any chests ready to open, and asks what to do with it: **bank it** for 25% more, or call a **rush hour**, where every shop earns x3 for the next 5 minutes (a countdown shows next to the episode number). Banking pays more after long breaks; a rush pays off when you're back to play for a while.
 - Sound effects for tapping, payouts, buying, milestones, automating, goals, chests and the finale, synthesized in the browser (no audio files). Each setting has its own voice: eerie in the Haunted Mall, arcade blips on Starport Nine. Each setting also has a quiet background loop, synthesized too: a humming, drafty mall, a station's engine drone and computer chirps, waves and creaking timbers on the ship, rain and a synth pad in the night market, and clanking machines on Planet Cog. The side panel has Effects and Ambience volume sliders; a Sound on/off switch above them mutes everything.
 
 ### Episodes and story
@@ -89,7 +89,7 @@ Daily chest: once a day, from your second day on, the egg chest opens free.
 
 ## Tuning
 
-Everything lives at the top of the script in `index.html`. The numbers: `SCHEMES` (costs, payouts, run times), `MILESTONES`, `UPGRADES` (price as a multiple of the shop's automation cost, and strength), `GOALS`, `STORY_GOALS` (one per episode; each skin's episodes have a `goal` line for it), `CARDS` (weights and strength per level), `CHESTS`, `LEVEL_AT`, `LATE_LEVEL_STRENGTH` (how much levels 6-10 count), `PERM_PER_EPISODE`, `EPISODE_COST_GROWTH` (how much costs multiply per episode), `OFFLINE_CAP_S` and `FREE_AUTO_SHOPS` (shops that start automated from episode 2 on). Everything players read or see is in `SKINS`: to add a setting, copy a skin, change its words, episodes and `theme` colors, and it shows up in the Setting picker.
+Everything lives at the top of the script in `index.html`. The numbers: `SCHEMES` (costs, payouts, run times), `MILESTONES`, `UPGRADES` (price as a multiple of the shop's automation cost, and strength), `GOALS`, `STORY_GOALS` (one per episode; each skin's episodes have a `goal` line for it), `CARDS` (weights and strength per level), `CHESTS`, `LEVEL_AT`, `LATE_LEVEL_STRENGTH` (how much levels 6-10 count), `PERM_PER_EPISODE`, `EPISODE_COST_GROWTH` (how much costs multiply per episode), `OFFLINE_CAP_S`, `BANK_BONUS`, `RUSH_MULT` and `RUSH_S` (the welcome-back choice) and `FREE_AUTO_SHOPS` (shops that start automated from episode 2 on). Everything players read or see is in `SKINS`: to add a setting, copy a skin, change its words, episodes and `theme` colors, and it shows up in the Setting picker.
 
 Balance check: `node tools/sim.mjs` reads the numbers from `index.html`, plays a greedy player who taps every shop the moment it's idle, and prints when each shop opens and when the finale unlocks. Episode 1 currently takes about 25 minutes that way (it buys 3 upgrades along the way), with the fifth goal landing a few minutes before the lease. It also prints when each goal clears. Real players are less efficient, so expect 30 to 40.
 
@@ -106,11 +106,11 @@ The same table is printed for a casual player (10 minutes every 2 hours) and an 
 | 5 | 45 minutes | 2 hours | 8 hours |
 | 6 | 56 minutes | 2 hours | 16 hours |
 | 7 | 1.1 hours | 2 hours | 16 hours |
-| 8 | 1.4 hours | 4 hours | 16 hours |
+| 8 | 1.4 hours | 2 hours | 16 hours |
 | 9 | 1.7 hours | 4 hours | 16 hours |
 | 10 | 2 hours | 4 hours | 16 hours |
-| 12 | 2.8 hours | 6 hours | 16 hours |
-| 15 | 4.4 hours | 6 hours | 1 day |
+| 12 | 2.8 hours | 4 hours | 16 hours |
+| 15 | 4.4 hours | 4 hours | 1 day |
 | 20 | 8.9 hours | 8 hours | 1.3 days |
 | 25 | 16.6 hours | 12 hours | 1.7 days |
 
