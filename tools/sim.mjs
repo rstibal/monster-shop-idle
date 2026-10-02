@@ -46,7 +46,8 @@ const fmtMoney = v => v >= 1e6 ? "$" + +(v / 1e6).toFixed(1) + "M" : "$" + v;
 const goalText = (g, ep) => g.text.replace(/\{(\d)\}/g, (m, i) => EP(ep).shops[i].noun).replace("{c}", SKIN.words.customers).replace("{$}", fmtMoney(goalTarget(g, ep)));
 
 const level = (meta, id) => LEVEL_AT.filter(c => (meta.cards[id] || 0) >= c).length;
-const bonus = (meta, id) => CARDS.find(c => c.id === id).per * level(meta, id);
+const LATE_LEVEL_STRENGTH = process.env.LATELEVEL ? Number(process.env.LATELEVEL) : num("LATE_LEVEL_STRENGTH");   // LATELEVEL=1 tries levels 6-10 at full strength
+const bonus = (meta, id) => { const l = level(meta, id); return CARDS.find(c => c.id === id).per * (Math.min(l, 5) + LATE_LEVEL_STRENGTH * Math.max(0, l - 5)); };
 
 function rng(seed) {
   return () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 2 ** 32; };
