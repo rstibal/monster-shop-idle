@@ -41,7 +41,7 @@ Idle tuning pass (2026-09-30): the simulator's session players used to tap every
 
 ## Testing notes
 
-- The in-app browser pane can't run page tools on `file://` URLs. Serve the folder instead (`python -m http.server 8770`, then open `http://localhost:8770/index.html?debug`) and stop the server afterwards. The pane caches the page, so after editing add a throwaway query (`&v=2`) when reloading, or you'll test the old code.
+- The in-app browser pane can't run page tools on `file://` URLs. Serve the folder instead (`python -m http.server 8770`, then open `http://localhost:8770/index.html?debug`) and stop the server afterwards (on Windows: `Get-NetTCPConnection -LocalPort 8770 -State Listen | % { Stop-Process -Id $_.OwningProcess }`). The pane caches the page, so after editing add a throwaway query (`&v=2`) when reloading, or you'll test the old code.
 - Automated clicks are instant, so they miss bugs that only happen during a held press. `left_click_drag` from a point to 1px away gives a realistic held press.
 - Background tabs pause `requestAnimationFrame`, so taps and income look frozen if the preview tab isn't in front. Front the tab or test functions directly through `?debug`. If the pane itself is hidden, frames stay paused even for the front tab; taking a screenshot makes it render.
 - A `beforeunload` handler saves state, so injecting a save then navigating gets overwritten. Override `Storage.prototype.setItem` first if you need to test loading a crafted save.
@@ -50,15 +50,18 @@ Idle tuning pass (2026-09-30): the simulator's session players used to tap every
 
 ## Working preferences
 
-- Commit locally as work is done, but ask before pushing. Pushing publishes to the public repo and the live Pages site. After a push, Pages takes about a minute; verify with the Pages build status (`gh api repos/rstibal/monster-shop-idle/pages/builds/latest`).
+- Commit locally as work is done, but ask before pushing. Pushing publishes to the public repo and the live Pages site. After a push, Pages takes about a minute; verify with the Pages build status (`gh api repos/rstibal/monster-shop-idle/pages/builds/latest`). If a deploy fails on GitHub's side (e.g. "Failed to get ID Token") or a re-run sits queued, request a fresh build with `gh api -X POST repos/rstibal/monster-shop-idle/pages/builds`.
 - End commit messages with a `Co-Authored-By: Claude <model> <noreply@anthropic.com>` line naming the model actually running the session (for example `Claude Opus 5.5`).
 - The repo lives at `C:\www\monster-shop-idle` on the main computer (outside OneDrive on purpose; don't put `.git` in a synced folder). On the second computer it's at `D:\Users\Rob\Documents\__Projects\Claude\monster-shop-idle`, which isn't synced either.
 - Keep the UI distinctive, not generic (raised buttons, a strong display font per skin, colors from the skin's theme). No all-caps labels. Rob didn't like the original moss and plum palette; Moonlit graveyard (silver and blue) was the mall's look until 2026-09-29, when he switched to Dripping ectoplasm. When he asks for a new look, show several real options side by side (the game in iframes with the theme swapped) and let him mix colors and fonts.
 
 ## Ideas not done yet
 
-- More episodes (after 5 the loop reuses episode 1)
+- More episodes (after 5 the loop reuses episode 1). Rob asked for this on 2026-10-03 (idea #4 from his list), but work hadn't started, and the scope (how many new episodes, full art or not) is still open. Each new episode per skin needs a `name`, a `goal` line, a `lease`, 6 shops (name, icon, noun), an `intro`, a `finale`, a scene and a row of 6 shop icons in `ART`, with the owner and rival in both story and scene. The previous last finale's closing line has to hand off to it, and the new last finale has to lead back to episode 1. Watch the index math: `STORY_GOALS` is picked with `S.episode % STORY_GOALS.length` (5) while `EP()` and the art use `% SK.episodes.length`, so going past 5 episodes per skin needs more story goals or a per-episode story-goal index. The cheaper option: replays ("Haunted Mall 2") just get a new intro line saying what's different this time.
 - Art for new settings or episodes (every current setting is fully drawn)
+- A stats panel (lifetime earnings, customers, finales, chests opened, time played)
+- The README roadmap still shows "[ ] Art", but every setting is fully drawn, so tick it
+- A headless smoke test (load `index.html` in node or a headless browser, play a few seconds at `?speed`, check for errors)
 - Optional rewarded-ad boosts (the design doc has the plan; not needed for a hobby project)
 - Rejected from the first sketch doc (Rob, 2026-09-30): 8 to 10 shops per episode or a new shop each episode (six stays), limited-time events, notifications, IAP
 - Card collections were built as per-setting albums on 2026-09-30 and scrapped the same day after Rob's playtest: switching settings doesn't reset anything, so filling each setting's album meant grinding about 25-30 chest draws per setting with beer and eggs that come slower each episode. Rob decided collections aren't needed; cards alone are the long-term goal and the setting picker stays cosmetic. Don't bring back a collection bonus tied to chest draws per setting.
