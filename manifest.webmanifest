@@ -1,7 +1,7 @@
 {
   "name": "Monster Shop Idle",
   "short_name": "Monster Shop",
-  "description": "An idle clicker about running dodgy shops in a haunted mall, on a space station, a pirate ship, in a cyberpunk market or on a robot planet.",
+  "description": "An idle clicker about running dodgy shops in a haunted mall, on a space station, a pirate ship, in a cyberpunk market, on a robot planet or at a wizard academy.",
   "id": "./",
   "start_url": "./",
   "scope": "./",

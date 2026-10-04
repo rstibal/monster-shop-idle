@@ -1,6 +1,6 @@
 # Monster Shop Idle
 
-A small idle clicker about running dodgy shops, in five settings: a goblin in a haunted mall, an ex-smuggler on a space station, a pirate captain on a ship that sails from port to port, a street vendor in a cyberpunk night market, or a repair bot on a planet of robots. Plain HTML, CSS and JavaScript in one file, with no build step and no dependencies.
+A small idle clicker about running dodgy shops, in six settings: a goblin in a haunted mall, an ex-smuggler on a space station, a pirate captain on a ship that sails from port to port, a street vendor in a cyberpunk night market, a repair bot on a planet of robots, or an expelled wizard who never left the academy. Plain HTML, CSS and JavaScript in one file, with no build step and no dependencies.
 
 Status: early prototype. All numbers are placeholders.
 
@@ -25,7 +25,7 @@ On iPhone the home-screen app keeps its own save, separate from Safari's, so pro
 
 ## Settings (skins)
 
-The side panel has a Setting picker. Each setting has its own cast, shops, story, currency names and colors; the numbers are the same, so one save works in both and you can switch at any time.
+The side panel has a Setting picker. Each setting has its own cast, shops, story, currency names and colors; the numbers are the same, so one save works in all of them and you can switch at any time.
 
 | Setting | Owner | Episodes | Currencies | Look |
 | --- | --- | --- | --- | --- |
@@ -34,6 +34,7 @@ The side panel has a Setting picker. Each setting has its own cast, shops, story
 | The Salty Gull | Captain Nell, a pirate | Barnacle Harbor, Smuggler's Cove, Skull Island, Floating Fair, Treasure Reef, Frostbite Bay | Grog, doubloons, pearls | Jolly Roger: black, bone white and blood red, New Rocker |
 | Neon Night Market | Kix, a street vendor | Gutter Street, Rain Bazaar, Chrome Row, Overdrive Circuit, Skyline Tower, Undercity | Batteries, tokens, shards | Black-violet with magenta and cyan, VT323 terminal pixels |
 | Planet Cog | Rivet, a repair bot | Scrapyard Flats, Toaster Works, Server City, Spark Festival, Old Spaceport, Rust Moon | Oil, bolts, cores | Scrap heap: tin grey, copper and patina green, Black Ops One |
+| Hexwick Academy | Fizz, an expelled wizard | Bell Tower, Greenhouses, Library, Dueling Grounds, Potion Cellars, Observatory | Potions, scrolls, moonstones | Spellfire: plum dark, flame orange and spell cyan, MedievalSharp |
 
 ## How it plays
 
@@ -48,7 +49,7 @@ The rules below use the Haunted Mall's names.
 - Each episode has a story goal (listed first, in the setting's accent color, with a line on why it matters there) and 8 shared goals. Clear any 5 and sign a dragon lease to unlock the episode finale. It resets cash and shops, keeps beer, eggs, crystals and cards, and gives 3 eggs plus a permanent income bonus: each finale multiplies it by 1.5 (x1.5, x2.25, x3.4 and so on), so it keeps pace with the rising costs. From episode 2 on, the first shop starts automated.
 - Saves stay in your browser. To move a game to another device, press **Copy** next to Save in the side panel, then **Paste** the code on the other device (it replaces the game there).
 - Automated shops keep earning while you're away, up to 8 hours. After a break of 5 minutes or more, a welcome-back popup shows what they earned and any chests ready to open, and asks what to do with it: **bank it** for 25% more, or call a **rush hour**, where every shop earns x3 for the next 5 minutes (a countdown shows next to the episode number). Banking pays more after long breaks; a rush pays off when you're back to play for a while.
-- Sound effects for tapping, payouts, buying, milestones, automating, goals, chests and the finale, synthesized in the browser (no audio files). Each setting has its own voice: eerie in the Haunted Mall, arcade blips on Starport Nine. Each setting also has a quiet background loop, synthesized too: a humming, drafty mall, a station's engine drone and computer chirps, waves and creaking timbers on the ship, rain and a synth pad in the night market, and clanking machines on Planet Cog. The side panel has Effects and Ambience volume sliders; a Sound on/off switch above them mutes everything.
+- Sound effects for tapping, payouts, buying, milestones, automating, goals, chests and the finale, synthesized in the browser (no audio files). Each setting has its own voice: eerie in the Haunted Mall, arcade blips on Starport Nine. Each setting also has a quiet background loop, synthesized too: a humming, drafty mall, a station's engine drone and computer chirps, waves and creaking timbers on the ship, rain and a synth pad in the night market, clanking machines on Planet Cog, and a crackling fire, an owl and stray spells at Hexwick Academy. The side panel has Effects and Ambience volume sliders; a Sound on/off switch above them mutes everything.
 
 ### Episodes and story
 
