@@ -29,11 +29,11 @@ The side panel has a Setting picker. Each setting has its own cast, shops, story
 
 | Setting | Owner | Episodes | Currencies | Look |
 | --- | --- | --- | --- | --- |
-| Haunted Mall | Grizzle, a goblin | Haunted Mall, Swamp Market, Crypt Quarter, Midnight Carnival, Sunken Casino | Beer, eggs, crystals | Dripping ectoplasm: slime green and lilac on green-black, Rubik Wet Paint |
-| Starport Nine | Juno Vance, an ex-smuggler | Docking Ring, Hydroponics Deck, Reactor Row, Zero-G Stadium, Pirate Moon | Scrap, keycards, stardust | Deep space navy with amber and teal, Russo One |
-| The Salty Gull | Captain Nell, a pirate | Barnacle Harbor, Smuggler's Cove, Skull Island, Floating Fair, Treasure Reef | Grog, doubloons, pearls | Jolly Roger: black, bone white and blood red, New Rocker |
-| Neon Night Market | Kix, a street vendor | Gutter Street, Rain Bazaar, Chrome Row, Overdrive Circuit, Skyline Tower | Batteries, tokens, shards | Black-violet with magenta and cyan, VT323 terminal pixels |
-| Planet Cog | Rivet, a repair bot | Scrapyard Flats, Toaster Works, Server City, Spark Festival, Old Spaceport | Oil, bolts, cores | Scrap heap: tin grey, copper and patina green, Black Ops One |
+| Haunted Mall | Grizzle, a goblin | Haunted Mall, Swamp Market, Crypt Quarter, Midnight Carnival, Sunken Casino, Ghost Line | Beer, eggs, crystals | Dripping ectoplasm: slime green and lilac on green-black, Rubik Wet Paint |
+| Starport Nine | Juno Vance, an ex-smuggler | Docking Ring, Hydroponics Deck, Reactor Row, Zero-G Stadium, Pirate Moon, Comet Cruise | Scrap, keycards, stardust | Deep space navy with amber and teal, Russo One |
+| The Salty Gull | Captain Nell, a pirate | Barnacle Harbor, Smuggler's Cove, Skull Island, Floating Fair, Treasure Reef, Frostbite Bay | Grog, doubloons, pearls | Jolly Roger: black, bone white and blood red, New Rocker |
+| Neon Night Market | Kix, a street vendor | Gutter Street, Rain Bazaar, Chrome Row, Overdrive Circuit, Skyline Tower, Undercity | Batteries, tokens, shards | Black-violet with magenta and cyan, VT323 terminal pixels |
+| Planet Cog | Rivet, a repair bot | Scrapyard Flats, Toaster Works, Server City, Spark Festival, Old Spaceport, Rust Moon | Oil, bolts, cores | Scrap heap: tin grey, copper and patina green, Black Ops One |
 
 ## How it plays
 
@@ -61,8 +61,9 @@ Each episode has its own district, shops, goal wording and a short story scene a
 | 3 | Crypt Quarter | Grave-flower cart, coffin showroom, seance parlor, ghost tours, bone-china antiques, mausoleum condos |
 | 4 | Midnight Carnival | Cobweb candy floss, ring toss for souls, tarot booth, haunted carousel, house of mirrors, big top lease |
 | 5 | Sunken Casino | Barnacle snack bar, soggy slots, mermaid card tables, shipwreck pawn shop, pearl-diving tours, drowned casino deed |
+| 6 | Ghost Line | Soot-cake trolley, lost-ticket office, phantom dining car, sleeper-car hire, tunnel-of-screams ride, Ghost Line charter |
 
-After episode 5 the list repeats (the story loops back too) (shown as "Haunted Mall 2" and so on), and the permanent bonus keeps carrying over. All episodes share the same six shop slots, but costs grow each episode: customers, automation and the cash goal cost 2.5x more each episode (x2.5 in episode 2, x6.25 in episode 3, x15.6 in episode 4 and so on). The permanent bonus grows by x1.5 per finale (up to x2.25 with the Finale card maxed), a little slower than costs, so each episode takes a bit longer than the last: a gentle long tail rather than a wall.
+After episode 6 the list repeats (the story loops back too) (shown as "Haunted Mall 2" and so on), and the permanent bonus keeps carrying over. All episodes share the same six shop slots, but costs grow each episode: customers, automation and the cash goal cost 2.5x more each episode (x2.5 in episode 2, x6.25 in episode 3, x15.6 in episode 4 and so on). The permanent bonus grows by x1.5 per finale (up to x2.25 with the Finale card maxed), a little slower than costs, so each episode takes a bit longer than the last: a gentle long tail rather than a wall.
 
 ### Cards and chests
 
@@ -105,14 +106,14 @@ The same table is printed for a casual player (10 minutes every 2 hours) and an 
 | 4 | 37 minutes | 2 hours | 8 hours |
 | 5 | 45 minutes | 2 hours | 8 hours |
 | 6 | 56 minutes | 2 hours | 16 hours |
-| 7 | 1.1 hours | 2 hours | 16 hours |
+| 7 | 1.2 hours | 2 hours | 16 hours |
 | 8 | 1.4 hours | 2 hours | 16 hours |
 | 9 | 1.7 hours | 4 hours | 16 hours |
 | 10 | 2 hours | 4 hours | 16 hours |
 | 12 | 2.8 hours | 4 hours | 16 hours |
-| 15 | 4.4 hours | 4 hours | 1 day |
-| 20 | 8.9 hours | 8 hours | 1.3 days |
-| 25 | 16.6 hours | 12 hours | 1.7 days |
+| 15 | 4.5 hours | 6 hours | 1 day |
+| 20 | 9.1 hours | 8 hours | 1.3 days |
+| 25 | 16.9 hours | 12 hours | 1.7 days |
 
 Cards reach level 10 across the board around episode 25 (57 of 60 levels in the simulator). When they topped out at level 5 they were all maxed by episode 12 and episode 20 took 22.6 hours.
 
@@ -123,11 +124,11 @@ Session players live on what their automated shops earn while they're away, so t
 ## Roadmap
 
 - [x] Cards and chests (permanent, survive episode resets)
-- [x] Episode-specific shops and story beats (5 episodes per setting)
+- [x] Episode-specific shops and story beats (6 episodes per setting)
 - [x] Balance pass targeting about 30 minutes for episode 1
 - [x] Costs scale per episode so later episodes stay a challenge
 - [x] Sound effects (synthesized, per setting)
-- [ ] Art
+- [x] Art (card portraits, story scenes and shop icons for every setting)
 - [ ] Optional rewarded-ad boosts
 
 ## License
