@@ -2018,6 +2018,7 @@
   const money = v => "$" + fmt(v);
   // Rewriting a button's contents mid-press drops the click, so per-frame updates only write when something changed.
   const setHTML = (el, html) => { if (el._html !== html) { el._html = html; el.innerHTML = html; } };
+  const setText = (el, text) => { if (el._text !== text) { el._text = text; el.textContent = text; } };
   const fmtTime = s => s < 10 ? +s.toFixed(1) + "s" : s < 60 ? Math.round(s) + "s" : Math.round(s / 60) + "m";
 
   // ---------- Actions ----------
@@ -3026,7 +3027,7 @@
       const fast = auto && runTime(i) / SPEED < 0.25;
       r.fill.style.width = ((fast ? 1 : sc.progress) * 100) + "%";
       const income = runIncome(i);
-      r.label.textContent = sc.n < 1 ? "Get a " + customers(1) + " to open" : auto ? money(perSecond(i)) + "/s" : (sc.running ? money(income) : "Tap to run: " + money(income));
+      setText(r.label, sc.n < 1 ? "Get a " + customers(1) + " to open" : auto ? money(perSecond(i)) + "/s" : (sc.running ? money(income) : "Tap to run: " + money(income)));
       const k = buyCount(i), cost = bulkCost(i, k);
       const nextM = MILESTONES.find(m => m > sc.n);
       const prevM = MILESTONES.filter(m => m <= sc.n).pop() || 0;
@@ -3059,13 +3060,14 @@
     const btn = $("finBtn");
     btn.disabled = !ready;
     const nextEp = nameOf(S.episode + 1);
-    btn.textContent = ready ? EP().finale.button : "Locked";
-    $("finText").innerHTML = ready
+    // only when it changes: rewriting the button every frame swallowed held presses, so the finale never opened (2026-10-10)
+    setText(btn, ready ? EP().finale.button : "Locked");
+    setHTML($("finText"), ready
       ? `${EP().finale.ready} Finishing the episode resets your cash and shops, adds <b>+${Math.round(finaleGain() * 100)}%</b> permanent income and <b>${EGGS_PER_FINALE} ${cur("eggs", EGGS_PER_FINALE)}</b>, and moves on to <b>${nextEp}</b>. You keep your ${cur("beer", 2)}, ${cur("eggs", 2)}, ${cur("crystals", 2)} and cards.`
       : "Still needed: " + [
           clearedCount() < GOALS_NEEDED ? `${GOALS_NEEDED - clearedCount()} more goal${GOALS_NEEDED - clearedCount() > 1 ? "s" : ""}` : "",
           S.schemes[SCHEMES.length - 1].n < 1 ? "a " + EP().lease : "",
-        ].filter(Boolean).join(" and ") + ".";
+        ].filter(Boolean).join(" and ") + ".");
     // refresh goal progress a few times a second, not every frame
     const t = Math.floor(performance.now() / 250);
     if (force || t !== update.t) { update.t = t; renderGoals(); }

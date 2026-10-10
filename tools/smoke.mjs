@@ -114,6 +114,31 @@ const PAGE_TEST = `(async () => {
   return fails;
 })()`;
 
+// A real press lasts a while, and a button rewritten every frame swallows it (the finale button did, 2026-10-10).
+// Script clicks are instant and miss that, so press and hold the finale button with real mouse events.
+async function heldPressOpensFinale(page) {
+  const setup = await page.send("Runtime.evaluate", { returnByValue: true, awaitPromise: true, expression: `(async () => {
+    const g = __game, dlg = document.getElementById("story");
+    while (dlg.open) { dlg.querySelector("button").click(); await new Promise(r => setTimeout(r, 200)); }
+    document.querySelector('[data-view="shops"]').click();
+    g.S.schemes.forEach(sc => { sc.n = 200; sc.auto = true; }); g.S.cash = 1e40; g.build();
+    await new Promise(r => setTimeout(r, 400));
+    const b = document.getElementById("finBtn"); b.scrollIntoView({ block: "center" });
+    await new Promise(r => setTimeout(r, 100));
+    const q = b.getBoundingClientRect();
+    return { x: q.left + q.width / 2, y: q.top + q.height / 2, ready: g.finaleReady() };
+  })()` });
+  const { x, y, ready } = setup.result.value;
+  if (!ready) return ["couldn't set up a finale for the held-press check"];
+  await page.send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y });
+  await page.send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", clickCount: 1 });
+  await wait(150);
+  await page.send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", clickCount: 1 });
+  await wait(200);
+  const r = await page.send("Runtime.evaluate", { returnByValue: true, expression: `document.getElementById("story").open && document.getElementById("storyTitle").textContent === __game.SK.episodes[__game.S.episode % __game.SK.episodes.length].finale.title` });
+  return r.result.value ? [] : ["a held press on the finale button didn't open the finale (is something rewriting the button every frame?)"];
+}
+
 async function main() {
   const browser = findBrowser();
   if (!browser) { console.error("No Chrome, Edge or Chromium found. Set CHROME=/path/to/browser."); process.exit(2); }
@@ -171,6 +196,7 @@ async function main() {
     await wait(1500);
     const r = await page.send("Runtime.evaluate", { expression: PAGE_TEST, awaitPromise: true, returnByValue: true });
     const fails = r.exceptionDetails ? ["the test itself threw: " + (r.exceptionDetails.exception?.description || r.exceptionDetails.text)] : r.result.value;
+    if (!r.exceptionDetails) fails.push(...await heldPressOpensFinale(page));
     const all = fails.concat(errors);
     console.log((all.length ? "FAIL " : "ok   ") + id + all.map(f => "\n       " + f).join(""));
     if (all.length) failed++;
