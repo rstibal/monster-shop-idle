@@ -91,10 +91,13 @@
     background: var(--accent); color: var(--on-accent); font-weight: 600; border-radius: 12px; font-size: 0.95rem;
     box-shadow: 0 4px 0 var(--accent-dark); pointer-events: none;
   }
-  /* a fixed grid so growing numbers never push an item onto another line: currencies stacked in the first
-     column, income and bonus in the second */
+  /* a fixed grid so growing numbers never push an item onto another line: income and bonus in the first
+     column, currencies stacked in the second; right-aligned when the stats sit beside the cash */
   .stats { display: grid; grid-template-columns: auto auto; grid-template-rows: repeat(3, auto); grid-auto-flow: column; justify-content: start; align-items: center; gap: 6px 28px; color: var(--ink-dim); font-size: 0.95rem; white-space: nowrap; }
+  .stats > :nth-child(1) { grid-area: 1 / 1; } .stats > :nth-child(2) { grid-area: 2 / 1; }
+  .stats > :nth-child(3) { grid-area: 1 / 2; } .stats > :nth-child(4) { grid-area: 2 / 2; } .stats > :nth-child(5) { grid-area: 3 / 2; }
   @media (max-width: 559px) { .stats { grid-template-columns: 1fr 1fr; gap: 6px 16px; } }
+  @media (min-width: 600px) { .stats { justify-items: end; } }
   .stats b { color: var(--ink); font-weight: 700; }
   .stats { align-items: center; }
   /* fast taps on phones shouldn't zoom the page or flash a gray highlight */
@@ -292,11 +295,11 @@
       <div class="cash" id="cash">$0</div>
     </div>
     <div class="stats">
+      <span>Income <b id="ips">$0/s</b></span>
+      <span>Permanent bonus <b id="perm">x1</b></span>
       <span class="stat"><span id="beerLabel">Beer</span> <b id="beer">0</b></span>
       <span><span id="eggsLabel">Eggs</span> <b id="eggs">0</b></span>
       <span><span id="crystalsLabel">Crystals</span> <b id="crystals">0</b></span>
-      <span>Income <b id="ips">$0/s</b></span>
-      <span>Permanent bonus <b id="perm">x1</b></span>
     </div>
   </header>
 
