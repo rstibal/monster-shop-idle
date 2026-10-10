@@ -73,10 +73,10 @@
   .wrap { max-width: 1000px; margin: 0 auto; padding: 16px; }
 
   /* Header: the cash counter is the one loud thing */
-  /* The stats row is either always below the cash or always beside it, never switching as numbers grow and shrink */
+  /* The stats row is either always below the cash (phones) or always beside it (600px and up, e.g. a Fold unfolded), never switching as numbers grow and shrink */
   header.top { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px 24px; padding: 8px 0 16px; }
   .brand { flex: 1 1 100%; min-width: 0; }
-  @media (min-width: 1000px) { header.top { flex-wrap: nowrap; } .brand { flex: 1 1 auto; } .stats { flex: 0 0 auto; } }
+  @media (min-width: 600px) { header.top { flex-wrap: nowrap; } .brand { flex: 1 1 auto; } .stats { flex: 0 0 auto; } .cash { font-size: clamp(2.6rem, 7.5vw, 4.6rem); } }
   .cash, .stats b { font-variant-numeric: tabular-nums; }
   .ep-line { margin: 0 0 2px; font-size: 0.85rem; color: var(--ink-dim); display: flex; gap: 10px; }
   .ep-line b { color: var(--accent); font-weight: 700; }
