@@ -163,6 +163,14 @@
   .mbar { height: 6px; max-width: 220px; margin-top: 5px; background: var(--deep); border-radius: 999px; overflow: hidden; }
   .mbar i { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
   .buys { display: flex; gap: 8px; flex-wrap: wrap; }
+  .buys .btn { min-width: 7em; }   /* one width for all three, so they line up from shop to shop and don't shift as amounts change */
+  /* phones: the three buttons get the card's full width under the icon, in three equal columns */
+  @media (max-width: 560px) {
+    .icon { grid-row: span 2; }
+    .meta { grid-column: 1 / -1; }
+    .buys { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; }
+    .buys .btn { min-width: 0; padding: 7px 4px; font-size: 0.88rem; }
+  }
   .btn {
     background: var(--accent); color: var(--on-accent); border: 0; border-radius: 10px; padding: 7px 12px; font-weight: 700;
     box-shadow: 0 3px 0 var(--accent-dark); transition: transform 80ms, box-shadow 80ms;
@@ -3032,16 +3040,15 @@
       const badge = crossed ? `<span class="badge">x${+Math.pow(2 + cardBonus("milestone"), crossed).toFixed(2)}</span>` : "";
       setHTML(r.buy, `Buy x${k}<span class="sub">${money(cost)}</span><span class="gain">${gain}</span>${badge}`);
       r.buy.disabled = S.cash < cost;
-      if (auto) r.auto.hidden = true;
-      else { r.auto.hidden = false; setHTML(r.auto, `Automate<span class="sub">${money(autoCost(i))}</span>`); r.auto.disabled = S.cash < autoCost(i) || sc.n < 1; }
-      // upgrades: shown once the shop has a customer, gone when all are bought
+      // all three buttons always stay in place (greyed out when done or out of reach), so a button never slides under a tap
+      if (auto) { setHTML(r.auto, `Automated<span class="sub">runs itself</span>`); r.auto.disabled = true; }
+      else { setHTML(r.auto, `Automate<span class="sub">${money(autoCost(i))}</span>`); r.auto.disabled = S.cash < autoCost(i) || sc.n < 1; }
       const nextUp = UPGRADES[sc.up];
-      r.up.hidden = !nextUp || sc.n < 1;
-      if (!r.up.hidden) {
+      if (nextUp) {
         const upCost = upgradeCost(i);
         setHTML(r.up, `Upgrade ${sc.up + 1}/${UPGRADES.length}<span class="sub">${money(upCost)}</span><span class="gain">income x${nextUp.mult}</span>`);
-        r.up.disabled = S.cash < upCost;
-      }
+        r.up.disabled = S.cash < upCost || sc.n < 1;
+      } else { setHTML(r.up, `Upgraded<span class="sub">all ${UPGRADES.length}</span><span class="gain">income x${upgradeMult(i)}</span>`); r.up.disabled = true; }
       const um = upgradeMult(i);
       r.n.textContent = sc.n + " " + customers(sc.n) + (auto ? " · auto" : "") + (um > 1 ? " · x" + um : "");
     });
