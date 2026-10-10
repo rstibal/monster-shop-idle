@@ -231,9 +231,9 @@
   .pull li { background: var(--deep); border-radius: 999px; padding: 4px 12px; color: var(--ink); font-weight: 600; }
   .pull li em { font-style: normal; color: var(--accent); margin-left: 6px; }
   /* Stats tab: two panels side by side when there's room, label left and number right */
-  .statgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; align-items: start; }
-  .tally { display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; margin: 0; font-size: 0.95rem; }
-  .tally dt { color: var(--ink-dim); }
+  .statgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }   /* panels stretch to the same height side by side */
+  .tally { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 16px; margin: 0; font-size: 0.95rem; }
+  .tally dt { color: var(--ink-dim); white-space: nowrap; }   /* labels stay on one line; a long value wraps instead */
   .tally dd { margin: 0; text-align: right; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
   .tally dd.money { color: var(--accent); }
   .panel p.since { margin: 12px 0 0; font-size: 0.8rem; }
@@ -1684,7 +1684,7 @@
   // lifetime counts for the Stats tab; they carry over finales (only Wipe resets them)
   const freshLife = () => ({ since: Date.now(), earned: 0, away: 0, customers: 0, taps: 0, upgrades: 0, automated: 0, goals: 0, finales: 0, chests: 0, cards: 0, played: 0 });
   const fresh = () => ({
-    life: freshLife(), epStart: Date.now(), epEarned: 0,
+    life: freshLife(), epLife: freshLife(), epStart: Date.now(), epEarned: 0,
     cash: 0, beer: 0, eggs: 0, crystals: 0, cards: {}, cardsV2: true, eps6: true, episode: 0, storySeen: -1, perm: 1, goalsDone: [], dailyDay: today(),
     schemes: SCHEMES.map((_, i) => ({ n: i === 0 ? 1 : 0, auto: false, up: 0, running: false, progress: 0 })),
     seen: Date.now(),
@@ -1714,6 +1714,7 @@
       // saves from before the Stats tab: what can be worked out is filled in, the rest counts from now
       if (!s.life) s.life = { ...freshLife(), finales: s.episode || 0, cards: Object.values(s.cards).reduce((a, n) => a + n, 0) };
       if (!s.epStart) { s.epStart = Date.now(); s.epEarned = 0; }
+      if (!s.epLife) s.epLife = { ...s.life };   // the all-time counts when this episode started, for the episode's share
       if (!s.eps6) { if (s.episode >= 5 && s.storySeen >= s.episode) s.storySeen = s.episode - 1; s.eps6 = true; }
       // saves from when Mort ran the first shops for free keep those shops automated
       if (!s.cardsV2) {
@@ -2105,7 +2106,7 @@
     next.cards = S.cards;
     next.rushUntil = S.rushUntil;   // a rush hour keeps running into the next episode
     next.dailyDay = S.dailyDay;
-    next.life = S.life; next.life.finales++;
+    next.life = S.life; next.life.finales++; next.epLife = { ...next.life };
     // without this, players who drop in a few times a day start each later episode earning nothing while away,
     // because the first automation costs as much as the episode's prices (see FREE_AUTO_SHOPS)
     next.schemes.slice(0, FREE_AUTO_SHOPS).forEach(sc => { sc.auto = true; sc.running = true; });
@@ -2907,14 +2908,20 @@
   const tally = rows => rows.map(([k, v, cls]) => `<dt>${k}</dt><dd${cls ? ` class="${cls}"` : ""}>${v}</dd>`).join("");
   function renderStats() {
     if ($("statsView").hidden) return;
-    const L = S.life, now = Date.now();
+    const L = S.life, now = Date.now(), ep = k => L[k] - (S.epLife[k] || 0);   // this episode's share of an all-time count
+    const top = S.schemes.map((x, i) => i).filter(i => S.schemes[i].n).sort((a, b) => perSecond(b) - perSecond(a))[0];
     setHTML($("statEp"), tally([
-      ["Episode", (S.episode + 1) + " · " + episodeName()],
+      ["Episode", count(S.episode + 1)],   // the district is in the header right above
       ["Running for", fmtPlayed((now - S.epStart) / 1000)],
       ["Earned", money(S.epEarned), "money"],
+      ["Earned while away", money(ep("away")), "money"],
       [cap(SK.words.customers), count(S.schemes.reduce((a, x) => a + x.n, 0))],
+      ["Taps", count(ep("taps"))],
+      ["Top shop", top === undefined ? "None yet" : cap(shop(top).noun) + " · " + money(perSecond(top)) + "/s"],
+      ["Milestone bonuses", S.schemes.reduce((a, x) => a + MILESTONES.filter(m => x.n >= m).length, 0) + " of " + SCHEMES.length * MILESTONES.length],
       ["Shops automated", S.schemes.filter((x, i) => isAuto(i)).length + " of " + SCHEMES.length],
       ["Upgrades", S.schemes.reduce((a, x) => a + x.up, 0) + " of " + SCHEMES.length * UPGRADES.length],
+      ["Chests opened", count(ep("chests"))],
       ["Goals cleared", clearedCount() + " of " + goalsNow().length],
     ]));
     setHTML($("statAll"), tally([
