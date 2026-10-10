@@ -3180,7 +3180,7 @@
   buildChests();
   maybeShowIntro();
   // ?debug exposes the state for testing in the console
-  if (new URLSearchParams(location.search).has("debug")) window.__game = { get S() { return S; }, get SK() { return SK; }, get amb() { return amb; }, setSkin, welcomeBack, sfx, get audio() { return actx && actx.state; }, openChest, renderCards, update, offline, tap, maybeShowIntro, openFinale, finish };
+  if (new URLSearchParams(location.search).has("debug")) window.__game = { get S() { return S; }, get SK() { return SK; }, get amb() { return amb; }, setSkin, welcomeBack, sfx, get audio() { return actx && actx.state; }, openChest, renderCards, update, offline, tap, buy, automate, upgrade, build, finaleReady, maybeShowIntro, openFinale, finish, SKINS };
   requestAnimationFrame(frame);
   // offline support for the home-screen app (http(s) only; file:// can't register one)
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
