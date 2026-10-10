@@ -227,6 +227,13 @@
   .pull ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
   .pull li { background: var(--deep); border-radius: 999px; padding: 4px 12px; color: var(--ink); font-weight: 600; }
   .pull li em { font-style: normal; color: var(--accent); margin-left: 6px; }
+  /* Stats tab: two panels side by side when there's room, label left and number right */
+  .statgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; align-items: start; }
+  .tally { display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; margin: 0; font-size: 0.95rem; }
+  .tally dt { color: var(--ink-dim); }
+  .tally dd { margin: 0; text-align: right; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .tally dd.money { color: var(--accent); }
+  .panel p.since { margin: 12px 0 0; font-size: 0.8rem; }
   .cardgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }   /* six cards: rows of 1, 2 or 3 all come out even */
   .card { --hue: 100; background: var(--panel); border: 3px solid var(--edge); border-radius: var(--radius); padding: 12px; display: grid; grid-template-columns: 56px 1fr; gap: 4px 12px; align-content: start; }
   .card.none { opacity: 0.6; }
@@ -299,6 +306,7 @@
         <div class="seg" role="group" aria-label="View">
           <button data-view="shops" aria-pressed="true">Shops</button>
           <button data-view="cards" aria-pressed="false">Cards<i class="dot" id="cardDot" hidden></i></button>
+          <button data-view="stats" aria-pressed="false">Stats</button>
         </div>
         <div class="toolbar" id="buyBar">
           <span>Buy</span>
@@ -314,6 +322,12 @@
         <div class="chests" id="chests"></div>
         <div class="pull" id="pull" aria-live="polite"></div>
         <div class="cardgrid" id="cardgrid"></div>
+      </section>
+      <section id="statsView" hidden aria-label="Stats">
+        <div class="statgrid">
+          <section class="panel" aria-labelledby="statEpH"><h2 id="statEpH">This episode</h2><dl class="tally" id="statEp"></dl></section>
+          <section class="panel" aria-labelledby="statAllH"><h2 id="statAllH">All time</h2><dl class="tally" id="statAll"></dl><p class="since" id="statSince"></p></section>
+        </div>
       </section>
     </main>
 
@@ -1664,7 +1678,10 @@
   const GOALS_NEEDED = 5;
 
   // ---------- State ----------
+  // lifetime counts for the Stats tab; they carry over finales (only Wipe resets them)
+  const freshLife = () => ({ since: Date.now(), earned: 0, away: 0, customers: 0, taps: 0, upgrades: 0, automated: 0, goals: 0, finales: 0, chests: 0, cards: 0, played: 0 });
   const fresh = () => ({
+    life: freshLife(), epStart: Date.now(), epEarned: 0,
     cash: 0, beer: 0, eggs: 0, crystals: 0, cards: {}, cardsV2: true, eps6: true, episode: 0, storySeen: -1, perm: 1, goalsDone: [], dailyDay: today(),
     schemes: SCHEMES.map((_, i) => ({ n: i === 0 ? 1 : 0, auto: false, up: 0, running: false, progress: 0 })),
     seen: Date.now(),
@@ -1691,6 +1708,9 @@
       // saves from before the story existed count as having read the current intro
       if (typeof s.storySeen !== "number") s.storySeen = s.episode || 0;
       // settings went from 5 episodes to 6 on 2026-10-03, so a save past episode 5 is now in a different district: show its intro
+      // saves from before the Stats tab: what can be worked out is filled in, the rest counts from now
+      if (!s.life) s.life = { ...freshLife(), finales: s.episode || 0, cards: Object.values(s.cards).reduce((a, n) => a + n, 0) };
+      if (!s.epStart) { s.epStart = Date.now(); s.epEarned = 0; }
       if (!s.eps6) { if (s.episode >= 5 && s.storySeen >= s.episode) s.storySeen = s.episode - 1; s.eps6 = true; }
       // saves from when Mort ran the first shops for free keep those shops automated
       if (!s.cardsV2) {
@@ -1985,6 +2005,7 @@
   const fmtTime = s => s < 10 ? +s.toFixed(1) + "s" : s < 60 ? Math.round(s) + "s" : Math.round(s / 60) + "m";
 
   // ---------- Actions ----------
+  function earn(v) { S.cash += v; S.life.earned += v; S.epEarned += v; }
   function unlocked(i) { return i === 0 || S.schemes[i - 1].n >= 1; }
 
   function buy(i) {
@@ -1994,6 +2015,7 @@
     const before = S.schemes[i].n;
     S.cash -= cost;
     S.schemes[i].n += k;
+    S.life.customers += k;
     const crossed = MILESTONES.filter(m => before < m && S.schemes[i].n >= m).length;
     sfx(crossed ? "milestone" : "buy");
     if (crossed) {
@@ -2009,6 +2031,7 @@
     if (isAuto(i) || S.cash < autoCost(i) || sc.n < 1) return;
     S.cash -= autoCost(i);
     sc.auto = true;
+    S.life.automated++;
     sfx("automate");
     if (!sc.running) sc.running = true;
     render();
@@ -2018,6 +2041,7 @@
     if (sc.n < 1 || sc.up >= UPGRADES.length || S.cash < upgradeCost(i)) return;
     S.cash -= upgradeCost(i);
     sc.up++;
+    S.life.upgrades++;
     sfx("milestone");
     toast(shop(i).name + ": income x" + UPGRADES[sc.up - 1].mult);
     render();
@@ -2026,6 +2050,7 @@
     const sc = S.schemes[i];
     if (sc.n < 1 || isAuto(i) || sc.running) return;
     sc.running = true;
+    S.life.taps++;
     sfx("tap", i);
   }
 
@@ -2043,6 +2068,7 @@
     else if (S[ch.cur] >= ch.cost) S[ch.cur] -= ch.cost;
     else return;
     const got = [];
+    S.life.chests++; S.life.cards += ch.pulls;
     for (let k = 0; k < ch.pulls; k++) {
       const c = pickCard();
       const before = cardLevel(c.id);
@@ -2076,6 +2102,7 @@
     next.cards = S.cards;
     next.rushUntil = S.rushUntil;   // a rush hour keeps running into the next episode
     next.dailyDay = S.dailyDay;
+    next.life = S.life; next.life.finales++;
     // without this, players who drop in a few times a day start each later episode earning nothing while away,
     // because the first automation costs as much as the episode's prices (see FREE_AUTO_SHOPS)
     next.schemes.slice(0, FREE_AUTO_SHOPS).forEach(sc => { sc.auto = true; sc.running = true; });
@@ -2723,8 +2750,9 @@
   // ---------- Loop ----------
   let last = performance.now();
   function frame(now) {
-    const dt = Math.min((now - last) / 1000, 1) * SPEED;
+    const real = Math.min((now - last) / 1000, 1), dt = real * SPEED;
     last = now;
+    S.life.played += real;
     for (let i = 0; i < SCHEMES.length; i++) {
       const sc = S.schemes[i];
       const auto = isAuto(i);
@@ -2733,7 +2761,7 @@
       sc.progress += dt / runTime(i);
       if (sc.progress >= 1) {
         const runs = auto ? Math.floor(sc.progress) : 1;
-        S.cash += runIncome(i) * runs;
+        earn(runIncome(i) * runs);
         if (!auto) sfx("cash", i);
         sc.progress = auto ? sc.progress - runs : 0;
         sc.running = auto;
@@ -2748,6 +2776,7 @@
     for (const g of goalsNow()) {
       if (!S.goalsDone.includes(g.id) && g.cur(S) >= goalTarget(g)) {
         S.goalsDone.push(g.id);
+        S.life.goals++;
         S.eggs += EGGS_PER_GOAL;
         sfx("goal");
         toast((g === storyGoal() ? "Story goal cleared: " : "Goal cleared: ") + goalText(g) + " (+" + EGGS_PER_GOAL + " " + cur("eggs", EGGS_PER_GOAL) + ")");
@@ -2768,7 +2797,7 @@
     if (secs < 30) return;
     let gain = 0;
     SCHEMES.forEach((_, i) => { if (isAuto(i)) gain += perSecond(i) / rushMult() * secs; });   // a rush hour only counts while you play
-    S.cash += gain;
+    earn(gain); S.life.away += gain;
     if (away < WELCOME_AFTER_S) { if (gain > 0) toast("Welcome back. Your shops earned " + money(gain) + " in " + fmtAway(secs)); return; }
     welcomeBack(away, gain);
   }
@@ -2783,7 +2812,7 @@
     if (finaleReady()) text.push("The <b>finale</b> is ready. " + EP().finale.ready);
     // the earnings are already in the till (closing the popup keeps them); the choice is the bonus on top
     const actions = gain > 0
-      ? [{ label: "Bank " + money(gain * (1 + BANK_BONUS)), run: () => { S.cash += gain * BANK_BONUS; sfx("milestone"); toast("Banked, with " + Math.round(BANK_BONUS * 100) + "% on top."); } },
+      ? [{ label: "Bank " + money(gain * (1 + BANK_BONUS)), run: () => { earn(gain * BANK_BONUS); S.life.away += gain * BANK_BONUS; sfx("milestone"); toast("Banked, with " + Math.round(BANK_BONUS * 100) + "% on top."); } },
          { label: "Rush hour", choice: true, run: () => { S.rushUntil = Date.now() + RUSH_S * 1000; sfx("finale"); toast("Rush hour! Everything earns x" + RUSH_MULT + " for " + RUSH_S / 60 + " minutes."); } }]
       : [{ label: "Back to work", run: () => sfx("buy") }];
     if (gain > 0) text.splice(1, 0, "<b>Bank it</b> for " + Math.round(BANK_BONUS * 100) + "% more, or call a <b>rush hour</b>: every shop earns x" + RUSH_MULT + " for the next " + RUSH_S / 60 + " minutes. A rush pays off if you're staying to play.");
@@ -2869,6 +2898,37 @@
     });
     $("cardDot").hidden = !any;
   }
+  // ---------- Stats ----------
+  const fmtPlayed = s => s < 60 ? Math.floor(s) + "s" : s < 3600 ? Math.floor(s / 60) + "m" : s < 86400 ? Math.floor(s / 3600) + "h " + Math.floor(s % 3600 / 60) + "m" : Math.floor(s / 86400) + "d " + Math.floor(s % 86400 / 3600) + "h";
+  const count = n => Math.round(n).toLocaleString();
+  const tally = rows => rows.map(([k, v, cls]) => `<dt>${k}</dt><dd${cls ? ` class="${cls}"` : ""}>${v}</dd>`).join("");
+  function renderStats() {
+    if ($("statsView").hidden) return;
+    const L = S.life, now = Date.now();
+    setHTML($("statEp"), tally([
+      ["Episode", (S.episode + 1) + " · " + episodeName()],
+      ["Running for", fmtPlayed((now - S.epStart) / 1000)],
+      ["Earned", money(S.epEarned), "money"],
+      [cap(SK.words.customers), count(S.schemes.reduce((a, x) => a + x.n, 0))],
+      ["Shops automated", S.schemes.filter((x, i) => isAuto(i)).length + " of " + SCHEMES.length],
+      ["Upgrades", S.schemes.reduce((a, x) => a + x.up, 0) + " of " + SCHEMES.length * UPGRADES.length],
+      ["Goals cleared", clearedCount() + " of " + goalsNow().length],
+    ]));
+    setHTML($("statAll"), tally([
+      ["Earned", money(L.earned), "money"],
+      ["Earned while away", money(L.away), "money"],
+      [cap(SK.words.customers), count(L.customers)],
+      ["Taps", count(L.taps)],
+      ["Upgrades bought", count(L.upgrades)],
+      ["Shops automated", count(L.automated)],
+      ["Goals cleared", count(L.goals)],
+      ["Finales", count(L.finales)],
+      ["Chests opened", count(L.chests)],
+      ["Cards drawn", count(L.cards)],
+      ["Time played", fmtPlayed(L.played)],
+    ]));
+    $("statSince").textContent = "Counting since " + new Date(L.since).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) + ". Time played only counts while the game is on screen.";
+  }
   function renderCards() {
     $("cardgrid").innerHTML = CARDS.map(cast).map(c => {
       const n = copies(c.id), lv = cardLevel(c.id), max = lv >= MAX_LEVEL;
@@ -2931,6 +2991,7 @@
     update.rush = rush;
     $("offlineNote").textContent = "Automated shops keep earning while you're away (up to " + offlineCap() / 3600 + " hours).";
     updateChests();
+    if (force || Date.now() - (update.statsAt || 0) > 1000) { update.statsAt = Date.now(); renderStats(); }   // once a second is plenty
     const s0 = S.schemes[0];
     $("hint").textContent = "Tap the " + uncap(shop(0).name) + " (the icon or its bar) to earn your first dollars. Every $1 gets you closer to a second " + customers(1) + ".";
     $("hint").hidden = !(s0.n === 1 && !isAuto(0) && S.cash < nextCost(0) && S.episode === 0);
@@ -3027,11 +3088,12 @@
   showBuyMode();
   const VIEW_KEY = "grizzle-haunted-mall-view";
   function setView(view) {
-    const cards = view === "cards";
-    document.querySelectorAll("[data-view]").forEach(x => x.setAttribute("aria-pressed", x.dataset.view === (cards ? "cards" : "shops")));
-    $("signs").hidden = cards;
-    $("buyBar").hidden = cards;
-    $("cardsView").hidden = !cards;
+    if (!["cards", "stats"].includes(view)) view = "shops";
+    document.querySelectorAll("[data-view]").forEach(x => x.setAttribute("aria-pressed", x.dataset.view === view));
+    $("signs").hidden = $("buyBar").hidden = view !== "shops";
+    $("cardsView").hidden = view !== "cards";
+    $("statsView").hidden = view !== "stats";
+    if (view === "stats") renderStats();
   }
   document.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", () => {
     setView(b.dataset.view);
