@@ -320,8 +320,8 @@
           <button data-view="stats" aria-pressed="false">Stats</button>
         </div>
         <div class="toolbar" id="buyBar">
-          <span>Buy</span>
-          <div class="seg" role="group" aria-label="Buy amount">
+          <span>Get</span>
+          <div class="seg" role="group" aria-label="Customers to get">
             <button data-mode="1" aria-pressed="true">x1</button>
             <button data-mode="10" aria-pressed="false">x10</button>
             <button data-mode="max" aria-pressed="false">Max</button>
@@ -3038,7 +3038,8 @@
       const crossed = MILESTONES.filter(m => sc.n < m && sc.n + k >= m).length;
       const gain = "+" + (auto ? money(added / runTime(i)) + "/s" : money(added) + "/run");
       const badge = crossed ? `<span class="badge">x${+Math.pow(2 + cardBonus("milestone"), crossed).toFixed(2)}</span>` : "";
-      setHTML(r.buy, `Buy x${k}<span class="sub">${money(cost)}</span><span class="gain">${gain}</span>${badge}`);
+      // "Get", like the goals ("Get 25 ... customers"): you get customers, you don't buy them
+      setHTML(r.buy, `Get x${k}<span class="sub">${money(cost)}</span><span class="gain">${gain}</span>${badge}`);
       r.buy.disabled = S.cash < cost;
       // all three buttons always stay in place (greyed out when done or out of reach), so a button never slides under a tap
       if (auto) { setHTML(r.auto, `Automated<span class="sub">runs itself</span>`); r.auto.disabled = true; }
