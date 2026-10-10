@@ -41,7 +41,7 @@ The side panel has a Setting picker. Each setting has its own cast, shops, story
 The rules below use the Haunted Mall's names.
 
 - Six shops unlock in order. Each episode has its own six (episode 1 runs from the pretzel kiosk of mystery to the dragon anchor-store lease).
-- Buy customers (x1, x10 or Max) to raise a shop's income. Cost grows geometrically.
+- Buy customers (x1, x10 or Max) to raise a shop's income. Max buys as many as you can afford up to the shop's next bonus, so it never skips past one; after the last bonus (150) it buys all you can afford. Cost grows geometrically.
 - Each Buy button shows what it adds: $/s for automated shops, $ per run for tapped ones. A green badge (x2) means the purchase crosses a milestone.
 - Tap a shop to run it once, or pay to automate it.
 - Owning 10, 25, 50, 100 and 150 customers of a shop doubles its income and gives 1 beer.

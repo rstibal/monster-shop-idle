@@ -1991,7 +1991,11 @@
     return Math.max(0, k);
   }
   function buyCount(i) {
-    if (buyMode === "max") return Math.max(1, maxAffordable(i));
+    // Max buys as many as you can afford, but stops at the next bonus (10, 25, 50, 100, 150); past the last one it has no limit
+    if (buyMode === "max") {
+      const k = Math.max(1, maxAffordable(i)), next = MILESTONES.find(m => m > S.schemes[i].n);
+      return next ? Math.min(k, next - S.schemes[i].n) : k;
+    }
     return Number(buyMode);
   }
 
