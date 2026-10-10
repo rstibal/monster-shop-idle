@@ -1,6 +1,6 @@
 # Monster Shop Idle
 
-A small idle clicker about running dodgy shops, in six settings: a goblin in a haunted mall, an ex-smuggler on a space station, a pirate captain on a ship that sails from port to port, a street vendor in a cyberpunk night market, a repair bot on a planet of robots, or an expelled wizard who never left the academy. Plain HTML, CSS and JavaScript in one file, with no build step and no dependencies.
+A small idle clicker about running dodgy shops, in eight settings: a goblin in a haunted mall, an ex-smuggler on a space station, a pirate captain on a ship that sails from port to port, a street vendor in a cyberpunk night market, a repair bot on a planet of robots, an expelled wizard who never left the academy, a jackalope in a Wild West ghost town, or a raptor who has just invented shopping. Plain HTML, CSS and JavaScript in one file, with no build step and no dependencies.
 
 Status: early prototype. All numbers are placeholders.
 
@@ -35,6 +35,8 @@ The side panel has a Setting picker. Each setting has its own cast, shops, story
 | Neon Night Market | Kix, a street vendor | Gutter Street, Rain Bazaar, Chrome Row, Overdrive Circuit, Skyline Tower, Undercity | Batteries, tokens, shards | Black-violet with magenta and cyan, VT323 terminal pixels |
 | Planet Cog | Rivet, a repair bot | Scrapyard Flats, Toaster Works, Server City, Spark Festival, Old Spaceport, Rust Moon | Oil, bolts, cores | Scrap heap: tin grey, copper and patina green, Black Ops One |
 | Hexwick Academy | Fizz, an expelled wizard | Bell Tower, Greenhouses, Library, Dueling Grounds, Potion Cellars, Observatory | Potions, scrolls, moonstones | Spellfire: plum dark, flame orange and spell cyan, MedievalSharp |
+| Tumbleweed Gulch | Dusty, a jackalope | Main Street, Gold Creek, Silver Mine, Rodeo, Railroad Depot, Painted Canyon | Sarsaparillas, horseshoes, nuggets | Saloon lamplight: saddle brown, lamp amber and turquoise, Rye |
+| Fern Valley | Clawdia, a raptor | Fern Valley, Tar Pits, Volcano, Dino Games, Ice Age, Meteor Hill | Berries, eggs, amber | Jungle sunset: deep green, orange and lime, Chewy |
 
 ## How it plays
 
@@ -50,7 +52,7 @@ The rules below use the Haunted Mall's names.
 - The **Stats** tab (next to Shops and Cards) shows this episode (time, earnings and how much came in while away, customers, taps, top shop, milestone bonuses, automations, upgrades, chests, goals) and all-time totals: earnings (and how much came in while you were away), customers, taps, upgrades, automations, goals, finales, chests, cards drawn and time played. Saves from before it start counting the day they're loaded.
 - Saves stay in your browser. To move a game to another device, press **Copy** next to Save in the side panel, then **Paste** the code on the other device (it replaces the game there).
 - Automated shops keep earning while you're away, up to 8 hours. After a break of 5 minutes or more, a welcome-back popup shows what they earned and any chests ready to open, and asks what to do with it: **bank it** for 25% more, or call a **rush hour**, where every shop earns x3 for the next 5 minutes (a countdown shows next to the episode number). Banking pays more after long breaks; a rush pays off when you're back to play for a while.
-- Sound effects for tapping, payouts, buying, milestones, automating, goals, chests and the finale, synthesized in the browser (no audio files). Each setting has its own voice: eerie in the Haunted Mall, arcade blips on Starport Nine. Each setting also has a quiet background loop, synthesized too: a humming, drafty mall, a station's engine drone and computer chirps, waves and creaking timbers on the ship, rain and a synth pad in the night market, clanking machines on Planet Cog, and a crackling fire, an owl and stray spells at Hexwick Academy. The side panel has Effects and Ambience volume sliders; a Sound on/off switch above them mutes everything.
+- Sound effects for tapping, payouts, buying, milestones, automating, goals, chests and the finale, synthesized in the browser (no audio files). Each setting has its own voice: eerie in the Haunted Mall, arcade blips on Starport Nine. Each setting also has a quiet background loop, synthesized too: a humming, drafty mall, a station's engine drone and computer chirps, waves and creaking timbers on the ship, rain and a synth pad in the night market, clanking machines on Planet Cog, a crackling fire, an owl and stray spells at Hexwick Academy, desert wind, a creaking windmill and a far-off coyote in Tumbleweed Gulch, and insects, frogs and the odd distant roar in Fern Valley. The side panel has Effects and Ambience volume sliders; a Sound on/off switch above them mutes everything.
 
 ### Episodes and story
 
