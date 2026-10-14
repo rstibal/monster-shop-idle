@@ -76,7 +76,9 @@
   /* The stats row is either always below the cash (phones) or always beside it (600px and up, e.g. a Fold unfolded), never switching as numbers grow and shrink */
   header.top { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px 24px; padding: 8px 0 16px; }
   .brand { flex: 1 1 100%; min-width: 0; }
-  @media (min-width: 600px) { header.top { flex-wrap: nowrap; } .brand { flex: 1 1 auto; } .stats { flex: 0 0 auto; } .cash { font-size: clamp(2.6rem, 7.5vw, 4.6rem); } }
+  /* beside the stats, the cash sizes itself to the room left (cqi is the brand's width; the owner's portrait takes about 94px of it),
+     so even "$888.88T" in a wide display font never runs under the stats box */
+  @media (min-width: 600px) { header.top { flex-wrap: nowrap; } .brand { flex: 1 1 0; container-type: inline-size; } .stats { flex: 0 0 auto; } }
   .cash, .stats b { font-variant-numeric: tabular-nums; }
   /* With art, the header becomes a framed banner: the episode's scene behind it, faded to the left so the cash stays readable,
      and the owner's portrait beside the cash (Rob's pick of five mockups, 2026-10-13) */
@@ -109,6 +111,7 @@
   .ep-line .rush { color: var(--alt); font-weight: 700; font-variant-numeric: tabular-nums; }
   .brand h1 { font-family: var(--display); font-weight: var(--display-weight); font-size: calc(1.15rem * var(--display-size)); margin: 0; color: var(--ink-dim); letter-spacing: 0.02em; }
   .cash { font-family: var(--display); font-weight: var(--display-weight); font-size: clamp(2.6rem, 9vw, 4.6rem); line-height: 1; color: var(--accent); text-shadow: 0 3px 0 var(--accent-dark); margin: 4px 0 0; }
+  @media (min-width: 600px) { .cash { font-size: clamp(2rem, calc((100cqi - 94px) / 6), 4.6rem); } }   /* after .cash, or it loses */
   .cash small { font-size: 0.45em; color: var(--accent-dark); text-shadow: none; margin-left: 6px; }
   /* Floats over the page so showing or hiding it never moves anything */
   .hint {
@@ -123,7 +126,8 @@
   .stats > :nth-child(1) { grid-area: 1 / 1; } .stats > :nth-child(2) { grid-area: 2 / 1; }
   .stats > :nth-child(3) { grid-area: 1 / 2; } .stats > :nth-child(4) { grid-area: 2 / 2; } .stats > :nth-child(5) { grid-area: 3 / 2; }
   @media (max-width: 559px) { .stats { grid-template-columns: 1fr 1fr; gap: 6px 16px; } }
-  @media (min-width: 600px) { .stats { justify-items: end; } }
+  /* beside the cash (600px and up) they stack in one narrow column, so the box never runs into the cash (Rob's request, 2026-10-13) */
+  @media (min-width: 600px) { .stats { justify-items: end; grid-template-columns: auto; grid-template-rows: none; grid-auto-flow: row; gap: 3px; } .stats > * { grid-area: auto !important; } }
   .stats b { color: var(--ink); font-weight: 700; }
   .stats { align-items: center; }
   /* fast taps on phones shouldn't zoom the page or flash a gray highlight */
