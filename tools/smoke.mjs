@@ -76,7 +76,7 @@ const PAGE_TEST = `(async () => {
   check(g.S.schemes[1].n >= 1, "never opened the second shop");
   check(g.S.life.earned > 0 && g.S.life.taps > 0, "the Stats totals didn't count earnings or taps");
   check(Number.isFinite(g.S.cash) && g.S.cash >= 0, "cash is not a sane number: " + g.S.cash);
-  check(/^\\$\\d+\\.\\d\\d(\\u00a0[A-Za-z]+)?$/.test(document.getElementById("cash").textContent), "cash display looks wrong: " + document.getElementById("cash").textContent);
+  check(/^\\$\\d+\\.\\d\\d[A-Za-z]*$/.test(document.getElementById("cash").textContent), "cash display looks wrong: " + document.getElementById("cash").textContent);
 
   // every view renders
   for (const v of ["cards", "stats", "shops"]) document.querySelector('[data-view="' + v + '"]').click();

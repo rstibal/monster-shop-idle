@@ -2455,13 +2455,13 @@
     const x = v / Math.pow(1000, t);
     return (x >= 100 ? x.toFixed(0) : x >= 10 ? x.toFixed(1) : x.toFixed(2)) + SUFFIX[t];
   }
-  // money always shows two decimals and a spaced suffix, like the old Sunny game: $0.50, $26.00, $55.88 M, $1.30 B
+  // money always shows two decimals, like the old Sunny game: $0.50, $26.00, $55.88M, $1.30B
   function money(v) {
     if (!isFinite(v)) return "$∞";
     if (v < 1000) return "$" + v.toFixed(2);
     let t = Math.min(Math.floor(Math.log10(v) / 3), SUFFIX.length - 1), x = (v / Math.pow(1000, t)).toFixed(2);
-    if (x >= 1000 && t < SUFFIX.length - 1) x = (v / Math.pow(1000, ++t)).toFixed(2);   // 999.996K rounds up to 1.00 M, not 1000.00 K
-    return "$" + x + "\u00a0" + SUFFIX[t];   // no-break space, so a narrow button never splits "$7.06" from "M"
+    if (x >= 1000 && t < SUFFIX.length - 1) x = (v / Math.pow(1000, ++t)).toFixed(2);   // 999.996K rounds up to 1.00M, not 1000.00K
+    return "$" + x + SUFFIX[t];
   }
   // Rewriting a button's contents mid-press drops the click, so per-frame updates only write when something changed.
   const setHTML = (el, html) => { if (el._html !== html) { el._html = html; el.innerHTML = html; } };
