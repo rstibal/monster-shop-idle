@@ -38,6 +38,8 @@ The side panel has a Setting picker. Each setting has its own cast, shops, story
 | Tumbleweed Gulch | Dusty, a jackalope | Main Street, Gold Creek, Silver Mine, Rodeo, Railroad Depot, Painted Canyon | Sarsaparillas, horseshoes, nuggets | Saloon lamplight: saddle brown, lamp amber and turquoise, Rye |
 | Fern Valley | Clawdia, a raptor | Fern Valley, Tar Pits, Volcano, Dino Games, Ice Age, Meteor Hill | Berries, eggs, amber | Jungle sunset: deep green, orange and lime, Chewy |
 
+Each setting's drawn art runs through the page: the episode's scene sits behind the cash with the owner's portrait beside it, the rival heckles from the top of the Goals panel, and the finale character waits in the Finale panel.
+
 ## How it plays
 
 The rules below use the Haunted Mall's names.

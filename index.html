@@ -78,6 +78,32 @@
   .brand { flex: 1 1 100%; min-width: 0; }
   @media (min-width: 600px) { header.top { flex-wrap: nowrap; } .brand { flex: 1 1 auto; } .stats { flex: 0 0 auto; } .cash { font-size: clamp(2.6rem, 7.5vw, 4.6rem); } }
   .cash, .stats b { font-variant-numeric: tabular-nums; }
+  /* With art, the header becomes a framed banner: the episode's scene behind it, faded to the left so the cash stays readable,
+     and the owner's portrait beside the cash (Rob's pick of five mockups, 2026-10-13) */
+  header.top.scenic { position: relative; overflow: hidden; border: 3px solid var(--edge); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; min-height: 200px; box-shadow: 0 6px 0 var(--deep); }
+  .hdr-scene { position: absolute; inset: 0; z-index: 0; }
+  .hdr-scene svg { width: 100%; height: 100%; display: block; }
+  .hdr-scene::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 70%, transparent) 38%, transparent 70%), linear-gradient(0deg, color-mix(in srgb, var(--bg) 80%, transparent) 0%, transparent 45%); }
+  header.top.scenic > :not(.hdr-scene) { position: relative; z-index: 1; }
+  header.top.scenic .stats { background: color-mix(in srgb, var(--panel) 85%, transparent); border: 2px solid var(--edge); border-radius: 12px; padding: 8px 12px; }
+  header.top.scenic .brand h1, header.top.scenic .ep-line { text-shadow: 0 1px 3px var(--deep); }
+  .brand.has-owner { display: grid; grid-template-columns: auto 1fr; column-gap: 14px; align-items: end; }
+  .brand.has-owner > * { grid-column: 2; }
+  .brand > .owner { grid-column: 1; grid-row: 1 / span 3; align-self: center; width: 104px; height: 104px; border-radius: 50%; overflow: hidden; border: 4px solid var(--accent); box-shadow: 0 5px 0 var(--accent-dark); }
+  .owner svg, .cameo .face svg { width: 100%; height: 100%; display: block; }
+  /* on phones the cash runs the full width, so the whole scene dims instead of only its left side */
+  @media (max-width: 559px) {
+    .brand > .owner { width: 72px; height: 72px; border-width: 3px; } header.top.scenic { min-height: 0; }
+    .hdr-scene::after { background: linear-gradient(0deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 62%, transparent) 70%, color-mix(in srgb, var(--bg) 35%, transparent) 100%); }
+  }
+  /* the rival heckles from the top of Goals, the finale character waits in the Finale panel */
+  .cameo { display: grid; grid-template-columns: 56px 1fr; gap: 10px; align-items: center; margin: 0 0 12px; }
+  .cameo .face { width: 56px; height: 56px; border-radius: 50%; overflow: hidden; border: 3px solid var(--alt); }
+  #finCameo .face { border-color: var(--accent); }
+  .panel .cameo .bubble { position: relative; margin: 0; background: var(--deep); border: 2px solid var(--edge); border-radius: 12px; padding: 6px 10px; font-size: 0.85rem; color: var(--ink); }
+  .cameo .bubble::before { content: ""; position: absolute; left: -8px; top: 50%; margin-top: -6px; border: 6px solid transparent; border-right-color: var(--edge); border-left: 0; }
+  .cameo .bubble b { display: block; color: var(--alt); font-family: var(--display); font-weight: var(--display-weight); font-size: calc(1rem * var(--display-size)); }
+  #finCameo .bubble b { color: var(--accent); }
   .ep-line { margin: 0 0 2px; font-size: 0.85rem; color: var(--ink-dim); display: flex; gap: 10px; }
   .ep-line b { color: var(--accent); font-weight: 700; }
   .ep-line .rush { color: var(--alt); font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -296,8 +322,10 @@
 </head>
 <body>
 <div class="wrap">
-  <header class="top">
-    <div class="brand">
+  <header class="top" id="top">
+    <div class="hdr-scene" id="hdrScene" aria-hidden="true" hidden></div>
+    <div class="brand" id="brand">
+      <div class="owner" id="ownerArt" aria-hidden="true" hidden></div>
       <p class="ep-line"><b id="epNum">Episode 1</b><span id="epPrices" hidden></span><span id="rush" class="rush" hidden></span></p>
       <h1 id="episodeName">Grizzle's Haunted Mall</h1>
       <div class="cash" id="cash">$0</div>
@@ -345,11 +373,13 @@
     <aside>
       <section class="panel" aria-labelledby="goalsH">
         <h2 id="goalsH">Goals</h2>
+        <div class="cameo" id="rivalCameo" hidden><div class="face"></div><p class="bubble"><b></b><span></span></p></div>
         <div id="goals"></div>
         <p id="goalsNote"></p>
       </section>
       <section class="panel finale" aria-labelledby="finH">
         <h2 id="finH">Episode finale</h2>
+        <div class="cameo" id="finCameo" hidden><div class="face"></div><p class="bubble"><b></b><span></span></p></div>
         <p id="finText"></p>
         <button class="btn alt" id="finBtn" disabled>Locked</button>
       </section>
@@ -3453,6 +3483,15 @@
 
   function build() {
     $("episodeName").textContent = SK.owner + "'s " + episodeName();
+    // the scene and cast around the page; the story dialog shows the same scene, so its ids get a prefix to stay unique
+    const scene = sceneArt().replace("<svg ", '<svg preserveAspectRatio="xMidYMid slice" ').replace(/(id="|url\(#)art-/g, "$1hdr-art-");
+    $("hdrScene").innerHTML = scene; $("hdrScene").hidden = !scene; $("top").classList.toggle("scenic", !!scene);
+    $("ownerArt").innerHTML = cardArt("money"); $("ownerArt").hidden = !cardArt("money"); $("brand").classList.toggle("has-owner", !!cardArt("money"));
+    for (const [el, id] of [["rivalCameo", "milestone"], ["finCameo", "finale"]]) {
+      $(el).hidden = !cardArt(id);
+      $(el).querySelector(".face").innerHTML = cardArt(id);
+      $(el).querySelector("b").textContent = SK.cards[id].name;
+    }
     document.title = SK.owner + "'s " + episodeName() + " · Monster Shop Idle";
     $("epNum").textContent = "Episode " + (S.episode + 1);
     // later episodes cost more (see costMult); say so, so the higher prices have a visible reason
@@ -3678,6 +3717,12 @@
           clearedCount() < GOALS_NEEDED ? `${GOALS_NEEDED - clearedCount()} more goal${GOALS_NEEDED - clearedCount() > 1 ? "s" : ""}` : "",
           S.schemes[SCHEMES.length - 1].n < 1 ? "a " + EP().lease : "",
         ].filter(Boolean).join(" and ") + ".");
+    // the rival's line follows your progress; the finale character is waiting on you
+    const done = clearedCount();
+    setText($("rivalCameo").querySelector("span"), ready ? "Fine. Enjoy it while it lasts."
+      : done >= GOALS_NEEDED ? "You'll never afford the " + EP().lease + "."
+      : done >= 3 ? "Hmph. Still not enough." : done ? "Beginner's luck." : GOALS_NEEDED + " goals? You won't clear three.");
+    setText($("finCameo").querySelector("span"), ready ? "Ready when you are, boss." : "Say the word when it's ready, boss.");
     // refresh goal progress a few times a second, not every frame
     const t = Math.floor(performance.now() / 250);
     if (force || t !== update.t) { update.t = t; renderGoals(); }
