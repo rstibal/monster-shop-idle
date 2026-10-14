@@ -179,10 +179,10 @@
   .sign h3 .n { color: var(--accent); font-size: calc(1rem * var(--display-size)); white-space: nowrap; }
   /* phones: shop name on its own line, customer count underneath */
   @media (max-width: 560px) { .sign h3 { flex-direction: column; align-items: flex-start; gap: 0; } }
-  .bar { cursor: pointer; height: 18px; background: var(--deep); border-radius: 999px; overflow: hidden; position: relative; }
+  .bar { cursor: pointer; height: 22px; background: var(--deep); border-radius: 999px; overflow: hidden; position: relative; }
   .bar i { position: absolute; inset: 0 auto 0 0; width: 0; background: hsl(var(--hue) var(--bar-s) var(--bar-l)); border-radius: 999px; }
   /* the run's time left on the left end, what it pays on the right end, like the Sunny game */
-  .bar span { position: absolute; inset: 0; display: grid; place-items: center end; padding: 0 10px; font-size: 0.78rem; font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.7); pointer-events: none; font-variant-numeric: tabular-nums; }
+  .bar span { position: absolute; inset: 0; display: grid; place-items: center end; padding: 0 10px; font-size: 0.85rem; font-weight: 700;   /* same size as the per-second rate under it */ color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.7); pointer-events: none; font-variant-numeric: tabular-nums; }
   .bar span.left { place-items: center start; }
   .meta { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; grid-column: 2; }
   .meta .info { font-size: 0.85rem; color: var(--ink-dim); flex: 1 1 150px; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
