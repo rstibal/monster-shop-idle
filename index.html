@@ -2455,7 +2455,14 @@
     const x = v / Math.pow(1000, t);
     return (x >= 100 ? x.toFixed(0) : x >= 10 ? x.toFixed(1) : x.toFixed(2)) + SUFFIX[t];
   }
-  const money = v => "$" + fmt(v);
+  // money always shows two decimals and a spaced suffix, like the old Sunny game: $0.50, $26.00, $55.88 M, $1.30 B
+  function money(v) {
+    if (!isFinite(v)) return "$∞";
+    if (v < 1000) return "$" + v.toFixed(2);
+    let t = Math.min(Math.floor(Math.log10(v) / 3), SUFFIX.length - 1), x = (v / Math.pow(1000, t)).toFixed(2);
+    if (x >= 1000 && t < SUFFIX.length - 1) x = (v / Math.pow(1000, ++t)).toFixed(2);   // 999.996K rounds up to 1.00 M, not 1000.00 K
+    return "$" + x + "\u00a0" + SUFFIX[t];   // no-break space, so a narrow button never splits "$7.06" from "M"
+  }
   // Rewriting a button's contents mid-press drops the click, so per-frame updates only write when something changed.
   const setHTML = (el, html) => { if (el._html !== html) { el._html = html; el.innerHTML = html; } };
   const setText = (el, text) => { if (el._text !== text) { el._text = text; el.textContent = text; } };
@@ -3629,11 +3636,12 @@
       const fast = auto && runTime(i) / SPEED < 0.25;
       r.fill.style.width = ((fast ? 1 : sc.progress) * 100) + "%";
       const income = runIncome(i);
-      setText(r.label, sc.n < 1 ? "Get a " + customers(1) + " to open" : auto ? money(perSecond(i)) + "/s" : (sc.running ? money(income) : "Tap to run: " + money(income)));
+      // the meter shows what this run pays; it lands in the cash total when the meter fills. The per-second rate sits in the info line.
+      setText(r.label, sc.n < 1 ? "Get a " + customers(1) + " to open" : auto || sc.running ? money(income) : "Tap to run: " + money(income));
       const k = buyCount(i), cost = bulkCost(i, k);
       const nextM = MILESTONES.find(m => m > sc.n);
       const prevM = MILESTONES.filter(m => m <= sc.n).pop() || 0;
-      setHTML(r.info, `<span>Runs every <b>${fmtTime(runTime(i))}</b></span>`
+      setHTML(r.info, `<span>Runs every <b>${fmtTime(runTime(i))}</b>${sc.n ? ` · <b>${money(perSecond(i))}/s</b>` : ""}</span>`
         + (nextM ? `<span>Next bonus at <b>${nextM}</b> · ${nextM - sc.n} to go</span>` : "<span>All bonuses earned</span>")
         + `<span class="mbar"><i style="width:${nextM ? ((sc.n - prevM) / (nextM - prevM)) * 100 : 100}%"></i></span>`);
       // what this purchase adds: $/s once automated, per run while tapped by hand
