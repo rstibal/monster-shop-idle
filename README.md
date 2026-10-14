@@ -48,7 +48,7 @@ The rules below use the Haunted Mall's names.
 - Get customers (x1, x10 or Max) to raise a shop's income; each one costs more than the last. Max gets as many as you can afford up to the shop's next bonus, so it never skips past one; after the last bonus (150) it gets all you can afford. Cost grows geometrically.
 - Each Get button shows what it adds: $/s for automated shops, $ per run for tapped ones. A green badge (x2) means the purchase crosses a milestone.
 - Tap a shop to run it once, or pay to automate it.
-- A shop's meter shows what the current run pays; the money lands in your cash when the meter fills. Each shop's earnings per second sit next to its run time. Money always shows two decimals ($26.00, $55.88M, $1.30B).
+- A shop's meter counts down the time left in the run on its left end and shows what the run pays on its right end; the money lands in your cash when the meter fills. Each shop's earnings per second sit under the meter. Money always shows two decimals ($26.00, $55.88M, $1.30B).
 - Owning 10, 25, 50, 100 and 150 customers of a shop doubles its income and gives 1 beer.
 - Each shop has 3 upgrades, bought in order, each doubling its income (x8 with all three). They cost 600, 6,000 and 60,000 times the shop's automation price, and reset with the episode.
 - Each episode has a story goal (listed first, in the setting's accent color, with a line on why it matters there) and 8 shared goals. Clear any 5 and sign a dragon lease to unlock the episode finale. It resets cash and shops, keeps beer, eggs, crystals and cards, and gives 3 eggs plus a permanent income bonus: each finale multiplies it by 1.5 (x1.5, x2.25, x3.4 and so on), so it keeps pace with the rising costs. From episode 2 on, the first shop starts automated.

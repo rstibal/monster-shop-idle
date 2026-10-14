@@ -181,7 +181,9 @@
   @media (max-width: 560px) { .sign h3 { flex-direction: column; align-items: flex-start; gap: 0; } }
   .bar { cursor: pointer; height: 18px; background: var(--deep); border-radius: 999px; overflow: hidden; position: relative; }
   .bar i { position: absolute; inset: 0 auto 0 0; width: 0; background: hsl(var(--hue) var(--bar-s) var(--bar-l)); border-radius: 999px; }
-  .bar span { position: absolute; inset: 0; display: grid; place-items: center end; padding-right: 10px; font-size: 0.78rem; font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.7); }
+  /* the run's time left on the left end, what it pays on the right end, like the Sunny game */
+  .bar span { position: absolute; inset: 0; display: grid; place-items: center end; padding: 0 10px; font-size: 0.78rem; font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.7); pointer-events: none; font-variant-numeric: tabular-nums; }
+  .bar span.left { place-items: center start; }
   .meta { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; grid-column: 2; }
   .meta .info { font-size: 0.85rem; color: var(--ink-dim); flex: 1 1 150px; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
   .meta .info b { color: var(--ink); }
@@ -2505,7 +2507,14 @@
   // Rewriting a button's contents mid-press drops the click, so per-frame updates only write when something changed.
   const setHTML = (el, html) => { if (el._html !== html) { el._html = html; el.innerHTML = html; } };
   const setText = (el, text) => { if (el._text !== text) { el._text = text; el.textContent = text; } };
-  const fmtTime = s => s < 10 ? +s.toFixed(1) + "s" : s < 60 ? Math.round(s) + "s" : Math.round(s / 60) + "m";
+  // a run's time left, counting down whole seconds to 0 (runs under a second just show their length): 12s, 2m 05s, 1h 04m
+  function fmtLeft(s, runLen) {
+    if (runLen < 1) return +runLen.toFixed(1) + "s";
+    s = Math.ceil(s - 1e-9);
+    if (s < 60) return s + "s";
+    if (s < 3600) return Math.floor(s / 60) + "m " + String(s % 60).padStart(2, "0") + "s";
+    return Math.floor(s / 3600) + "h " + String(Math.floor(s / 60) % 60).padStart(2, "0") + "m";
+  }
 
   // ---------- Actions ----------
   function earn(v) { S.cash += v; S.life.earned += v; S.epEarned += v; }
@@ -3515,7 +3524,7 @@
       el.innerHTML = `
         <button class="icon" aria-label="Run ${shop(i).name}"></button>
         <h3><span class="nm"></span><span class="n"></span></h3>
-        <div class="bar"><i></i><span></span></div>
+        <div class="bar"><i></i><span class="left"></span><span class="right"></span></div>
         <div class="meta">
           <div class="info"></div>
           <div class="buys">
@@ -3528,7 +3537,7 @@
       signsEl.appendChild(el);
       const r = {
         el, icon: el.querySelector(".icon"), nm: el.querySelector(".nm"), n: el.querySelector(".n"),
-        fill: el.querySelector(".bar i"), label: el.querySelector(".bar span"), info: el.querySelector(".info"),
+        fill: el.querySelector(".bar i"), label: el.querySelector(".bar .right"), left: el.querySelector(".bar .left"), info: el.querySelector(".info"),
         buy: el.querySelector(".buy"), auto: el.querySelector(".auto"), up: el.querySelector(".up"), locked: el.querySelector(".locked-msg"),
         meta: el.querySelector(".meta"), bar: el.querySelector(".bar"),
       };
@@ -3689,7 +3698,9 @@
       const k = buyCount(i), cost = bulkCost(i, k);
       const nextM = MILESTONES.find(m => m > sc.n);
       const prevM = MILESTONES.filter(m => m <= sc.n).pop() || 0;
-      setHTML(r.info, `<span>Runs every <b>${fmtTime(runTime(i))}</b>${sc.n ? ` · <b>${money(perSecond(i))}/s</b>` : ""}</span>`
+      const runLen = runTime(i) / SPEED;   // real seconds
+      setText(r.left, fmtLeft((sc.running ? 1 - sc.progress : 1) * runLen, runLen));
+      setHTML(r.info, `<span><b>${money(perSecond(i))}/s</b></span>`
         + (nextM ? `<span>Next bonus at <b>${nextM}</b> · ${nextM - sc.n} to go</span>` : "<span>All bonuses earned</span>")
         + `<span class="mbar"><i style="width:${nextM ? ((sc.n - prevM) / (nextM - prevM)) * 100 : 100}%"></i></span>`);
       // what this purchase adds: $/s once automated, per run while tapped by hand
