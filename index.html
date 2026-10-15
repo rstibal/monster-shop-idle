@@ -220,6 +220,7 @@
     .meta { grid-column: 1 / -1; }
     .buys { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; }
     .buys .btn { min-width: 0; padding: 7px 4px; font-size: 0.88rem; }
+    .seg button { min-height: 44px; }   /* the x1/x10/Max and view toggles get thumb-sized */
   }
   .btn {
     background: var(--accent); color: var(--on-accent); border: 0; border-radius: 10px; padding: 7px 12px; font-weight: 700;
@@ -502,7 +503,7 @@
     { id: "money",     weight: 30, per: 0.1,  perk: b => `All income x${num2(1 + b)}` },
     { id: "speed",     weight: 25, per: 0.1,  perk: b => `Shops run x${num2(1 + b)} faster` },
     { id: "discount",  weight: 20, per: 0.04, perk: b => `${cap(SK.words.customers)} and automation ${Math.round(100 * b)}% cheaper` },
-    { id: "finale",    weight: 15, per: 0.2,  perk: b => `Finale bonus +${Math.round(PERM_PER_EPISODE * (1 + b) * 100)}%` },
+    { id: "finale",    weight: 15, per: 0.2,  perk: b => `Finale bonus +${Math.round(PERM_PER_EPISODE * (1 + b) * 100)}% instead of +${Math.round(PERM_PER_EPISODE * 100)}%` },
     { id: "milestone", weight: 10, per: 0.05, perk: b => `Milestones multiply income x${num2(2 + b)}` },
     { id: "beer",      weight: 15, per: 0.2,  perk: b => `${cap(cur("beer", 2))} per milestone x${num2(1 + b)}` },
   ];
@@ -4222,7 +4223,7 @@
     $("chests").innerHTML = CHESTS.map(c => `
       <div class="chest">
         <h3>${SK.chests[c.id].name}</h3>
-        <p>${SK.chests[c.id].blurb}${c.id === DAILY_CHEST ? " Free once a day." : ""} Draws ${c.pulls} cards.</p>
+        <p>${SK.chests[c.id].blurb}${c.id === DAILY_CHEST ? ` <span id="dailyNote">Free once a day.</span>` : ""} Draws ${c.pulls} cards.</p>
         <button class="btn alt" data-chest="${c.id}"></button>
       </div>`).join("");
     $("chests").querySelectorAll("[data-chest]").forEach(b => b.addEventListener("click", () => openChest(b.dataset.chest)));
@@ -4241,6 +4242,7 @@
       any = any || can;
     });
     $("cardDot").hidden = !any;
+    if ($("dailyNote")) setText($("dailyNote"), dailyReady() ? "Free once a day." : "Free again tomorrow.");
   }
   // ---------- Stats ----------
   const fmtPlayed = s => s < 60 ? Math.floor(s) + "s" : s < 3600 ? Math.floor(s / 60) + "m" : s < 86400 ? Math.floor(s / 3600) + "h " + Math.floor(s % 3600 / 60) + "m" : Math.floor(s / 86400) + "d " + Math.floor(s % 86400 / 3600) + "h";
@@ -4291,7 +4293,7 @@
         <div class="portrait${art ? " drawn" : ""}${lv ? "" : " unknown"}">${art || (lv ? c.icon : "❔")}</div>
         <h3><span>${c.name}</span><span class="lv">${lv ? "Level " + lv : ""}</span></h3>
         <div class="role">${c.role}</div>
-        <div class="copies"><div class="gbar"><i style="width:${pct}%"></i></div><span>${max ? n + " copies" : `${n} of ${hi} copies`}</span></div>
+        <div class="copies"><div class="gbar"><i style="width:${pct}%"></i></div><span>${max ? n + " copies" : `${n} of ${hi} ${hi === 1 ? "copy" : "copies"}`}</span></div>
         <p class="perk"><b>${now}</b><small>${next}</small></p>
       </article>`;
     }).join("");
