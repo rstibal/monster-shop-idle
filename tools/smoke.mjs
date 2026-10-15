@@ -86,6 +86,9 @@ const PAGE_TEST = `(async () => {
   check(document.querySelectorAll("#cardgrid > *").length === 6, "the Cards tab doesn't show six cards");
   g.S.eggs += 2; g.openChest("egg");
   check(g.S.life.chests === 1 && Object.values(g.S.cards).reduce((a, n) => a + n, 0) >= 3, "opening an egg chest didn't draw cards");
+  check(dlg.open && dlg.querySelectorAll(".dcard").length === 3, "the egg chest's draw didn't show three cards in the dialog");
+  dlg.querySelector("button")?.click();
+  await wait(200);
   document.querySelector('[data-view="shops"]').click();
 
   // a finale: max out the shops, let the goals clear, finish the episode

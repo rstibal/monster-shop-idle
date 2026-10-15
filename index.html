@@ -138,6 +138,11 @@
     background: var(--accent); color: var(--on-accent); font-weight: 600; border-radius: 12px; font-size: 0.95rem;
     box-shadow: 0 4px 0 var(--accent-dark); pointer-events: none;
   }
+  /* beside the side column it centers on the shop column (the page's 16px padding, then half of what's left after the
+     300px column and its 16px gap), so it covers neither Goals nor the Finale */
+  @media (min-width: 820px) {
+    .hint { left: calc((100vw - min(100vw, 1000px)) / 2 + 16px + (min(100vw, 1000px) - 348px) / 2); max-width: min(40ch, calc(min(100vw, 1000px) - 380px)); }
+  }
   /* a fixed grid so growing numbers never push an item onto another line: income and bonus in the first
      column, currencies stacked in the second; right-aligned when the stats sit beside the cash */
   .stats { display: grid; grid-template-columns: auto auto; grid-template-rows: repeat(3, auto); grid-auto-flow: column; justify-content: start; align-items: center; gap: 6px 28px; color: var(--ink-dim); font-size: 0.95rem; white-space: nowrap; }
@@ -325,6 +330,19 @@
   .card .portrait.drawn svg { display: block; width: 100%; height: 100%; }
   #pull .mini { display: inline-block; width: 22px; height: 22px; vertical-align: -6px; border-radius: 5px; overflow: hidden; }
   #pull .mini svg { display: block; width: 100%; height: 100%; }
+  /* a chest's draw in the story dialog: the cards turn up one after another (--k is the order) */
+  /* one row per draw (--n cards), never 2 + 1; a crystal barrel's four go 2 x 2 on narrow phones */
+  dialog#story .draw { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 480px) { dialog#story .draw.four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .dcard { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 6px; text-align: center; background: var(--deep); border: 2px solid var(--edge); border-radius: 12px; animation: deal 320ms ease-out both; animation-delay: calc(var(--k) * 160ms); }
+  .dcard .face { width: min(64px, 100%); aspect-ratio: 1; height: auto; border-radius: 50%; overflow: hidden; display: grid; place-items: center; font-size: 2.2rem; border: 3px solid var(--edge); }
+  .dcard .face svg { display: block; width: 100%; height: 100%; }
+  .dcard .nm { font-weight: 700; font-size: 0.9rem; line-height: 1.2; overflow-wrap: normal; }   /* wrap between words only ("Countess / Vex", not "Count / ess") */
+  .dcard .tag { font-size: 0.8rem; color: var(--ink-dim); }
+  .dcard.hot { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-dark); }
+  .dcard.hot .face { border-color: var(--accent); }
+  .dcard.hot .tag { color: var(--accent); font-weight: 700; }
+  @keyframes deal { from { opacity: 0; transform: translateY(12px) scale(0.9); } to { opacity: 1; transform: none; } }
   .card .portrait.unknown svg { filter: brightness(0.12) saturate(0); }
   dialog#story::backdrop { background: var(--backdrop); }
   dialog#story h2 { font-family: var(--display); font-weight: var(--display-weight); font-size: calc(1.4rem * var(--display-size)); margin: 0 0 10px; color: var(--accent); }
@@ -336,13 +354,20 @@
   .save-btns { display: flex; gap: 6px; }
   .save-btns .small-btn { flex: 1; padding: 4px 6px; }
 
+  /* Toasts stack (up to three, each fading on its own timer) so quick buying doesn't replace one before it can be read.
+     From 820px they sit at the bottom of the side column, so they never cover the shop buttons. */
   .toast {
-    position: fixed; z-index: 5; left: 50%; bottom: 20px; transform: translate(-50%, 30px); opacity: 0;
-    background: var(--accent); color: var(--on-accent); font-weight: 700; padding: 10px 16px; border-radius: 12px;
-    max-width: calc(100vw - 32px); text-align: center; transition: opacity 200ms, transform 200ms; pointer-events: none;
-    box-shadow: 0 4px 0 var(--accent-dark);
+    position: fixed; z-index: 5; left: 50%; bottom: 20px; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 32px);
+    display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none;
   }
-  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  @media (min-width: 820px) { .toast { left: auto; transform: none; right: calc((100vw - min(100vw, 1000px)) / 2 + 16px); max-width: 300px; align-items: stretch; } }
+  .toast > div {
+    background: var(--accent); color: var(--on-accent); font-weight: 700; padding: 10px 16px; border-radius: 12px;
+    text-align: center; box-shadow: 0 4px 0 var(--accent-dark); animation: toast-in 200ms ease-out;
+    transition: opacity 200ms, transform 200ms;
+  }
+  .toast > div.out { opacity: 0; transform: translateY(10px); }
+  @keyframes toast-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
   .pop { position: fixed; pointer-events: none; font-family: var(--display); font-weight: var(--display-weight); color: var(--accent); text-shadow: 0 2px 0 var(--accent-dark); animation: pop 800ms ease-out forwards; z-index: 5; }
   @keyframes pop { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-40px); } }
   /* Below 820px the side column sits under the shops, so once the header scrolls away a bar slides in at the top with the
@@ -367,7 +392,8 @@
   aside .panel { scroll-margin-top: 76px; }   /* the chip's jump lands below the bar */
   @media (prefers-reduced-motion: reduce) {
     .pop { animation: none; opacity: 0; }
-    .toast, .btn, .icon, .minibar { transition: none; }
+    .dcard { animation: none; }
+    .toast > div, .btn, .icon, .minibar { transition: none; animation: none; }
   }
 </style>
 </head>
@@ -3009,6 +3035,7 @@
   // Rewriting a button's contents mid-press drops the click, so per-frame updates only write when something changed.
   const setHTML = (el, html) => { if (el._html !== html) { el._html = html; el.innerHTML = html; } };
   const setText = (el, text) => { if (el._text !== text) { el._text = text; el.textContent = text; } };
+  const setLabel = (el, text) => { if (el._label !== text) { el._label = text; el.setAttribute("aria-label", text); } };   // what a screen reader says for a button
   // a run's time left, counting down whole seconds to 0 (runs under a second just show their length): 12s, 2m 05s, 1h 04m
   function fmtLeft(s, runLen) {
     if (runLen < 1) return +runLen.toFixed(1) + "s";
@@ -3096,6 +3123,13 @@
     $("pull").innerHTML = "<ul>" + got.map(g => `<li>${cardArt(g.c.id) ? `<span class="mini">${cardArt(g.c.id)}</span>` : cast(g.c).icon} ${cast(g.c).name}${g.tag ? `<em>${g.tag}</em>` : ""}</li>`).join("") + "</ul>";
     renderCards();
     render();
+    // the draw itself, card by card in the story dialog; new cards and level-ups stand out
+    const hot = t => t === "new" || t.startsWith("level");
+    showStory({
+      title: SK.chests[id].name,
+      text: [`<span class="draw${got.length === 4 ? " four" : ""}" style="--n:${got.length}">${got.map((g, k) => `<span class="dcard${hot(g.tag) ? " hot" : ""}" style="--k:${k}"><span class="face">${cardArt(g.c.id) || cast(g.c).icon}</span><span class="nm">${cast(g.c).name}</span><span class="tag">${g.tag ? cap(g.tag) : "+1 copy"}</span></span>`).join("")}</span>`],
+      actions: [{ label: "Nice" }, ...(S[ch.cur] >= ch.cost ? [{ label: "Open another", choice: true, run: () => openChest(id) }] : [])],
+    });
   }
 
   // only count goals that still exist, so saves from older goal lists don't inflate it
@@ -4213,6 +4247,7 @@
       r.bar.addEventListener("click", ev => tap(i, ev));
       r.bar.setAttribute("role", "button");
       r.bar.tabIndex = 0;
+      r.bar.setAttribute("aria-label", "Run " + shop(i).name);   // otherwise it reads as its time and pay, "1s $31.98"
       r.bar.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); tap(i, ev); } });
       r.buy.addEventListener("click", () => buy(i));
       r.auto.addEventListener("click", () => automate(i));
@@ -4245,6 +4280,7 @@
       // only rewrite the label when it changes; rewriting a button every frame drops taps
       const label = free ? `Open free<span class="sub">Daily chest</span>` : `Open<span class="sub">${c.cost} ${cur(c.cur, c.cost)}</span>`;
       if (b.dataset.label !== label) { b.dataset.label = label; b.innerHTML = label; }
+      setLabel(b, `Open ${SK.chests[c.id].name}` + (free ? ", free today" : ` for ${c.cost} ${cur(c.cur, c.cost)}`));
       any = any || can;
     });
     $("cardDot").hidden = !any;
@@ -4389,6 +4425,11 @@
         setHTML(r.up, `Upgrade ${sc.up + 1}/${UPGRADES.length}<span class="sub">${money(upCost)}</span><span class="gain">income x${nextUp.mult}</span>`);
         r.up.disabled = S.cash < upCost || sc.n < 1;
       } else { setHTML(r.up, `Upgraded<span class="sub">all ${UPGRADES.length}</span><span class="gain">income x${upgradeMult(i)}</span>`); r.up.disabled = true; }
+      // the buttons' text reads as "Get x1$8.87+$2.46/s" with no shop name, so screen readers get a sentence instead
+      const nm = shop(i).name;
+      setLabel(r.buy, `Get ${k} ${shop(i).noun} ${customers(k)} for ${money(cost)}, ${gain}${crossed ? ", reaches a bonus" : ""}`);
+      setLabel(r.auto, auto ? nm + " is automated" : `Automate ${nm} for ${money(autoCost(i))}`);
+      setLabel(r.up, nextUp ? `Upgrade ${nm}, ${sc.up + 1} of ${UPGRADES.length}, for ${money(upgradeCost(i))}, income x${nextUp.mult}` : nm + " is fully upgraded");
       const um = upgradeMult(i);
       r.n.textContent = sc.n + " " + customers(sc.n) + (auto ? " · auto" : "") + (um > 1 ? " · x" + um : "");
     });
@@ -4426,13 +4467,13 @@
     if (force || t !== update.t) { update.t = t; renderGoals(); }
   }
 
-  let toastTimer;
+  const TOASTS_MAX = 3;
   function toast(msg) {
-    const el = $("toast");
+    const box = $("toast"), el = document.createElement("div");
     el.textContent = msg;
-    el.classList.add("show");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove("show"), 3500);
+    box.appendChild(el);
+    while (box.children.length > TOASTS_MAX) box.firstChild.remove();   // the oldest makes way
+    setTimeout(() => { el.classList.add("out"); setTimeout(() => el.remove(), 200); }, 3500);
   }
 
   function applySkin() {

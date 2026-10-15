@@ -96,6 +96,8 @@ Each card is one multiplier that grows with its level. Levels 6 to 10 add half a
 | Beer chest / Scrap crate | 5 beer / scrap | 2 | Shop milestones |
 | Crystal barrel / Stardust vault | 12 crystals / stardust | 4 | Duplicates of maxed cards |
 
+Opening a chest deals its cards in a popup, with new cards and level-ups highlighted and a button to open another if you can afford it.
+
 Daily chest: once a day, from your second day on, the egg chest opens free.
 
 ## Tuning
