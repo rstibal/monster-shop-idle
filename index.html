@@ -463,6 +463,7 @@
   const BANK_BONUS = 0.25;
   const RUSH_MULT = 3;
   const RUSH_S = 300;
+  const RUSH_AFTER_S = 30 * 60;                 // a rush is only offered after a break this long; at 5 minutes, stepping away for 5 and rushing for 5 doubled income
   const FREE_AUTO_SHOPS = 1;                    // from episode 2 on, this many shops start automated, so a new episode earns while you're away from the start
 
   // Cards: permanent, survive episode resets. Copies needed for levels 1..10 (cumulative).
@@ -2621,8 +2622,10 @@
       return s;
     } catch { return null; }
   }
+  // S.seen only moves while the page is on screen: a hidden tab's game loop is paused but its save timer keeps going,
+  // and moving seen then would throw away the earnings offline() credits on return (or on the next load)
   function save() {
-    try { S.seen = Date.now(); localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch {}
+    try { if (!document.hidden) S.seen = Date.now(); localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch {}
   }
   // Save codes carry a game between devices (saves live in each browser): the save as base64 JSON behind a short tag.
   const SAVE_CODE_TAG = "MSI1.";
@@ -4115,11 +4118,14 @@
     if (ready.length) text.push("Ready to open: " + (ready.length > 1 ? ready.slice(0, -1).join(", ") + " and " : "") + ready[ready.length - 1] + ".");
     if (finaleReady()) text.push("The <b>finale</b> is ready. " + EP().finale.ready);
     // the earnings are already in the till (closing the popup keeps them); the choice is the bonus on top
+    const rush = away >= RUSH_AFTER_S;
     const actions = gain > 0
-      ? [{ label: "Bank " + money(gain * (1 + BANK_BONUS)), run: () => { earn(gain * BANK_BONUS); S.life.away += gain * BANK_BONUS; sfx("milestone"); toast("Banked, with " + Math.round(BANK_BONUS * 100) + "% on top."); } },
-         { label: "Rush hour", choice: true, run: () => { S.rushUntil = Date.now() + RUSH_S * 1000; sfx("finale"); toast("Rush hour! Everything earns x" + RUSH_MULT + " for " + RUSH_S / 60 + " minutes."); } }]
+      ? [{ label: "Bank " + money(gain * (1 + BANK_BONUS)), run: () => { earn(gain * BANK_BONUS); S.life.away += gain * BANK_BONUS; sfx("milestone"); toast("Banked, with " + Math.round(BANK_BONUS * 100) + "% on top."); } }]
       : [{ label: "Back to work", run: () => sfx("buy") }];
-    if (gain > 0) text.splice(1, 0, "<b>Bank it</b> for " + Math.round(BANK_BONUS * 100) + "% more, or call a <b>rush hour</b>: every shop earns x" + RUSH_MULT + " for the next " + RUSH_S / 60 + " minutes. A rush pays off if you're staying to play.");
+    if (gain > 0 && rush) actions.push({ label: "Rush hour", choice: true, run: () => { S.rushUntil = Date.now() + RUSH_S * 1000; sfx("finale"); toast("Rush hour! Everything earns x" + RUSH_MULT + " for " + RUSH_S / 60 + " minutes."); } });
+    if (gain > 0) text.splice(1, 0, rush
+      ? "<b>Bank it</b> for " + Math.round(BANK_BONUS * 100) + "% more, or call a <b>rush hour</b>: every shop earns x" + RUSH_MULT + " for the next " + RUSH_S / 60 + " minutes. A rush pays off if you're staying to play."
+      : "<b>Bank it</b> for " + Math.round(BANK_BONUS * 100) + "% more. Stay away " + RUSH_AFTER_S / 60 + " minutes or more and you can call a <b>rush hour</b> instead.");
     if (ready.length && gain <= 0) actions.push({ label: "Open chests", run: () => document.querySelector('[data-view="cards"]').click() });
     showStory({ title: "Welcome back", text, actions });
   }
@@ -4491,7 +4497,7 @@
   });
   addEventListener("beforeunload", save);
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) { save(); stopAmbience(); return; }
+    if (document.hidden) { S.seen = Date.now(); save(); stopAmbience(); return; }
     startAmbience();
     // browsers pause the game loop in background tabs, so credit the time away (S.seen was saved on hide)
     last = performance.now();
@@ -4503,6 +4509,7 @@
 
   applySkin();
   offline();
+  S.seen = Date.now();   // credited up to now; a page opened in a background tab must not count that time again when shown
   // resume any automated shops
   S.schemes.forEach((sc, i) => { if (isAuto(i) && sc.n > 0) sc.running = true; });
   build();
