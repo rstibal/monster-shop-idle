@@ -278,8 +278,9 @@
 
   /* Cards and chests */
   .views { margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-  .views .seg button { padding: 6px 18px; }
-  .views .toolbar .seg button { padding: 6px 14px; font-size: 1rem; }   /* same height as the view toggle beside it */
+  /* side padding kept slim so both toggles fit on one line in the shop column at 820px, the narrowest two-column width */
+  .views .seg button { padding: 6px 15px; }
+  .views .toolbar .seg button { padding: 6px 12px; font-size: 1rem; }   /* same height as the view toggle beside it */
   .views .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-left: 6px; vertical-align: middle; }
   .chests { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 14px; }
   @media (min-width: 560px) { .chests { grid-template-columns: repeat(3, 1fr); } }
