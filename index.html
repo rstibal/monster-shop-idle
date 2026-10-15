@@ -214,12 +214,16 @@
   .mbar i { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
   .buys { display: flex; gap: 8px; flex-wrap: wrap; }
   .buys .btn { min-width: 7em; }   /* one width for all three, so they line up from shop to shop and don't shift as amounts change */
-  /* phones: the three buttons get the card's full width under the icon, in three equal columns */
-  @media (max-width: 560px) {
+  /* narrow shop column (phones, and the two-column layout from 820px until the buttons fit beside the info): the three
+     buttons get the card's full width under the icon, in three equal columns, so they never wrap onto two rows */
+  .signs { container-type: inline-size; }
+  @container (max-width: 640px) {
     .icon { grid-row: span 2; }
     .meta { grid-column: 1 / -1; }
     .buys { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; }
     .buys .btn { min-width: 0; padding: 7px 4px; font-size: 0.88rem; }
+  }
+  @media (max-width: 560px) {
     .seg button { min-height: 44px; }   /* the x1/x10/Max and view toggles get thumb-sized */
   }
   .btn {
