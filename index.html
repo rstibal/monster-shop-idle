@@ -4387,7 +4387,8 @@
   }
 
   // ---------- Wiring ----------
-  $("skinSel").innerHTML = SKINS.map(k => `<option value="${k.id}">${k.name}</option>`).join("");
+  // newest settings first (SKINS is in the order they were added); a new player still starts in the first one, the mall
+  $("skinSel").innerHTML = [...SKINS].reverse().map(k => `<option value="${k.id}">${k.name}</option>`).join("");
   $("skinSel").addEventListener("change", e => setSkin(e.target.value));
   const showBuyMode = () => document.querySelectorAll("#buyBar .seg button").forEach(x => x.setAttribute("aria-pressed", x.dataset.mode === buyMode));
   document.querySelectorAll("#buyBar .seg button").forEach(b => b.addEventListener("click", () => {
