@@ -15,6 +15,23 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link id="skinFonts" href="https://fonts.googleapis.com/css2?family=Rubik+Wet+Paint&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+  // Before anything draws: put on the last setting's look (saved by applySkin), and keep the page hidden until the game
+  // has built it, so reloading in another setting never flashes the mall's colors, fonts or text first.
+  (() => {
+    const root = document.documentElement;
+    root.classList.add("booting");
+    setTimeout(() => root.classList.remove("booting"), 4000);   // never stay hidden if the game script fails
+    try {
+      const want = new URLSearchParams(location.search).get("skin") || localStorage.getItem("grizzle-haunted-mall-skin");
+      const last = JSON.parse(localStorage.getItem("grizzle-haunted-mall-theme") || "null");
+      if (!want || !last || last.id !== want) return;
+      for (const [k, v] of Object.entries(last.theme)) if (k !== "fonts") root.style.setProperty("--" + k, v);
+      document.getElementById("skinFonts").href = last.theme.fonts;
+      document.querySelector('meta[name="theme-color"]').content = last.theme.bg;
+    } catch {}
+  })();
+</script>
 <style>
   /* Colors and fonts come from the active skin (SKINS[].theme sets these same names).
      The defaults here are the Haunted Mall skin, so the first paint looks right before the script runs. */
@@ -55,6 +72,7 @@
   }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
+  html.booting .wrap, html.booting .hint { visibility: hidden; }   /* until the game has built the page in its setting (see the script in <head>) */
   html { -webkit-text-size-adjust: 100%; }
   body {
     margin: 0;
@@ -2619,6 +2637,7 @@
 
   // ---------- Skin ----------
   const SKIN_KEY = "grizzle-haunted-mall-skin";
+  const THEME_KEY = "grizzle-haunted-mall-theme";   // the last applied theme, read by the script in <head> before anything draws
   const skinById = id => SKINS.find(k => k.id === id);
   let SK = skinById(new URLSearchParams(location.search).get("skin")) || skinById((() => { try { return localStorage.getItem(SKIN_KEY); } catch { return null; } })()) || SKINS[0];
   const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
@@ -4378,6 +4397,7 @@
     for (const key of ["beer", "eggs", "crystals"]) $(key + "Label").textContent = cap(cur(key, 2));
     $("pull").textContent = "Open one to draw cards. Duplicates level a card up.";
     $("skinSel").value = SK.id;
+    try { localStorage.setItem(THEME_KEY, JSON.stringify({ id: SK.id, theme: SK.theme })); } catch {}   // for the script in <head> on the next load
   }
   function setSkin(id) {
     SK = skinById(id) || SKINS[0];
@@ -4490,6 +4510,8 @@
   maybeShowIntro();
   // ?debug exposes the state for testing in the console
   if (new URLSearchParams(location.search).has("debug")) window.__game = { get S() { return S; }, get SK() { return SK; }, get amb() { return amb; }, setSkin, welcomeBack, sfx, get audio() { return actx && actx.state; }, openChest, renderCards, update, offline, tap, buy, automate, upgrade, build, finaleReady, maybeShowIntro, openFinale, finish, SKINS };
+  update(true);   // fill in the numbers now, then show the page (see the script in <head>)
+  document.documentElement.classList.remove("booting");
   requestAnimationFrame(frame);
   // offline support for the home-screen app (http(s) only; file:// can't register one)
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
