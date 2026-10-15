@@ -2620,10 +2620,7 @@
   // ---------- Skin ----------
   const SKIN_KEY = "grizzle-haunted-mall-skin";
   const skinById = id => SKINS.find(k => k.id === id);
-  // A brand-new player starts in the newest setting. Anyone with a game already saved but no setting picked has been
-  // playing in the mall (the old default), so they stay there instead of being moved.
-  const stored = key => { try { return localStorage.getItem(key); } catch { return null; } };
-  let SK = skinById(new URLSearchParams(location.search).get("skin")) || skinById(stored(SKIN_KEY)) || (stored(SAVE_KEY) ? SKINS[0] : SKINS[SKINS.length - 1]);
+  let SK = skinById(new URLSearchParams(location.search).get("skin")) || skinById((() => { try { return localStorage.getItem(SKIN_KEY); } catch { return null; } })()) || SKINS[0];
   const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
   const uncap = t => t.charAt(0).toLowerCase() + t.slice(1);   // shop names mid-sentence; keeps "VR" and "Tesla" as they are
   const cur = (key, n) => SK.currency[key][n === 1 ? 0 : 1];            // "egg" or "eggs" in this skin
@@ -4390,8 +4387,8 @@
   }
 
   // ---------- Wiring ----------
-  // newest settings first (SKINS is in the order they were added)
-  $("skinSel").innerHTML = [...SKINS].reverse().map(k => `<option value="${k.id}">${k.name}</option>`).join("");
+  // the Haunted Mall first (where the game started, and the default), then the rest newest first (SKINS is in the order they were added)
+  $("skinSel").innerHTML = [SKINS[0], ...SKINS.slice(1).reverse()].map(k => `<option value="${k.id}">${k.name}</option>`).join("");
   $("skinSel").addEventListener("change", e => setSkin(e.target.value));
   const showBuyMode = () => document.querySelectorAll("#buyBar .seg button").forEach(x => x.setAttribute("aria-pressed", x.dataset.mode === buyMode));
   document.querySelectorAll("#buyBar .seg button").forEach(b => b.addEventListener("click", () => {
