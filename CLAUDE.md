@@ -60,7 +60,7 @@ Idle tuning pass (2026-09-30): the simulator's session players used to tap every
 
 - Commit locally as work is done, but ask before pushing. Pushing publishes to the public repo and the live Pages site. After a push, Pages takes about a minute; verify with the Pages build status (`gh api repos/rstibal/monster-shop-idle/pages/builds/latest`). If a deploy fails on GitHub's side (e.g. "Failed to get ID Token") or a re-run sits queued, request a fresh build with `gh api -X POST repos/rstibal/monster-shop-idle/pages/builds`.
 - End commit messages with a `Co-Authored-By: Claude <model> <noreply@anthropic.com>` line naming the model actually running the session (for example `Claude Opus 5.5`).
-- The repo lives at `C:\www\monster-shop-idle` on the main computer (outside OneDrive on purpose; don't put `.git` in a synced folder). On the second computer it's at `D:\Users\Rob\Documents\__Projects\Claude\monster-shop-idle`, which isn't synced either.
+- The repo lives at `C:\www\monster-shop-idle` on the main computer (outside OneDrive on purpose; don't put `.git` in a synced folder). On the second computer it's at `D:\code\monster-shop-idle` since 2026-10-18 (moved from `D:\Users\Rob\Documents\__Projects\Claude\monster-shop-idle`), which isn't synced either.
 - Keep the UI distinctive, not generic (raised buttons, a strong display font per skin, colors from the skin's theme). No all-caps labels. Rob didn't like the original moss and plum palette; Moonlit graveyard (silver and blue) was the mall's look until 2026-09-29, when he switched to Dripping ectoplasm. When he asks for a new look, show several real options side by side (the game in iframes with the theme swapped) and let him mix colors and fonts.
 
 ## Ideas not done yet
