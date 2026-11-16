@@ -227,6 +227,9 @@
     .meta { grid-column: 1 / -1; }
     .buys { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; }
     .buys .btn { min-width: 0; padding: 7px 4px; font-size: 0.88rem; }
+    /* the rate and the next bonus share one line, with the milestone bar full width under them */
+    .meta .info { flex-direction: row; flex-wrap: wrap; justify-content: space-between; column-gap: 12px; }
+    .mbar { flex: 1 0 100%; max-width: none; margin-top: 3px; }
   }
   @media (max-width: 560px) {
     .seg button { min-height: 44px; }   /* the x1/x10/Max and view toggles get thumb-sized */
@@ -268,6 +271,11 @@
   .goal.story .label span:first-child { color: var(--accent); font-weight: 700; }
   .panel .goal .why { margin: 2px 0 0; font-size: 0.8rem; font-style: italic; }
   .goal.story .gbar i { background: var(--accent); }
+  /* cleared goals in the full list: ticked off and quiet */
+  .goal.done { margin-bottom: 6px; }
+  .goal.done .label span:first-child { color: var(--ink-dim); }
+  .goal.done .label span:first-child::before { content: "✓ "; color: var(--accent); font-weight: 700; }
+  #goalsMore { width: 100%; min-height: 36px; }
   .panel p { margin: 0 0 10px; font-size: 0.92rem; color: var(--ink-dim); }
   .panel p b { color: var(--ink); }
   .finale .btn { width: 100%; padding: 10px; }
@@ -290,6 +298,14 @@
   /* side padding kept slim so both toggles fit on one line in the shop column at 820px, the narrowest two-column width */
   .views .seg button { padding: 6px 15px; }
   .views .toolbar .seg button { padding: 6px 12px; font-size: 1rem; }   /* same height as the view toggle beside it */
+  /* phones: both toggles on one row above the shops (the "Get" label goes; every button under it says "Get x1") */
+  @media (max-width: 560px) {
+    .views { gap: 6px; }   /* still wraps under about 350px, where the two don't fit */
+    .views .seg button { padding: 6px 9px; font-size: 0.92rem; white-space: nowrap; }
+    .views .toolbar .seg button { padding: 6px 7px; font-size: 0.92rem; }
+    .views .dot { margin-left: 4px; }
+    .views .toolbar > span { display: none; }
+  }
   .views .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-left: 6px; vertical-align: middle; }
   .chests { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 14px; }
   @media (min-width: 560px) { .chests { grid-template-columns: repeat(3, 1fr); } }
@@ -368,8 +384,13 @@
   }
   .toast > div.out { opacity: 0; transform: translateY(10px); }
   @keyframes toast-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
-  .pop { position: fixed; pointer-events: none; font-family: var(--display); font-weight: var(--display-weight); color: var(--accent); text-shadow: 0 2px 0 var(--accent-dark); animation: pop 800ms ease-out forwards; z-index: 5; }
-  @keyframes pop { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-40px); } }
+  .pop { position: fixed; pointer-events: none; font-family: var(--display); font-weight: var(--display-weight); font-size: calc(1.15rem * var(--display-size)); line-height: 1; white-space: nowrap; color: var(--accent); text-shadow: 0 2px 0 var(--accent-dark), 0 0 6px var(--deep); animation: pop 900ms ease-out forwards; z-index: 5; }
+  @keyframes pop { from { opacity: 1; transform: translateY(0); } 60% { opacity: 1; } to { opacity: 0; transform: translateY(-34px); } }
+  @keyframes pop-still { from, 70% { opacity: 1; } to { opacity: 0; } }
+  /* a shop waiting for a tap: a ring in the shop's color pulses around its icon and rims its meter */
+  .sign.ready .icon:not(:focus-visible) { outline: 3px solid hsl(var(--hue) var(--bar-s) var(--bar-l)); outline-offset: 2px; animation: ready 1.3s ease-in-out infinite alternate; }
+  .sign.ready .bar { box-shadow: inset 0 0 0 2px hsl(var(--hue) var(--bar-s) var(--bar-l)); }
+  @keyframes ready { from { outline-color: hsl(var(--hue) var(--bar-s) var(--bar-l)); } to { outline-color: transparent; } }
   /* Below 820px the side column sits under the shops, so once the header scrolls away a bar slides in at the top with the
      cash, income and a goals chip that jumps to Goals (or the finale once it's ready). Rob's pick of three mockups, 2026-10-15. */
   .minibar {
@@ -391,7 +412,8 @@
   .chip.ready b { color: inherit; }
   aside .panel { scroll-margin-top: 76px; }   /* the chip's jump lands below the bar */
   @media (prefers-reduced-motion: reduce) {
-    .pop { animation: none; opacity: 0; }
+    .pop { animation: pop-still 900ms linear forwards; }   /* it fades in place instead of floating */
+    .sign.ready .icon:not(:focus-visible) { animation: none; }
     .dcard { animation: none; }
     .toast > div, .btn, .icon, .minibar { transition: none; animation: none; }
   }
@@ -457,6 +479,7 @@
         <div class="cameo" id="rivalCameo" hidden><div class="face"></div><p class="bubble"><b></b><span></span></p></div>
         <div id="goals"></div>
         <p id="goalsNote"></p>
+        <button class="small-btn" id="goalsMore" aria-expanded="false" aria-controls="goals"></button>
       </section>
       <section class="panel finale" id="finPanel" aria-labelledby="finH">
         <h2 id="finH">Episode finale</h2>
@@ -4134,7 +4157,7 @@
       if (sc.progress >= 1) {
         const runs = auto ? Math.floor(sc.progress) : 1;
         earn(runIncome(i) * runs);
-        if (!auto) sfx("cash", i);
+        if (!auto) { sfx("cash", i); pop(i, runIncome(i)); }
         sc.progress = auto ? sc.progress - runs : 0;
         sc.running = auto;
       }
@@ -4142,6 +4165,23 @@
     checkGoals();
     update();
     requestAnimationFrame(frame);
+  }
+
+  // A hand-tapped run's pay floats up from the end of its meter, so the payout shows at the shop with the sound off and
+  // with the header's cash scrolled away. Automated shops stay quiet, like their sound.
+  function pop(i, v) {
+    const r = rows[i];
+    if (!r || document.hidden) return;
+    const box = r.bar.getBoundingClientRect();
+    if (!box.width || box.bottom < 0 || box.top > innerHeight) return;   // another tab is showing, or the shop is off screen
+    const el = document.createElement("div");
+    el.className = "pop";
+    el.setAttribute("aria-hidden", "true");
+    el.textContent = "+" + money(v);
+    el.style.right = (document.documentElement.clientWidth - box.right + 10) + "px";
+    el.style.top = (box.top - 4) + "px";
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 950);
   }
 
   function checkGoals() {
@@ -4341,14 +4381,22 @@
     }).join("");
   }
 
+  // The panel shows the next three goals; "Show all" lists every goal, cleared ones ticked off at the end, so you can
+  // pick which five to go for. Written with setHTML, so the list is only rebuilt when something in it changes.
+  let goalsAll = false;
   function renderGoals() {
-    const active = goalsNow().filter(g => !S.goalsDone.includes(g.id)).slice(0, 3);
-    $("goals").innerHTML = active.map(g => {
+    const all = goalsNow(), isDone = g => S.goalsDone.includes(g.id);
+    const open = all.filter(g => !isDone(g));
+    const shown = goalsAll ? [...open, ...all.filter(isDone)] : open.slice(0, 3);
+    setHTML($("goals"), shown.map(g => {
+      if (isDone(g)) return `<div class="goal done" data-id="${g.id}"><div class="label"><span>${goalText(g)}</span><span>Cleared</span></div></div>`;
       const target = goalTarget(g), cur = Math.min(g.cur(S), target);
       const story = g === storyGoal() && EP().goal ? `<p class="why">${EP().goal}</p>` : "";
       return `<div class="goal${story ? " story" : ""}" data-id="${g.id}"><div class="label"><span>${goalText(g)}</span><span>${fmt(cur)} / ${fmt(target)}</span></div>${story}<div class="gbar"><i style="width:${(cur / target) * 100}%"></i></div></div>`;
-    }).join("") || "<p>All goals cleared.</p>";
-    $("goalsNote").innerHTML = `Cleared <b>${clearedCount()}</b> of the <b>${GOALS_NEEDED}</b> needed to open the finale.`;
+    }).join("") || "<p>All goals cleared.</p>");
+    setHTML($("goalsNote"), `Cleared <b>${clearedCount()}</b> of the <b>${GOALS_NEEDED}</b> needed to open the finale.`);
+    setText($("goalsMore"), goalsAll ? "Show next goals only" : "Show all " + all.length + " goals");
+    $("goalsMore").setAttribute("aria-expanded", goalsAll);
   }
 
   function render() {
@@ -4395,6 +4443,7 @@
       if (!unlocked(i)) return;
       const auto = isAuto(i);
       if (auto || sc.running) total += perSecond(i);   // tapped shops count while they run, so tapping doesn't show $0.00/s
+      r.el.classList.toggle("ready", sc.n >= 1 && !auto && !sc.running);   // waiting for a tap: its icon gets a pulsing ring
       const fast = auto && runTime(i) / SPEED < 0.25;
       r.fill.style.width = ((fast ? 1 : sc.progress) * 100) + "%";
       const income = runIncome(i);
@@ -4521,6 +4570,7 @@
   }));
   try { setView(localStorage.getItem(VIEW_KEY)); } catch { setView("shops"); }
   $("finBtn").addEventListener("click", openFinale);
+  $("goalsMore").addEventListener("click", () => { goalsAll = !goalsAll; renderGoals(); });
   // the phone bar slides in once the header is out of view (it's display: none from 820px, where Goals sit beside the shops)
   if ("IntersectionObserver" in window) new IntersectionObserver(([e]) => $("minibar").classList.toggle("on", !e.isIntersecting)).observe($("top"));
   $("goalChip").addEventListener("click", () => {
