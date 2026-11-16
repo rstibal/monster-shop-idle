@@ -66,6 +66,17 @@ Idle tuning pass (2026-09-30): the simulator's session players used to tap every
 
 ## Ideas not done yet
 
+- Left from the 2026-11-15 UX scan (Rob wants to come back to these; none started, the fixes are suggestions he hasn't picked):
+  - Phone bar (`#minibar`): no way to reach Cards or Stats once scrolled down, and the Cards dot and chest currencies are off screen.
+  - Upgrade prices show too early ("Upgrade 1/3 $300.00K" beside a $4.28 customer on a new game). Maybe a quieter label until cash is within about 100x of the price; the button has to stay in place.
+  - The per-second rate on a shop that isn't automated reads as income you're getting. Maybe dim it or write "when run".
+  - The chest draw shows "Old Bog Witch · New" but not what the card does or how far it is from the next level.
+  - Chest tiles don't show your balance ("Open · 5 beer" doesn't say you have 20); on phones the header counts are off screen in the Cards view.
+  - Greyed-out buttons give no sense of time until affordable. Maybe a thin fill on the button (cash / cost), no extra text.
+  - From 820px, toasts sit over the settings panel (the sound sliders) for 3.5 s each.
+  - Keyboard: Get, Automate and Upgrade use `disabled`, so a focused button that becomes unaffordable is a disabled focused element; `aria-disabled` plus the early returns already in `buy()`, `automate()` and `upgrade()` would be sturdier. Only checked in Chrome, not with a real screen reader.
+  - Not checked after the 2026-11-15 push: the live site by eye, the nine settings other than the mall (smoke test only), whether "Upgrade 1/3" wrapping to two lines in its button at 360px is new, and the toggle row wrapping below about 350px.
+
 - More episodes: each new one per skin needs a `name`, a `goal` line, a `lease`, 6 shops (name, icon, noun), an `intro`, a `finale`, a scene and a row of 6 shop icons in `ART`, with the owner and rival in both story and scene, plus a new `STORY_GOALS` entry. The cheaper option for later: replays ("Haunted Mall 2") just get a new intro line saying what's different this time.
 - Optional rewarded-ad boosts (the design doc has the plan; not needed for a hobby project)
 - Rejected from the first sketch doc (Rob, 2026-09-30): 8 to 10 shops per episode or a new shop each episode (six stays), limited-time events, notifications, IAP
